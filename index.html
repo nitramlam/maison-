@@ -120,6 +120,12 @@
   .sheet{background:var(--card);width:100%;max-width:560px;max-height:90vh;overflow-y:auto;border-radius:24px 24px 0 0;
          padding:22px 20px calc(22px + env(safe-area-inset-bottom));animation:up .22s cubic-bezier(.2,.8,.3,1)}
   @keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+  .sheet{position:relative}
+  .grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:-10px auto 12px}
+  .sheet-x{position:sticky;top:0;float:right;z-index:3;width:36px;height:36px;margin:-6px -6px 0 8px;border:0;border-radius:50%;
+           display:grid;place-items:center;background:color-mix(in srgb, var(--ink) 8%, var(--card));color:var(--ink)}
+  .sheet-x svg{width:18px;height:18px}
+  .sheet-x:active{transform:scale(.9)}
   .sheet h3{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:24px;margin-bottom:16px}
   .field{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:13px;padding:13px 14px;font:16px Inter,system-ui,sans-serif;outline:none}
   .field:focus{border-color:var(--accent)}
@@ -905,7 +911,32 @@ const secRows = secs => secs.length ? secs.map(s => `<div class="srow" data-row=
   : `<p class="hint">Aucune catégorie pour l'instant. Les catégories regroupent les éléments de la liste.</p>`;
 
 let sheetKind = null;
-function openSheet(html) { sheetKind = null; sheet.innerHTML = html; overlay.hidden = false; sheet.scrollTop = 0; }
+function openSheet(html) {
+  sheetKind = null;
+  sheet.innerHTML = `<div class="grab"></div><button type="button" class="sheet-x" data-close aria-label="Fermer">${ICON.x}</button>` + html;
+  sheet.style.transform = '';
+  overlay.hidden = false; sheet.scrollTop = 0;
+}
+
+// Glisser la fenêtre vers le bas pour la fermer
+(() => {
+  let y0 = null, dy = 0;
+  sheet.addEventListener('touchstart', e => {
+    if (sheet.scrollTop > 0 || e.target.closest('input, textarea, .emo-grid, .dd-list')) { y0 = null; return; }
+    y0 = e.touches[0].clientY; dy = 0; sheet.style.transition = 'none';
+  }, { passive: true });
+  sheet.addEventListener('touchmove', e => {
+    if (y0 === null) return;
+    dy = Math.max(0, e.touches[0].clientY - y0);
+    sheet.style.transform = dy ? `translateY(${dy}px)` : '';
+  }, { passive: true });
+  sheet.addEventListener('touchend', () => {
+    if (y0 === null) return;
+    sheet.style.transition = 'transform .2s ease';
+    if (dy > 90) closeSheet(); else sheet.style.transform = '';
+    y0 = null;
+  });
+})();
 function closeSheet() { sheetKind = null; overlay.hidden = true; sheet.innerHTML = ''; }
 
 function openMembersSheet() {
@@ -965,7 +996,7 @@ function openSettingsSheet() {
       ${navigator.share ? `<button type="button" class="btn primary" data-share-me>M'envoyer le lien</button>` : ''}
       <button type="button" class="btn ${navigator.share ? 'ghost' : 'primary'}" data-copy-me>Copier</button>
     </div>
-    <p class="hint" style="text-align:center;margin-top:8px">🔒 Ce lien, c'est toi : ne le donne à personne d'autre. Pour inviter quelqu'un, utilise le bouton 👤+.</p>
+    <p class="hint" style="text-align:center;margin-top:8px">🔒 Ce lien, c'est toi : ne le donne à personne d'autre. Pour inviter quelqu'un, passe par Membres (les ronds en haut).</p>
     <div class="sep" style="margin-bottom:16px"></div>
     <button type="button" class="btn danger full" data-leave>Retirer cette maison de mes appareils</button>
     <p class="hint" style="text-align:center">Les listes ne sont pas supprimées pour les autres. Tu pourras revenir avec le lien d'invitation.</p>`);
