@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Maison">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F6F3EE">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<title>Maison</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F3EE; --card:#FFFFFF; --ink:#1F1B16; --muted:#8A8178; --line:#ECE6DD;
+    --accent:#2F6B4F; --shadow:0 1px 2px rgba(31,27,22,.05), 0 4px 14px rgba(31,27,22,.04);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#141210; --card:#1F1C19; --ink:#F2EDE6; --muted:#9A9087; --line:#2E2A26; --accent:#5FA883; --shadow:none; }
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  [hidden]{display:none!important}
+  html,body{background:var(--bg);color:var(--ink)}
+  body{font-family:Inter,system-ui,-apple-system,sans-serif;font-size:16px;line-height:1.4;min-height:100vh;
+       padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left)}
+  button{font:inherit;color:inherit;cursor:pointer}
+  .wrap{max-width:560px;margin:0 auto;padding:22px 18px 190px}
+
+  h1{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:34px;letter-spacing:-.02em;line-height:1.1;word-break:break-word}
+  h2{font-size:18px;font-weight:600;margin-bottom:12px}
+  .sub{color:var(--muted);margin-top:6px;font-size:15px}
+  .banner{margin-top:16px;padding:12px 14px;border-radius:14px;background:var(--card);box-shadow:var(--shadow);font-size:14px;color:var(--muted)}
+
+  .card{background:var(--card);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
+  .pad{padding:20px 18px}
+  .muted{color:var(--muted)}
+  .sec{margin-top:24px}
+  .stack > * + *{margin-top:10px}
+
+  .hometop{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .hometop .btns{display:flex;gap:4px;margin:-6px -8px 0 0}
+
+  /* Accueil */
+  .lrow{display:flex;align-items:center;gap:14px;padding:13px 16px;width:100%;background:none;border:0;text-align:left}
+  .lrow + .lrow{border-top:1px solid var(--line)}
+  .lrow:active{background:color-mix(in srgb, var(--ink) 4%, transparent)}
+  .tile{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;flex:none;font-size:23px;line-height:1;
+        background:color-mix(in srgb, var(--accent) 10%, var(--card))}
+  .grow{flex:1;min-width:0}
+  .lname{font-weight:600;font-size:17px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lmeta{color:var(--muted);font-size:14px;margin-top:1px}
+  .chev{color:var(--muted);flex:none}
+
+  .fab{position:fixed;right:max(20px, env(safe-area-inset-right));bottom:calc(22px + env(safe-area-inset-bottom));
+       background:var(--accent);color:#fff;border:0;border-radius:999px;padding:14px 20px 14px 16px;font-weight:600;font-size:16px;
+       box-shadow:0 8px 24px color-mix(in srgb, var(--accent) 40%, transparent);display:flex;gap:8px;align-items:center;z-index:5}
+  .fab svg{width:20px;height:20px}
+
+  .empty{text-align:center;padding:34px 22px}
+  .empty p{color:var(--muted);margin:8px 0 18px}
+  .btn{border:0;border-radius:13px;padding:12px 18px;font-weight:600;font-size:15px}
+  .primary{background:var(--accent);color:#fff}
+  .ghost{background:color-mix(in srgb, var(--ink) 7%, transparent)}
+  .danger{background:color-mix(in srgb, #C0392B 12%, transparent);color:#C0392B}
+  .danger.sure{background:#C0392B;color:#fff}
+  .full{width:100%}
+
+  /* Vue d'une liste */
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin:-8px -8px 14px}
+  .back,.iconbtn{background:none;border:0;color:var(--accent);font-weight:500;font-size:17px;display:flex;align-items:center;gap:2px;padding:8px}
+  .back svg,.iconbtn svg{width:22px;height:22px}
+  .ltitle{display:flex;align-items:center;gap:12px}
+
+  .grp{margin-top:22px}
+  .grp-h{display:flex;align-items:center;gap:8px;margin:0 4px 9px;font-size:12.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+  .grp-h .e{font-size:16px;letter-spacing:0}
+  .grp-h .n{color:var(--muted);font-weight:500;letter-spacing:0}
+  .grp-h::after{content:"";flex:1;height:1px;background:var(--line);margin-left:4px}
+  .grp-h.soft{color:var(--muted)}
+  .grp-h .act{margin-left:auto;order:2}
+  .link{background:none;border:0;color:var(--accent);font-size:14px;font-weight:500;padding:2px 4px;text-transform:none;letter-spacing:0}
+
+  .irow{display:flex;align-items:center;gap:12px;padding:11px 14px;min-height:54px}
+  .irow + .irow{border-top:1px solid var(--line)}
+  .check{width:27px;height:27px;border-radius:50%;border:2px solid color-mix(in srgb, var(--muted) 55%, transparent);flex:none;
+         display:grid;place-items:center;background:none;transition:all .15s}
+  .check svg{width:15px;height:15px;color:#fff}
+  .check.on{background:var(--accent);border-color:var(--accent)}
+  .itext{flex:1;min-width:0;cursor:pointer}
+  .ititle{font-size:17px;word-break:break-word}
+  .done .ititle{color:var(--muted);text-decoration:line-through}
+  .by{font-size:12.5px;color:var(--muted);margin-top:1px}
+
+  /* Barre d'ajout */
+  .composer{position:fixed;left:0;right:0;bottom:0;padding:22px 16px calc(14px + env(safe-area-inset-bottom));
+            background:linear-gradient(to bottom, transparent, var(--bg) 30%);z-index:5}
+  .composer form{max-width:528px;margin:0 auto;display:flex;gap:8px;align-items:center;background:var(--card);border-radius:16px;
+                 padding:6px 6px 6px 16px;box-shadow:0 2px 6px rgba(31,27,22,.06), 0 10px 30px rgba(31,27,22,.08);border:1px solid var(--line)}
+  .composer input{flex:1;min-width:0;border:0;background:none;font:16px Inter,system-ui,sans-serif;color:var(--ink);outline:none;padding:8px 0}
+  .composer input::placeholder{color:var(--muted)}
+  .composer form button{background:var(--accent);color:#fff;border:0;border-radius:12px;padding:10px 16px;font-weight:600;font-size:15px}
+
+  .chips{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .composer .chips{max-width:528px;margin:0 auto 9px;padding-bottom:2px}
+  .chip{flex:none;border:1px solid var(--line);background:var(--card);padding:7px 12px;border-radius:999px;font-weight:500;font-size:13.5px;white-space:nowrap}
+  .chip.add{border-style:dashed;color:var(--muted);background:transparent}
+
+  /* Feuille du bas */
+  .overlay{position:fixed;inset:0;background:rgba(20,16,12,.42);display:flex;align-items:flex-end;justify-content:center;z-index:20}
+  .sheet{background:var(--card);width:100%;max-width:560px;max-height:90vh;overflow-y:auto;border-radius:24px 24px 0 0;
+         padding:22px 20px calc(22px + env(safe-area-inset-bottom));animation:up .22s cubic-bezier(.2,.8,.3,1)}
+  @keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+  .sheet h3{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:24px;margin-bottom:16px}
+  .field{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:13px;padding:13px 14px;font:16px Inter,system-ui,sans-serif;outline:none}
+  .field:focus{border-color:var(--accent)}
+  .field.err{border-color:#C0392B}
+  .label{font-size:13px;color:var(--muted);font-weight:500;margin:18px 2px 8px}
+  .actions{display:flex;gap:10px;margin-top:20px}
+  .actions .btn{flex:1}
+  .sep{height:1px;background:var(--line);margin:22px 0 6px}
+  .linkbox{font-size:14px;word-break:break-all;padding:12px 14px;border-radius:13px;background:var(--bg);border:1px solid var(--line);user-select:all;-webkit-user-select:all}
+
+  /* Émojis */
+  .emo-row{display:flex;gap:10px;align-items:center}
+  .emo-big{width:52px;height:52px;flex:none;border-radius:14px;border:1px solid var(--line);background:var(--bg);font-size:28px;line-height:1;display:grid;place-items:center}
+  .emo-wrap{margin-top:12px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}
+  .emo-grid{max-height:210px;overflow-y:auto;padding:4px 8px 8px}
+  .emo-g{font-size:11.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:10px 4px 4px}
+  .emo-cells{display:grid;grid-template-columns:repeat(auto-fill, minmax(40px, 1fr))}
+  .emo{height:42px;border:0;background:none;border-radius:10px;font-size:24px;line-height:1}
+  .emo:active,.emo.on{background:color-mix(in srgb, var(--accent) 16%, transparent)}
+  .emo-custom{border:0;border-top:1px solid var(--line);border-radius:0 0 14px 14px;background:transparent}
+
+  .srow{display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--line)}
+  .srow-btn{flex:1;display:flex;align-items:center;gap:10px;background:none;border:0;text-align:left;padding:11px 2px;font-size:16px;min-width:0}
+  .srow-btn .e{font-size:20px;width:26px;text-align:center}
+  .srow-btn .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .del{background:none;border:0;color:var(--muted);padding:8px;flex:none}
+  .del svg{width:18px;height:18px}
+  .hint{font-size:13.5px;color:var(--muted);margin-top:4px}
+
+  /* Liste déroulante */
+  .dd-btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line);background:var(--bg);
+          border-radius:13px;padding:13px 14px;font-size:16px;text-align:left}
+  .dd-btn .v{display:flex;align-items:center;gap:10px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dd-btn svg{width:18px;height:18px;color:var(--muted);flex:none;transition:transform .15s}
+  .dd.open .dd-btn{border-color:var(--accent)}
+  .dd.open .dd-btn svg{transform:rotate(180deg)}
+  .dd-panel{margin-top:8px;border:1px solid var(--line);border-radius:14px;background:var(--bg);overflow:hidden}
+  .dd-search{border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent}
+  .dd-search:focus{border-color:var(--line)}
+  .dd-list{max-height:240px;overflow-y:auto}
+  .dd-opt{width:100%;display:flex;align-items:center;gap:10px;background:none;border:0;padding:12px 14px;text-align:left;font-size:16px}
+  .dd-opt + .dd-opt{border-top:1px solid var(--line)}
+  .dd-opt:active{background:color-mix(in srgb, var(--accent) 10%, transparent)}
+  .dd-opt .e{width:24px;text-align:center;font-size:19px;flex:none}
+  .dd-opt .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dd-opt .ck{margin-left:auto;color:var(--accent);flex:none;display:flex}
+  .dd-opt .ck svg{width:18px;height:18px}
+  .dd-opt.create{color:var(--accent);font-weight:500}
+  .dd-empty{padding:12px 14px;color:var(--muted);font-size:14px}
+
+  .logo{font-size:52px;margin-bottom:10px}
+  .toast{position:fixed;left:50%;bottom:calc(110px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);
+         padding:11px 16px;border-radius:12px;font-size:14px;z-index:30;max-width:calc(100% - 40px);text-align:center}
+</style>
+</head>
+<body>
+  <main class="wrap" id="screen"></main>
+
+  <button class="fab" id="fab" hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+    Nouvelle liste
+  </button>
+
+  <div class="composer" id="composer" hidden>
+    <nav class="chips" id="secChips"></nav>
+    <form id="composerForm" autocomplete="off">
+      <input id="newItem" type="text" maxlength="200" placeholder="Ajouter un élément…" enterkeyhint="send">
+      <button type="submit">Ajouter</button>
+    </form>
+  </div>
+
+  <div class="overlay" id="overlay" hidden><div class="sheet" id="sheet"></div></div>
+  <div class="toast" id="toast" hidden></div>
+
+<script type="module">
+import { firebaseConfig } from './firebase-config.js';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import {
+  initializeFirestore, getFirestore, persistentLocalCache, persistentMultipleTabManager,
+  collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, writeBatch
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+// ================== Outils ==================
+const ICON = {
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+  chev: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>',
+  down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
+  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>',
+  more: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>',
+  invite: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>',
+  gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>'
+};
+
+const EMOJIS = [
+  ['Maison', '🏠 🏡 🛋️ 🛏️ 🚿 🛁 🚽 🧺 🧹 🧽 🧼 🪣 🧴 🧻 🪥 🔑 🚪 🪟 🪴 💡 🔌 🔋 🧰 🔧 🔨 🪛 🪚 🎨 🖼️ 📦 🗑️ ♻️ 🧯 🕯️'],
+  ['Cuisine', '🛒 🍎 🍐 🍊 🍋 🍌 🍉 🍇 🍓 🍒 🥝 🍅 🥑 🥕 🌽 🥦 🥬 🥒 🥔 🧅 🧄 🍄 🥜 🥖 🥐 🍞 🧀 🥛 🧈 🥚 🍗 🥩 🥓 🐟 🦐 🍝 🍚 🥫 🧂 🫒 🍯 🍫 🍪 🍰 🍦 ☕ 🍵 🧃 🥤 🍷 🍺 🧊 ❄️ 🍕 🥗 🍳'],
+  ['Famille & vie', '👶 🧒 👨‍👩‍👧‍👦 🐶 🐱 🐾 🐟 💊 🩺 🩹 🏥 👕 👖 👗 🧦 👟 🧥 🎁 🎂 🎉 🎈 📚 ✏️ 🎒 🏫 💼 💻 📱 🖨️ 🚗 ⛽ 🚲 🛴 ✈️ 🧳 🏖️ ⛺ ⚽ 🎾 🏋️ 🎮 🎬 🎵 🎸'],
+  ['Nature', '🌱 🌿 🍀 🌳 🌲 🌸 🌻 🌹 🍂 🌞 🌙 ⭐ 🌧️ ⛄ 🔥 💧 🌊'],
+  ['Symboles', '✅ ☑️ 📋 📝 📌 📍 🏷️ 📅 ⏰ ⏳ ⚠️ ❗ ❓ 💰 💳 🧾 ❤️ 🧡 💛 💚 💙 💜 🤍 🖤 🔴 🟠 🟡 🟢 🔵 🟣 ⚪ ⚫ ✨']
+].map(([g, s]) => [g, s.split(' ')]);
+
+const $ = s => document.querySelector(s);
+const screen = $('#screen'), composer = $('#composer'), input = $('#newItem'), secChips = $('#secChips'),
+      fab = $('#fab'), overlay = $('#overlay'), sheet = $('#sheet');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+const str = (v, fallback) => (typeof v === 'string' && v.trim()) ? v : fallback;
+
+function firstGrapheme(s) {
+  s = String(s || '').trim();
+  if (!s) return '';
+  if (window.Intl && Intl.Segmenter) {
+    const it = new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(s)[Symbol.iterator]().next();
+    return it.value ? it.value.segment : '';
+  }
+  return Array.from(s)[0];
+}
+
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (_) { return null; } },
+  set(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (_) {} }
+};
+
+function newCode() {
+  const abc = 'abcdefghjkmnpqrstuvwxyz23456789';
+  const bytes = crypto.getRandomValues(new Uint8Array(20));
+  return Array.from(bytes, b => abc[b % abc.length]).join('');
+}
+function codeFrom(text) {
+  const t = String(text || '').trim();
+  const m = t.match(/[?&#]maison=([a-z0-9]{16,40})/i);
+  if (m) return m[1].toLowerCase();
+  return /^[a-z0-9]{16,40}$/i.test(t) ? t.toLowerCase() : null;
+}
+const inviteUrl = () => `${location.origin}${location.pathname}?maison=${state.code}`;
+
+function keepCodeInUrl() {
+  // Le code reste dans l'adresse : "Sur l'écran d'accueil" le garde dans l'icône.
+  const url = state.code ? `${location.pathname}?maison=${state.code}` : location.pathname;
+  history.replaceState(null, '', url);
+}
+
+let toastTimer;
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg; t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.hidden = true; }, 3200);
+}
+
+// ================== État ==================
+const state = {
+  code: null, myName: store.get('maison.name') || '',
+  house: null, houseChecked: false, houseMissing: false,
+  lists: [], sections: [], items: [],
+  view: 'home', listId: null, loading: true, error: null
+};
+let db = null, unsubs = [], renderedKey = '';
+
+const sectionsOf = listId => state.sections.filter(s => s.listId === listId);
+const currentList = () => state.lists.find(l => l.id === state.listId);
+
+// ================== Firebase ==================
+const configured = firebaseConfig && firebaseConfig.projectId && !String(firebaseConfig.projectId).includes('COLLE');
+if (configured) {
+  const app = initializeApp(firebaseConfig);
+  try {
+    db = initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) });
+  } catch (_) {
+    db = getFirestore(app);
+  }
+}
+
+const col = name => collection(db, 'households', state.code, name);
+const ref = (name, id) => doc(db, 'households', state.code, name, id);
+const houseRef = () => doc(db, 'households', state.code);
+
+function onWriteError(e) {
+  console.error(e);
+  if (e && e.code === 'permission-denied') toast('Accès refusé : vérifie les règles Firebase.');
+  else toast("Ça n'a pas marché, réessaie.");
+}
+// Les écritures s'affichent tout de suite (même hors connexion) et partent dès que possible.
+const fire = p => { p.catch(onWriteError); };
+
+function subscribe() {
+  unsubs.forEach(u => u()); unsubs = [];
+  state.loading = true; state.houseChecked = false; state.houseMissing = false;
+  const have = {};
+  const kinds = ['lists', 'sections', 'items'];
+  const got = k => { have[k] = true; if (kinds.every(x => have[x])) state.loading = false; render(); };
+  const err = e => { console.error(e); state.loading = false; state.error = e && e.code === 'permission-denied'
+      ? 'Accès refusé : vérifie les règles Firebase.' : 'Impossible de charger les listes pour le moment.'; render(); };
+
+  unsubs.push(onSnapshot(houseRef(), { includeMetadataChanges: true }, snap => {
+    if (snap.exists()) { state.house = snap.data(); state.houseMissing = false; state.houseChecked = true; }
+    else if (!snap.metadata.fromCache) { state.house = null; state.houseMissing = true; state.houseChecked = true; }
+    render();
+  }, err));
+
+  unsubs.push(onSnapshot(query(col('lists'), orderBy('createdAt')), snap => {
+    state.lists = snap.docs.map(d => { const v = d.data(); return { id: d.id, name: str(v.name, 'Sans nom'), emoji: str(v.emoji, '📋') }; });
+    got('lists');
+  }, err));
+  unsubs.push(onSnapshot(query(col('sections'), orderBy('createdAt')), snap => {
+    state.sections = snap.docs.map(d => { const v = d.data(); return { id: d.id, listId: v.listId, name: str(v.name, 'Sans nom'), emoji: str(v.emoji, '🏷️') }; });
+    got('sections');
+  }, err));
+  unsubs.push(onSnapshot(query(col('items'), orderBy('createdAt')), snap => {
+    state.items = snap.docs.map(d => {
+      const v = d.data();
+      return { id: d.id, listId: v.listId, sectionId: typeof v.sectionId === 'string' ? v.sectionId : null,
+               title: String(v.title ?? ''), done: v.done === true, byName: typeof v.byName === 'string' ? v.byName : '' };
+    });
+    got('items');
+  }, err));
+}
+
+function enterHouse(code) {
+  state.code = code;
+  store.set('maison.code', code);
+  keepCodeInUrl();
+  state.view = 'home'; state.lists = []; state.sections = []; state.items = []; state.house = null;
+  subscribe();
+  render();
+}
+
+function leaveHouse() {
+  unsubs.forEach(u => u()); unsubs = [];
+  state.code = null; state.house = null;
+  store.set('maison.code', null);
+  keepCodeInUrl();
+  closeSheet(); render();
+}
+
+// ================== Écrans d'accueil (créer / rejoindre) ==================
+function renderSetup() {
+  return `<div class="logo">🔧</div><h1>Presque prêt</h1>
+    <div class="card pad sec stack"><p>Il reste à coller la configuration Firebase dans le fichier <b>firebase-config.js</b>.</p>
+    <p class="muted">Suis le guide d'installation, étape « Connecter Firebase ».</p></div>`;
+}
+
+function renderWelcome() {
+  return `<div class="logo">🏡</div><h1>Maison</h1>
+    <p class="sub">Vos listes partagées : courses, tâches, et tout le reste.</p>
+    <form class="card pad sec stack" data-form="create" autocomplete="off">
+      <h2>Créer une maison</h2>
+      <input class="field" name="house" maxlength="40" placeholder="Nom de la maison (ex. Chez nous)">
+      <input class="field" name="me" maxlength="30" placeholder="Ton prénom" value="${esc(state.myName)}">
+      <button class="btn primary full" type="submit">Créer</button>
+    </form>
+    <form class="card pad sec stack" data-form="join" autocomplete="off">
+      <h2>Rejoindre une maison</h2>
+      <p class="hint">Ouvre le lien d'invitation reçu, ou colle-le ici.</p>
+      <input class="field" name="link" placeholder="Lien d'invitation">
+      <input class="field" name="me" maxlength="30" placeholder="Ton prénom" value="${esc(state.myName)}">
+      <button class="btn primary full" type="submit">Rejoindre</button>
+    </form>`;
+}
+
+function renderAskName() {
+  return `<div class="logo">👋</div><h1>Bienvenue</h1>
+    <p class="sub">Tu rejoins la maison <b id="houseName">${esc(state.house?.name || '…')}</b>.</p>
+    <form class="card pad sec stack" data-form="name" autocomplete="off">
+      <h2>Comment tu t'appelles ?</h2>
+      <p class="hint">Les autres verront ton prénom à côté de ce que tu ajoutes.</p>
+      <input class="field" name="me" maxlength="30" placeholder="Ton prénom">
+      <button class="btn primary full" type="submit">C'est parti</button>
+    </form>`;
+}
+
+function renderMissing() {
+  return `<div class="logo">🤔</div><h1>Maison introuvable</h1>
+    <div class="card pad sec stack"><p>Ce lien d'invitation ne correspond à aucune maison. Demande un nouveau lien à la personne qui t'a invité.</p>
+    <button class="btn ghost full" data-action="leave">Revenir à l'accueil</button></div>`;
+}
+
+screen.addEventListener('submit', e => {
+  e.preventDefault();
+  const f = e.target, v = n => (f.querySelector(`[name="${n}"]`)?.value || '').trim();
+  const need = n => { const el = f.querySelector(`[name="${n}"]`); if (!el.value.trim()) { el.classList.add('err'); el.focus(); return true; } return false; };
+
+  if (f.dataset.form === 'create') {
+    if (need('house') || need('me')) return;
+    state.myName = v('me').slice(0, 30); store.set('maison.name', state.myName);
+    const code = newCode();
+    state.code = code;
+    fire(setDoc(houseRef(), { name: v('house').slice(0, 40), createdAt: Date.now() }));
+    enterHouse(code);
+    setTimeout(openInviteSheet, 400);
+  } else if (f.dataset.form === 'join') {
+    const code = codeFrom(v('link'));
+    if (!code) { const el = f.querySelector('[name="link"]'); el.classList.add('err'); el.focus(); toast('Ce lien ne semble pas valide.'); return; }
+    if (need('me')) return;
+    state.myName = v('me').slice(0, 30); store.set('maison.name', state.myName);
+    enterHouse(code);
+  } else if (f.dataset.form === 'name') {
+    if (need('me')) return;
+    state.myName = v('me').slice(0, 30); store.set('maison.name', state.myName);
+    renderedKey = ''; render();
+  }
+});
+
+// ================== Rendu de l'app ==================
+function renderHome() {
+  const cnt = {};
+  for (const i of state.items) {
+    const c = cnt[i.listId] || (cnt[i.listId] = { todo: 0, done: 0 });
+    i.done ? c.done++ : c.todo++;
+  }
+  let h = `<header class="hometop"><div class="grow"><h1>${esc(state.house?.name || 'Maison')}</h1>
+      ${state.loading ? '<p class="sub">Chargement…</p>' : ''}</div>
+      <div class="btns">
+        <button class="iconbtn" data-action="invite" aria-label="Inviter">${ICON.invite}</button>
+        <button class="iconbtn" data-action="settings" aria-label="Réglages">${ICON.gear}</button>
+      </div></header>`;
+  if (state.error) h += `<div class="banner">${esc(state.error)}</div>`;
+  if (state.loading) return h;
+
+  if (!state.lists.length) {
+    return h + `<div class="card empty" style="margin-top:22px"><div style="font-size:40px">📝</div>
+      <p>Aucune liste pour l'instant.</p>
+      <button class="btn primary" data-action="newList">Créer ma première liste</button></div>`;
+  }
+  h += `<section class="sec"><div class="card">${state.lists.map(l => {
+    const k = cnt[l.id] || { todo: 0, done: 0 };
+    const meta = k.todo ? `${k.todo} à faire` : (k.done ? 'Tout est fait ✓' : 'Vide');
+    return `<button class="lrow" data-action="open" data-id="${esc(l.id)}">
+      <span class="tile">${esc(l.emoji)}</span>
+      <span class="grow"><div class="lname">${esc(l.name)}</div><div class="lmeta">${meta}</div></span>
+      <span class="chev">${ICON.chev}</span></button>`;
+  }).join('')}</div></section>`;
+  return h;
+}
+
+function itemRow(i) {
+  const by = i.byName && i.byName !== state.myName ? `<div class="by">ajouté par ${esc(i.byName)}</div>` : '';
+  return `<div class="irow ${i.done ? 'done' : ''}">
+    <button class="check ${i.done ? 'on' : ''}" data-action="toggle" data-id="${esc(i.id)}" aria-label="${i.done ? 'Décocher' : 'Cocher'}">${i.done ? ICON.check : ''}</button>
+    <div class="itext" data-action="editItem" data-id="${esc(i.id)}"><div class="ititle">${esc(i.title)}</div>${by}</div>
+  </div>`;
+}
+
+const group = (head, items, cls = '') => `<section class="grp"><div class="grp-h ${cls}">${head}<span class="n">${items.length}</span></div>
+  <div class="card">${items.map(itemRow).join('')}</div></section>`;
+
+function renderList(l) {
+  const its = state.items.filter(i => i.listId === l.id);
+  const todo = its.filter(i => !i.done), done = its.filter(i => i.done);
+  const secs = sectionsOf(l.id), secIds = new Set(secs.map(s => s.id));
+
+  let h = `<div class="topbar">
+      <button class="back" data-action="back">${ICON.back}Listes</button>
+      <button class="iconbtn" data-action="listMenu" aria-label="Modifier la liste">${ICON.more}</button>
+    </div>
+    <header class="ltitle"><span class="tile">${esc(l.emoji)}</span><div class="grow"><h1 style="font-size:30px">${esc(l.name)}</h1></div></header>`;
+
+  if (!todo.length) {
+    h += `<section class="sec"><div class="card"><div class="pad muted">${
+      done.length ? 'Plus rien à faire ici.' : 'Ajoute un premier élément en bas de l\'écran.'}</div></div></section>`;
+  } else {
+    const groups = secs.map(s => ({ s, items: todo.filter(i => i.sectionId === s.id) })).filter(g => g.items.length);
+    const loose = todo.filter(i => !secIds.has(i.sectionId));
+    if (!groups.length) h += `<section class="sec"><div class="card">${loose.map(itemRow).join('')}</div></section>`;
+    else {
+      for (const g of groups) h += group(`<span class="e">${esc(g.s.emoji)}</span>${esc(g.s.name)}`, g.items);
+      if (loose.length) h += group('Sans catégorie', loose, 'soft');
+    }
+  }
+  if (done.length) {
+    h += `<section class="grp" style="margin-top:30px"><div class="grp-h soft">Cochés<span class="n">${done.length}</span>
+        <button class="link act" data-action="clearDone">Tout effacer</button></div>
+      <div class="card">${done.map(itemRow).join('')}</div></section>`;
+  }
+  return h;
+}
+
+function renderSecChips(l) {
+  const n = sectionsOf(l.id).length;
+  secChips.innerHTML =
+    `<button type="button" class="chip" data-sec-manage>🏷️ Catégories${n ? ` (${n})` : ''}</button>` +
+    `<button type="button" class="chip add" data-sec-new>+ Ajouter une catégorie</button>`;
+}
+
+function render() {
+  let key;
+  if (!configured) key = 'setup';
+  else if (!state.code) key = 'welcome';
+  else if (state.houseMissing) key = 'missing';
+  else if (!state.myName) key = 'askName';
+  else key = 'app';
+
+  composer.hidden = true; fab.hidden = true;
+
+  if (key !== 'app') {
+    // Ces écrans contiennent des champs : on ne les redessine que si l'écran change.
+    if (renderedKey !== key) {
+      screen.innerHTML = key === 'setup' ? renderSetup() : key === 'welcome' ? renderWelcome()
+        : key === 'missing' ? renderMissing() : renderAskName();
+      renderedKey = key;
+    }
+    const hn = $('#houseName');
+    if (hn && state.house?.name) hn.textContent = state.house.name;
+    return;
+  }
+  renderedKey = 'app';
+
+  const list = currentList();
+  if (state.view === 'list' && !list && !state.loading) state.view = 'home';
+  const inList = state.view === 'list' && list;
+  screen.innerHTML = inList ? renderList(list) : renderHome();
+  composer.hidden = !inList;
+  if (inList) renderSecChips(list);
+  fab.hidden = !(state.view === 'home' && !state.loading && state.lists.length);
+}
+
+// ================== Écritures ==================
+function toggle(id) {
+  const it = state.items.find(i => i.id === id);
+  if (it) fire(updateDoc(ref('items', id), { done: !it.done }));
+}
+function clearDone() {
+  const b = writeBatch(db);
+  state.items.filter(i => i.listId === state.listId && i.done).forEach(i => b.delete(ref('items', i.id)));
+  fire(b.commit());
+}
+function deleteSection(id) {
+  const b = writeBatch(db);
+  state.items.filter(i => i.sectionId === id).forEach(i => b.update(ref('items', i.id), { sectionId: null }));
+  b.delete(ref('sections', id));
+  fire(b.commit());
+}
+function deleteList(id) {
+  const b = writeBatch(db);
+  state.items.filter(i => i.listId === id).forEach(i => b.delete(ref('items', i.id)));
+  sectionsOf(id).forEach(s => b.delete(ref('sections', s.id)));
+  b.delete(ref('lists', id));
+  fire(b.commit());
+  closeSheet(); state.view = 'home'; render();
+}
+function addSection(listId, name, emoji) {
+  const r = doc(col('sections'));
+  fire(setDoc(r, { listId, name, emoji, createdAt: Date.now() }));
+  return r.id;
+}
+
+// ================== Feuilles ==================
+let sheetEmoji = '📋', sheetSec = null, sheetTarget = null, sheetListId = null;
+
+function emojiPicker(open) {
+  return `<div class="emo-wrap" ${open ? '' : 'hidden'}>
+    <div class="emo-grid">${EMOJIS.map(([g, list]) => `<div class="emo-g">${g}</div><div class="emo-cells">${
+      list.map(e => `<button type="button" class="emo ${e === sheetEmoji ? 'on' : ''}" data-emo="${e}">${e}</button>`).join('')}</div>`).join('')}</div>
+    <input class="field emo-custom" data-emo-custom placeholder="…ou tape n'importe quel émoji" maxlength="16" autocomplete="off">
+  </div>`;
+}
+const nameRow = (value, placeholder) => `<div class="emo-row">
+    <button type="button" class="emo-big" data-emo-toggle aria-label="Choisir un émoji">${esc(sheetEmoji)}</button>
+    <input class="field" name="name" maxlength="60" placeholder="${placeholder}" value="${esc(value)}"></div>`;
+const actions = label => `<div class="actions"><button type="button" class="btn ghost" data-close>Annuler</button><button type="submit" class="btn primary">${label}</button></div>`;
+const secRows = secs => secs.length ? secs.map(s => `<div class="srow" data-row="${esc(s.id)}">
+    <button type="button" class="srow-btn" data-sec-edit="${esc(s.id)}"><span class="e">${esc(s.emoji)}</span><span class="t">${esc(s.name)}</span></button>
+    <button type="button" class="del" data-del-sec="${esc(s.id)}" aria-label="Supprimer la catégorie">${ICON.x}</button></div>`).join('')
+  : `<p class="hint">Aucune catégorie pour l'instant. Les catégories regroupent les éléments de la liste.</p>`;
+
+function openSheet(html) { sheet.innerHTML = html; overlay.hidden = false; sheet.scrollTop = 0; }
+function closeSheet() { overlay.hidden = true; sheet.innerHTML = ''; }
+
+function openInviteSheet() {
+  const url = inviteUrl();
+  openSheet(`<h3>Inviter quelqu'un</h3>
+    <p class="hint" style="margin-bottom:12px">Envoie ce lien aux personnes de la maison. En l'ouvrant, elles rejoignent vos listes. Garde-le pour la maison : toute personne qui l'a peut voir et modifier les listes.</p>
+    <div class="linkbox">${esc(url)}</div>
+    <div class="actions">
+      ${navigator.share ? `<button type="button" class="btn primary" data-share>Envoyer le lien</button>` : ''}
+      <button type="button" class="btn ${navigator.share ? 'ghost' : 'primary'}" data-copy>Copier le lien</button>
+    </div>
+    <button type="button" class="btn ghost full" style="margin-top:10px" data-close>Fermer</button>`);
+}
+
+function openSettingsSheet() {
+  openSheet(`<h3>Réglages</h3>
+    <form data-form="settings" autocomplete="off">
+      <div class="label" style="margin-top:0">Nom de la maison</div>
+      <input class="field" name="house" maxlength="40" value="${esc(state.house?.name || '')}">
+      <div class="label">Ton prénom</div>
+      <input class="field" name="me" maxlength="30" value="${esc(state.myName)}">
+      ${actions('Enregistrer')}
+    </form>
+    <div class="sep" style="margin-bottom:16px"></div>
+    <button type="button" class="btn danger full" data-leave>Quitter cette maison sur cet iPhone</button>
+    <p class="hint" style="text-align:center">Les listes ne sont pas supprimées. Tu pourras revenir avec le lien d'invitation.</p>`);
+}
+
+function openListSheet(list) {
+  sheetTarget = list ? list.id : null;
+  sheetEmoji = list ? list.emoji : '📋';
+  let h = `<h3>${list ? 'Modifier la liste' : 'Nouvelle liste'}</h3>
+    <form data-form="${list ? 'editList' : 'newList'}" autocomplete="off">
+      ${nameRow(list ? list.name : '', 'Nom de la liste')}${emojiPicker(!list)}${actions(list ? 'Enregistrer' : 'Créer')}
+    </form>`;
+  if (list) {
+    h += `<div class="sep"></div><div class="label">Catégories de cette liste</div>
+      <div>${secRows(sectionsOf(list.id))}</div>
+      <button type="button" class="btn ghost full" style="margin-top:12px" data-sec-new>+ Nouvelle catégorie</button>
+      <div class="sep" style="margin-bottom:16px"></div>
+      <button type="button" class="btn danger full" data-delete-list>Supprimer la liste</button>`;
+  }
+  openSheet(h);
+}
+
+function openSectionsSheet() {
+  const secs = sectionsOf(state.listId);
+  openSheet(`<h3>Catégories</h3><div>${secRows(secs)}</div>
+    ${secs.length ? `<p class="hint" style="margin-top:10px">Touche une catégorie pour changer son nom ou son émoji.</p>` : ''}
+    <div class="actions"><button type="button" class="btn ghost" data-close>Fermer</button>
+      <button type="button" class="btn primary" data-sec-new>+ Nouvelle catégorie</button></div>`);
+}
+
+function openSectionSheet(sec) {
+  sheetTarget = sec ? sec.id : null;
+  sheetEmoji = sec ? sec.emoji : '🏷️';
+  let h = `<h3>${sec ? 'Modifier la catégorie' : 'Nouvelle catégorie'}</h3>
+    <form data-form="${sec ? 'editSec' : 'newSec'}" autocomplete="off">
+      ${nameRow(sec ? sec.name : '', 'Nom de la catégorie')}${emojiPicker(!sec)}${actions(sec ? 'Enregistrer' : 'Créer')}
+    </form>`;
+  if (sec) {
+    h += `<div class="sep" style="margin-bottom:16px"></div>
+      <button type="button" class="btn danger full" data-del-sec-sure="${esc(sec.id)}">Supprimer la catégorie</button>
+      <p class="hint" style="text-align:center">Les éléments restent dans la liste, sans catégorie.</p>`;
+  }
+  openSheet(h);
+}
+
+// --- Liste déroulante de catégorie avec recherche ---
+function ddLabel() {
+  const s = state.sections.find(x => x.id === sheetSec);
+  return s ? `<span class="e">${esc(s.emoji)}</span>${esc(s.name)}` : '<span class="muted">Sans catégorie</span>';
+}
+function renderDdList() {
+  const box = sheet.querySelector('[data-dd-list]');
+  if (!box) return;
+  const typed = (sheet.querySelector('[data-dd-search]')?.value || '').trim();
+  const q = norm(typed);
+  const all = sectionsOf(sheetListId);
+  const secs = all.filter(s => !q || norm(s.name).includes(q));
+  const tick = id => (sheetSec === id ? `<span class="ck">${ICON.check}</span>` : '');
+  let h = '';
+  if (!q || norm('Sans catégorie').includes(q)) h += `<button type="button" class="dd-opt" data-dd-opt=""><span class="e">–</span><span class="t muted">Sans catégorie</span>${tick(null)}</button>`;
+  h += secs.map(s => `<button type="button" class="dd-opt" data-dd-opt="${esc(s.id)}"><span class="e">${esc(s.emoji)}</span><span class="t">${esc(s.name)}</span>${tick(s.id)}</button>`).join('');
+  if (q && !all.some(s => norm(s.name) === q)) h += `<button type="button" class="dd-opt create" data-dd-create><span class="e">＋</span><span class="t">Créer « ${esc(typed.slice(0, 40))} »</span></button>`;
+  box.innerHTML = h || `<div class="dd-empty">Aucune catégorie trouvée.</div>`;
+}
+function setDdOpen(open) {
+  const dd = sheet.querySelector('[data-dd]');
+  if (!dd) return;
+  dd.classList.toggle('open', open);
+  dd.querySelector('.dd-panel').hidden = !open;
+  if (open) { const s = dd.querySelector('[data-dd-search]'); s.value = ''; renderDdList(); setTimeout(() => s.focus(), 30); }
+}
+function chooseSection(id) {
+  sheetSec = id || null;
+  const lab = sheet.querySelector('[data-dd-label]');
+  if (lab) lab.innerHTML = ddLabel();
+  setDdOpen(false);
+}
+function openItemSheet(item) {
+  const secs = sectionsOf(item.listId);
+  sheetTarget = item.id; sheetListId = item.listId;
+  sheetSec = secs.some(s => s.id === item.sectionId) ? item.sectionId : null;
+  openSheet(`<h3>Modifier l'élément</h3>
+    <form data-form="editItem" autocomplete="off">
+      <input class="field" name="title" maxlength="200" value="${esc(item.title)}">
+      <div class="label">Catégorie</div>
+      <div class="dd" data-dd>
+        <button type="button" class="dd-btn" data-dd-toggle><span class="v" data-dd-label>${ddLabel()}</span>${ICON.down}</button>
+        <div class="dd-panel" hidden>
+          <input class="field dd-search" data-dd-search type="search" placeholder="Rechercher ou créer une catégorie…" autocomplete="off" enterkeyhint="done">
+          <div class="dd-list" data-dd-list></div>
+        </div>
+      </div>
+      ${actions('Enregistrer')}
+    </form>
+    <div class="sep" style="margin-bottom:16px"></div>
+    <button type="button" class="btn danger full" data-delete-item>Supprimer l'élément</button>`);
+}
+
+function setEmoji(e) {
+  sheetEmoji = e;
+  const big = sheet.querySelector('[data-emo-toggle]');
+  if (big) big.textContent = e;
+  sheet.querySelectorAll('[data-emo]').forEach(b => b.classList.toggle('on', b.dataset.emo === e));
+}
+
+async function copyInvite() {
+  try { await navigator.clipboard.writeText(inviteUrl()); toast('Lien copié.'); }
+  catch (_) { toast('Sélectionne le lien et copie-le.'); }
+}
+
+overlay.addEventListener('click', e => {
+  const t = e.target;
+  if (t === overlay || t.closest('[data-close]')) return closeSheet();
+
+  const emo = t.closest('[data-emo]');
+  if (emo) return setEmoji(emo.dataset.emo);
+  if (t.closest('[data-emo-toggle]')) { sheet.querySelector('.emo-wrap')?.toggleAttribute('hidden'); return; }
+
+  if (t.closest('[data-dd-toggle]')) return setDdOpen(sheet.querySelector('.dd-panel')?.hidden);
+  const opt = t.closest('[data-dd-opt]');
+  if (opt) return chooseSection(opt.dataset.ddOpt);
+  if (t.closest('[data-dd-create]')) {
+    const name = (sheet.querySelector('[data-dd-search]')?.value || '').trim().slice(0, 40);
+    if (!name) return;
+    sheetSec = addSection(sheetListId, name, '🏷️');
+    sheet.querySelector('[data-dd-label]').innerHTML = `<span class="e">🏷️</span>${esc(name)}`;
+    return setDdOpen(false);
+  }
+
+  if (t.closest('[data-share]')) {
+    navigator.share({ title: 'Maison', text: `Rejoins la maison « ${state.house?.name || 'Maison'} » pour partager nos listes :`, url: inviteUrl() }).catch(() => {});
+    return;
+  }
+  if (t.closest('[data-copy]')) return copyInvite();
+  if (t.closest('[data-leave]')) return leaveHouse();
+
+  if (t.closest('[data-sec-new]')) return openSectionSheet(null);
+  const edit = t.closest('[data-sec-edit]');
+  if (edit) { const s = state.sections.find(x => x.id === edit.dataset.secEdit); if (s) openSectionSheet(s); return; }
+
+  const delSec = t.closest('[data-del-sec]');
+  if (delSec) {
+    deleteSection(delSec.dataset.delSec);
+    delSec.closest('.srow')?.remove();
+    toast('Catégorie supprimée. Ses éléments sont gardés.');
+    return;
+  }
+  const delSecSure = t.closest('[data-del-sec-sure]');
+  if (delSecSure) {
+    if (!delSecSure.classList.contains('sure')) { delSecSure.classList.add('sure'); delSecSure.textContent = 'Confirmer la suppression'; }
+    else { deleteSection(delSecSure.dataset.delSecSure); closeSheet(); toast('Catégorie supprimée. Ses éléments sont gardés.'); }
+    return;
+  }
+  const delList = t.closest('[data-delete-list]');
+  if (delList) {
+    if (!delList.classList.contains('sure')) { delList.classList.add('sure'); delList.textContent = 'Confirmer : supprimer la liste et tout son contenu'; }
+    else deleteList(state.listId);
+    return;
+  }
+  if (t.closest('[data-delete-item]')) {
+    const id = sheetTarget; closeSheet();
+    fire(deleteDoc(ref('items', id)));
+  }
+});
+
+overlay.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.matches('[data-dd-search]')) {
+    e.preventDefault();
+    sheet.querySelector('[data-dd-list] .dd-opt')?.click();
+  }
+});
+overlay.addEventListener('input', e => {
+  if (e.target.matches('[data-dd-search]')) return renderDdList();
+  if (e.target.matches('[data-emo-custom]')) { const g = firstGrapheme(e.target.value); if (g) setEmoji(g); }
+  e.target.classList?.remove('err');
+});
+
+overlay.addEventListener('submit', e => {
+  e.preventDefault();
+  const f = e.target;
+  const field = f.querySelector('[name="name"], [name="title"], [name="house"]');
+  const value = (field?.value || '').trim();
+  if (!value) { field?.classList.add('err'); field?.focus(); return; }
+
+  switch (f.dataset.form) {
+    case 'newList': {
+      const r = doc(col('lists'));
+      fire(setDoc(r, { name: value.slice(0, 60), emoji: sheetEmoji, createdAt: Date.now() }));
+      closeSheet(); state.view = 'list'; state.listId = r.id; render(); window.scrollTo(0, 0);
+      break;
+    }
+    case 'editList': {
+      const l = state.lists.find(x => x.id === sheetTarget), name = value.slice(0, 60);
+      if (l && (l.name !== name || l.emoji !== sheetEmoji)) fire(updateDoc(ref('lists', l.id), { name, emoji: sheetEmoji }));
+      closeSheet(); break;
+    }
+    case 'newSec': {
+      addSection(state.listId, value.slice(0, 40), sheetEmoji);
+      closeSheet(); toast('Catégorie créée. Touche un élément pour l\'y ranger.'); break;
+    }
+    case 'editSec': {
+      const s = state.sections.find(x => x.id === sheetTarget), name = value.slice(0, 40);
+      if (s && (s.name !== name || s.emoji !== sheetEmoji)) fire(updateDoc(ref('sections', s.id), { name, emoji: sheetEmoji }));
+      closeSheet(); break;
+    }
+    case 'editItem': {
+      const it = state.items.find(x => x.id === sheetTarget), title = value.slice(0, 200);
+      if (it && (it.title !== title || (it.sectionId || null) !== sheetSec)) fire(updateDoc(ref('items', it.id), { title, sectionId: sheetSec }));
+      closeSheet(); break;
+    }
+    case 'settings': {
+      const me = (f.querySelector('[name="me"]').value || '').trim().slice(0, 30);
+      if (me) { state.myName = me; store.set('maison.name', me); }
+      const house = value.slice(0, 40);
+      if (house !== state.house?.name) fire(updateDoc(houseRef(), { name: house }));
+      closeSheet(); render(); break;
+    }
+  }
+});
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !overlay.hidden) closeSheet(); });
+
+// ================== Interactions ==================
+screen.addEventListener('click', e => {
+  const el = e.target.closest('[data-action]');
+  if (!el) return;
+  const id = el.dataset.id;
+  switch (el.dataset.action) {
+    case 'open': state.view = 'list'; state.listId = id; render(); window.scrollTo(0, 0); break;
+    case 'back': state.view = 'home'; render(); window.scrollTo(0, 0); break;
+    case 'toggle': toggle(id); break;
+    case 'editItem': { const it = state.items.find(i => i.id === id); if (it) openItemSheet(it); break; }
+    case 'clearDone': clearDone(); break;
+    case 'listMenu': { const l = currentList(); if (l) openListSheet(l); break; }
+    case 'newList': openListSheet(null); break;
+    case 'invite': openInviteSheet(); break;
+    case 'settings': openSettingsSheet(); break;
+    case 'leave': leaveHouse(); break;
+  }
+});
+screen.addEventListener('input', e => e.target.classList?.remove('err'));
+
+fab.addEventListener('click', () => openListSheet(null));
+
+secChips.addEventListener('mousedown', e => { if (document.activeElement === input) e.preventDefault(); });
+secChips.addEventListener('click', e => {
+  if (e.target.closest('[data-sec-new]')) return openSectionSheet(null);
+  if (e.target.closest('[data-sec-manage]')) return openSectionsSheet();
+});
+
+$('#composerForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const title = input.value.trim().slice(0, 200);
+  if (!title || !state.listId) return;
+  input.value = ''; input.focus();
+  fire(setDoc(doc(col('items')), { listId: state.listId, sectionId: null, title, done: false, createdAt: Date.now(), byName: state.myName }));
+});
+
+// ================== Démarrage ==================
+if (configured) {
+  const fromUrl = codeFrom(location.search) || codeFrom(location.hash);
+  const code = fromUrl || store.get('maison.code');
+  if (code) enterHouse(code);
+}
+render();
+</script>
+</body>
+</html>
