@@ -28,7 +28,7 @@
   body{font-family:Inter,system-ui,-apple-system,sans-serif;font-size:16px;line-height:1.4;min-height:100vh;
        padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left)}
   button{font:inherit;color:inherit;cursor:pointer}
-  .wrap{max-width:560px;margin:0 auto;padding:22px 18px 190px}
+  .wrap{max-width:560px;margin:0 auto;padding:22px 18px 80px}
 
   h1{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:34px;letter-spacing:-.02em;line-height:1.1;word-break:break-word}
   h2{font-size:18px;font-weight:600;margin-bottom:12px}
@@ -96,17 +96,22 @@
   .by{font-size:12.5px;color:var(--muted);margin-top:1px}
 
   /* Barre d'ajout */
-  .composer{position:fixed;left:0;right:0;bottom:0;padding:22px 16px calc(14px + env(safe-area-inset-bottom));
-            background:linear-gradient(to bottom, transparent, var(--bg) 30%);z-index:5}
-  .composer form{max-width:528px;margin:0 auto;display:flex;gap:8px;align-items:center;background:var(--card);border-radius:16px;
-                 padding:6px 6px 6px 16px;box-shadow:0 2px 6px rgba(31,27,22,.06), 0 10px 30px rgba(31,27,22,.08);border:1px solid var(--line)}
-  .composer input{flex:1;min-width:0;border:0;background:none;font:16px Inter,system-ui,sans-serif;color:var(--ink);outline:none;padding:8px 0}
+  .composer{position:sticky;top:0;z-index:6;margin:14px -18px 0;padding:10px 18px 10px;
+            background:color-mix(in srgb, var(--bg) 86%, transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+  .composer.stuck{box-shadow:0 8px 18px -14px rgba(31,27,22,.35)}
+  .composer form{display:flex;gap:8px;align-items:center;background:var(--card);border-radius:16px;
+                 padding:5px 5px 5px 16px;box-shadow:0 1px 2px rgba(31,27,22,.05), 0 6px 18px rgba(31,27,22,.06);border:1px solid var(--line);
+                 transition:border-color .2s, box-shadow .2s}
+  .composer form:focus-within{border-color:var(--lc);box-shadow:0 0 0 4px color-mix(in srgb, var(--lc) 16%, transparent)}
+  .composer input{flex:1;min-width:0;border:0;background:none;font:16px Inter,system-ui,sans-serif;color:var(--ink);outline:none;padding:9px 0}
   .composer input::placeholder{color:var(--muted)}
-  .composer form button{background:var(--accent);color:#fff;border:0;border-radius:12px;padding:10px 16px;font-weight:600;font-size:15px}
+  .composer form button{background:var(--lc);color:#fff;border:0;border-radius:12px;width:42px;height:42px;display:grid;place-items:center;flex:none;transition:transform .12s}
+  .composer form button:active{transform:scale(.9)}
+  .composer form button svg{width:20px;height:20px}
 
   .chips{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none}
   .chips::-webkit-scrollbar{display:none}
-  .composer .chips{max-width:528px;margin:0 auto 9px;padding-bottom:2px}
+  .composer .chips{margin-top:9px;padding-bottom:2px}
   .chip{flex:none;border:1px solid var(--line);background:var(--card);padding:7px 12px;border-radius:999px;font-weight:500;font-size:13.5px;white-space:nowrap}
   .chip.add{border-style:dashed;color:var(--muted);background:transparent}
 
@@ -166,6 +171,71 @@
   .dd-empty{padding:12px 14px;color:var(--muted);font-size:14px}
 
   .logo{font-size:52px;margin-bottom:10px}
+
+  /* Couleur propre à chaque liste (--h = teinte) */
+  :root{--lc:var(--accent)}
+  .view{--lc:hsl(var(--h,152) 45% 38%)}
+  @media (prefers-color-scheme: dark){ .view{--lc:hsl(var(--h,152) 45% 60%)} }
+  .hello{color:var(--muted);font-size:15px;font-weight:500;margin-bottom:4px}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px}
+  .lcard{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:10px;text-align:left;border:0;border-radius:22px;
+         padding:16px 16px 15px;min-height:132px;background:hsl(var(--h) 60% 94%);color:var(--ink);overflow:hidden;
+         transition:transform .15s cubic-bezier(.3,.7,.4,1), box-shadow .2s}
+  .lcard::after{content:"";position:absolute;right:-26px;top:-26px;width:90px;height:90px;border-radius:50%;background:hsl(var(--h) 60% 88%);opacity:.7}
+  .lcard:active{transform:scale(.96)}
+  .lcard .lemo{position:relative;z-index:1;width:50px;height:50px;border-radius:16px;display:grid;place-items:center;font-size:28px;line-height:1;
+               background:var(--card);box-shadow:0 2px 8px hsl(var(--h) 40% 40% / .14)}
+  .lcard .lname{position:relative;z-index:1;font-weight:600;font-size:17px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;white-space:normal}
+  .lcard .lmeta{position:relative;z-index:1;margin-top:auto;font-size:13.5px;color:hsl(var(--h) 30% 35%)}
+  .lcard.add{background:transparent;border:1.5px dashed var(--line);align-items:center;justify-content:center;color:var(--muted);font-weight:500}
+  .lcard.add::after{display:none}
+  .lcard.add .plus{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb, var(--accent) 12%, transparent);color:var(--accent);font-size:26px;line-height:1}
+  @media (prefers-color-scheme: dark){
+    .lcard{background:hsl(var(--h) 22% 17%)}
+    .lcard::after{background:hsl(var(--h) 25% 22%)}
+    .lcard .lemo{background:hsl(var(--h) 20% 23%);box-shadow:none}
+    .lcard .lmeta{color:hsl(var(--h) 20% 70%)}
+  }
+
+  .view .ltitle .tile{width:54px;height:54px;border-radius:17px;font-size:30px;background:hsl(var(--h) 60% 92%)}
+  @media (prefers-color-scheme: dark){ .view .ltitle .tile{background:hsl(var(--h) 22% 20%)} }
+  .view .back{color:var(--lc)}
+  .view .iconbtn{color:var(--lc)}
+  .view .check.on{background:var(--lc);border-color:var(--lc)}
+  .view .grp-h:not(.soft){color:var(--lc)}
+  .view .grp-h:not(.soft)::after{background:color-mix(in srgb, var(--lc) 28%, var(--line))}
+  .view .link{color:var(--lc)}
+
+  /* Éléments : émoji + quantité */
+  .iline{display:flex;align-items:center;gap:10px;min-width:0}
+  .iemo{font-size:21px;line-height:1;flex:none;width:26px;text-align:center}
+  .ititle{flex:1;min-width:0}
+  .qty{flex:none;margin-left:auto;font-size:13.5px;font-weight:600;padding:4px 10px;border-radius:999px;white-space:nowrap;max-width:45%;overflow:hidden;text-overflow:ellipsis;
+       color:var(--lc);background:color-mix(in srgb, var(--lc) 12%, transparent)}
+  .done .qty{color:var(--muted);background:color-mix(in srgb, var(--muted) 12%, transparent)}
+  .done .iemo{opacity:.5}
+  .emo-big.none{color:var(--muted);font-size:22px}
+  .emo-none{display:block;width:calc(100% - 16px);margin:8px 8px 0;border:1px dashed var(--line);background:none;border-radius:10px;padding:8px;font-size:14px;color:var(--muted)}
+
+  /* Animations */
+  @keyframes viewIn{from{opacity:0;transform:translateX(26px)}to{opacity:1;transform:none}}
+  @keyframes viewBack{from{opacity:0;transform:translateX(-26px)}to{opacity:1;transform:none}}
+  @keyframes rise{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+  @keyframes enter{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+  @keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.28)}100%{transform:scale(1)}}
+  .anim-in{animation:viewIn .3s cubic-bezier(.2,.8,.3,1)}
+  .anim-back{animation:viewBack .3s cubic-bezier(.2,.8,.3,1)}
+  .anim-in .lcard,.anim-back .lcard,.anim-first .lcard{animation:rise .42s cubic-bezier(.2,.8,.3,1) both;animation-delay:calc(var(--i,0) * 45ms)}
+  .irow.enter{animation:enter .35s cubic-bezier(.2,.8,.3,1)}
+  .irow{transition:opacity .25s, background-color .25s}
+  .irow.checking{opacity:.55}
+  .irow.checking .check{animation:pop .32s ease}
+  .irow.checking .ititle{text-decoration:line-through;color:var(--muted)}
+  .check{transition:background-color .2s, border-color .2s, transform .12s}
+  .check:active{transform:scale(.88)}
+  .itext:active{opacity:.6}
+  @media (prefers-reduced-motion: reduce){ *,*::before,*::after{animation:none!important;transition:none!important} }
   .housebtn{background:none;border:0;display:flex;align-items:center;gap:6px;text-align:left;padding:0;max-width:100%}
   .housebtn h1{min-width:0}
   .housebtn .caret{display:flex;flex:none;color:var(--muted)}
@@ -177,20 +247,22 @@
 </style>
 </head>
 <body>
-  <main class="wrap" id="screen"></main>
+  <main class="wrap" id="app">
+    <div id="screen"></div>
+    <div class="composer" id="composer" hidden>
+      <form id="composerForm" autocomplete="off">
+        <input id="newItem" type="text" maxlength="200" placeholder="Ajouter un élément…" enterkeyhint="send">
+        <button type="submit" aria-label="Ajouter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+      </form>
+      <nav class="chips" id="secChips"></nav>
+    </div>
+    <div id="body"></div>
+  </main>
 
   <button class="fab" id="fab" hidden>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
     Nouvelle liste
   </button>
-
-  <div class="composer" id="composer" hidden>
-    <nav class="chips" id="secChips"></nav>
-    <form id="composerForm" autocomplete="off">
-      <input id="newItem" type="text" maxlength="200" placeholder="Ajouter un élément…" enterkeyhint="send">
-      <button type="submit">Ajouter</button>
-    </form>
-  </div>
 
   <div class="overlay" id="overlay" hidden><div class="sheet" id="sheet"></div></div>
   <div class="toast" id="toast" hidden></div>
@@ -224,6 +296,7 @@ const EMOJIS = [
 ].map(([g, s]) => [g, s.split(' ')]);
 
 const $ = s => document.querySelector(s);
+const app = $('#app'), body = $('#body');
 const screen = $('#screen'), composer = $('#composer'), input = $('#newItem'), secChips = $('#secChips'),
       fab = $('#fab'), overlay = $('#overlay'), sheet = $('#sheet');
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -288,7 +361,11 @@ const state = {
   view: 'home', listId: null, loading: true, error: null
 };
 let db = null, unsubs = [], renderedKey = '';
+const seenItems = new Set(); let itemsPrimed = false;
+state.fresh = new Set(); state.anim = 'first';
 
+const HUES = [152, 211, 26, 338, 266, 188, 44, 4, 120, 290];
+function hueOf(id) { let h = 0; for (const c of String(id)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return HUES[h % HUES.length]; }
 const sectionsOf = listId => state.sections.filter(s => s.listId === listId);
 const currentList = () => state.lists.find(l => l.id === state.listId);
 
@@ -342,11 +419,16 @@ function subscribe() {
     got('sections');
   }, err));
   unsubs.push(onSnapshot(query(col('items'), orderBy('createdAt')), snap => {
+    const fresh = new Set();
+    for (const d of snap.docs) { if (itemsPrimed && !seenItems.has(d.id)) fresh.add(d.id); seenItems.add(d.id); }
+    itemsPrimed = true; state.fresh = fresh;
     state.items = snap.docs.map(d => {
       const v = d.data();
       return { id: d.id, listId: v.listId, sectionId: typeof v.sectionId === 'string' ? v.sectionId : null,
                title: String(v.title ?? ''), done: v.done === true, byName: typeof v.byName === 'string' ? v.byName : '',
-               by: typeof v.by === 'string' ? v.by : null };
+               by: typeof v.by === 'string' ? v.by : null,
+               emoji: typeof v.emoji === 'string' && v.emoji ? v.emoji : null,
+               qty: typeof v.qty === 'string' ? v.qty.trim() : '' };
     });
     got('items');
   }, err));
@@ -429,6 +511,7 @@ function enterHouse(code) {
   store.set('maison.code', code);
   keepCodeInUrl();
   state.view = 'home'; state.lists = []; state.sections = []; state.items = []; state.house = null;
+  seenItems.clear(); itemsPrimed = false; state.anim = 'first';
   subscribe();
   render();
 }
@@ -540,6 +623,7 @@ function renderHome() {
     i.done ? c.done++ : c.todo++;
   }
   let h = `<header class="hometop"><div class="grow">
+      ${state.myName ? `<div class="hello">Bonjour ${esc(state.myName)} 👋</div>` : ''}
       <button class="housebtn" data-action="houses" aria-label="Mes maisons"><h1>${esc(state.house?.name || 'Maison')}</h1><span class="caret">${ICON.down}</span></button>
       ${state.loading ? '<p class="sub">Chargement…</p>' : ''}</div>
       <div class="btns">
@@ -554,43 +638,51 @@ function renderHome() {
       <p>Aucune liste pour l'instant.</p>
       <button class="btn primary" data-action="newList">Créer ma première liste</button></div>`;
   }
-  h += `<section class="sec"><div class="card">${state.lists.map(l => {
+  h += `<section class="grid">${state.lists.map((l, idx) => {
     const k = cnt[l.id] || { todo: 0, done: 0 };
     const meta = k.todo ? `${k.todo} à faire` : (k.done ? 'Tout est fait ✓' : 'Vide');
-    return `<button class="lrow" data-action="open" data-id="${esc(l.id)}">
-      <span class="tile">${esc(l.emoji)}</span>
-      <span class="grow"><div class="lname">${esc(l.name)}</div><div class="lmeta">${meta}</div></span>
-      <span class="chev">${ICON.chev}</span></button>`;
-  }).join('')}</div></section>`;
+    return `<button class="lcard" style="--h:${hueOf(l.id)};--i:${idx}" data-action="open" data-id="${esc(l.id)}">
+      <span class="lemo">${esc(l.emoji)}</span>
+      <span class="lname">${esc(l.name)}</span>
+      <span class="lmeta">${meta}</span></button>`;
+  }).join('')}
+    <button class="lcard add" style="--i:${state.lists.length}" data-action="newList"><span class="plus">+</span>Nouvelle liste</button>
+  </section>`;
   return h;
 }
 
 function itemRow(i) {
   const mine = i.by ? i.by === meId : i.byName === state.myName;
   const by = i.byName && !mine ? `<div class="by">ajouté par ${esc(i.byName)}</div>` : '';
-  return `<div class="irow ${i.done ? 'done' : ''}">
+  return `<div class="irow ${i.done ? 'done' : ''} ${state.fresh.has(i.id) ? 'enter' : ''}">
     <button class="check ${i.done ? 'on' : ''}" data-action="toggle" data-id="${esc(i.id)}" aria-label="${i.done ? 'Décocher' : 'Cocher'}">${i.done ? ICON.check : ''}</button>
-    <div class="itext" data-action="editItem" data-id="${esc(i.id)}"><div class="ititle">${esc(i.title)}</div>${by}</div>
+    <div class="itext" data-action="editItem" data-id="${esc(i.id)}">
+      <div class="iline">${i.emoji ? `<span class="iemo">${esc(i.emoji)}</span>` : ''}<span class="ititle">${esc(i.title)}</span>${i.qty ? `<span class="qty">${esc(i.qty)}</span>` : ''}</div>
+      ${by}
+    </div>
   </div>`;
 }
 
 const group = (head, items, cls = '') => `<section class="grp"><div class="grp-h ${cls}">${head}<span class="n">${items.length}</span></div>
   <div class="card">${items.map(itemRow).join('')}</div></section>`;
 
-function renderList(l) {
-  const its = state.items.filter(i => i.listId === l.id);
-  const todo = its.filter(i => !i.done), done = its.filter(i => i.done);
-  const secs = sectionsOf(l.id), secIds = new Set(secs.map(s => s.id));
-
-  let h = `<div class="topbar">
+function renderListHead(l) {
+  return `<div class="topbar">
       <button class="back" data-action="back">${ICON.back}Listes</button>
       <button class="iconbtn" data-action="listMenu" aria-label="Modifier la liste">${ICON.more}</button>
     </div>
     <header class="ltitle"><span class="tile">${esc(l.emoji)}</span><div class="grow"><h1 style="font-size:30px">${esc(l.name)}</h1></div></header>`;
+}
+
+function renderList(l) {
+  const its = state.items.filter(i => i.listId === l.id);
+  const todo = its.filter(i => !i.done), done = its.filter(i => i.done);
+  const secs = sectionsOf(l.id), secIds = new Set(secs.map(s => s.id));
+  let h = '';
 
   if (!todo.length) {
     h += `<section class="sec"><div class="card"><div class="pad muted">${
-      done.length ? 'Plus rien à faire ici.' : 'Ajoute un premier élément en bas de l\'écran.'}</div></div></section>`;
+      done.length ? 'Plus rien à faire ici.' : 'Ajoute un premier élément juste au-dessus.'}</div></div></section>`;
   } else {
     const groups = secs.map(s => ({ s, items: todo.filter(i => i.sectionId === s.id) })).filter(g => g.items.length);
     const loose = todo.filter(i => !secIds.has(i.sectionId));
@@ -626,6 +718,7 @@ function render() {
   composer.hidden = true; fab.hidden = true;
 
   if (key !== 'app') {
+    body.innerHTML = '';
     // Ces écrans contiennent des champs : on ne les redessine que si l'écran change.
     if (renderedKey !== key) {
       screen.innerHTML = key === 'setup' ? renderSetup() : key === 'welcome' ? renderWelcome()
@@ -641,10 +734,36 @@ function render() {
   const list = currentList();
   if (state.view === 'list' && !list && !state.loading) state.view = 'home';
   const inList = state.view === 'list' && list;
-  screen.innerHTML = inList ? renderList(list) : renderHome();
-  composer.hidden = !inList;
-  if (inList) renderSecChips(list);
-  fab.hidden = !(state.view === 'home' && !state.loading && state.lists.length);
+  const anim = state.loading ? '' : (state.anim ? 'anim-' + state.anim : '');
+  if (!state.loading) state.anim = null;
+  if (inList) {
+    const hue = hueOf(list.id);
+    screen.innerHTML = `<div class="view ${anim}" style="--h:${hue}">${renderListHead(list)}</div>`;
+    body.innerHTML = `<div class="view ${anim}" style="--h:${hue}">${renderList(list)}</div>`;
+    composer.classList.add('view');
+    composer.style.setProperty('--h', hue);
+    composer.hidden = false;
+    renderSecChips(list);
+  } else {
+    screen.innerHTML = `<div class="${anim}">${renderHome()}</div>`;
+    body.innerHTML = '';
+  }
+  state.fresh = new Set();
+  updateStuck();
+}
+
+function updateStuck() {
+  if (composer.hidden) return;
+  composer.classList.toggle('stuck', composer.getBoundingClientRect().top <= 1);
+}
+window.addEventListener('scroll', updateStuck, { passive: true });
+
+function go(view, listId) {
+  state.anim = view === 'list' ? 'in' : 'back';
+  state.view = view;
+  if (listId) state.listId = listId;
+  render();
+  window.scrollTo(0, 0);
 }
 
 // ================== Écritures ==================
@@ -669,7 +788,7 @@ function deleteList(id) {
   sectionsOf(id).forEach(s => b.delete(ref('sections', s.id)));
   b.delete(ref('lists', id));
   fire(b.commit());
-  closeSheet(); state.view = 'home'; render();
+  closeSheet(); go('home');
 }
 function addSection(listId, name, emoji) {
   const r = doc(col('sections'));
@@ -680,8 +799,9 @@ function addSection(listId, name, emoji) {
 // ================== Feuilles ==================
 let sheetEmoji = '📋', sheetSec = null, sheetTarget = null, sheetListId = null;
 
-function emojiPicker(open) {
+function emojiPicker(open, allowNone) {
   return `<div class="emo-wrap" ${open ? '' : 'hidden'}>
+    ${allowNone ? `<button type="button" class="emo-none" data-emo-none>Sans émoji</button>` : ''}
     <div class="emo-grid">${EMOJIS.map(([g, list]) => `<div class="emo-g">${g}</div><div class="emo-cells">${
       list.map(e => `<button type="button" class="emo ${e === sheetEmoji ? 'on' : ''}" data-emo="${e}">${e}</button>`).join('')}</div>`).join('')}</div>
     <input class="field emo-custom" data-emo-custom placeholder="…ou tape n'importe quel émoji" maxlength="16" autocomplete="off">
@@ -844,9 +964,16 @@ function openItemSheet(item) {
   const secs = sectionsOf(item.listId);
   sheetTarget = item.id; sheetListId = item.listId;
   sheetSec = secs.some(s => s.id === item.sectionId) ? item.sectionId : null;
+  sheetEmoji = item.emoji || null;
   openSheet(`<h3>Modifier l'élément</h3>
     <form data-form="editItem" autocomplete="off">
-      <input class="field" name="title" maxlength="200" value="${esc(item.title)}">
+      <div class="emo-row">
+        <button type="button" class="emo-big ${sheetEmoji ? '' : 'none'}" data-emo-toggle aria-label="Choisir un émoji">${sheetEmoji ? esc(sheetEmoji) : '＋'}</button>
+        <input class="field" name="title" maxlength="200" value="${esc(item.title)}">
+      </div>
+      ${emojiPicker(false, true)}
+      <div class="label">Quantité</div>
+      <input class="field" name="qty" maxlength="30" placeholder="ex. 2, 500 g, 5 vis, 1 kilo…" value="${esc(item.qty)}" autocomplete="off">
       <div class="label">Catégorie</div>
       <div class="dd" data-dd>
         <button type="button" class="dd-btn" data-dd-toggle><span class="v" data-dd-label>${ddLabel()}</span>${ICON.down}</button>
@@ -862,9 +989,9 @@ function openItemSheet(item) {
 }
 
 function setEmoji(e) {
-  sheetEmoji = e;
+  sheetEmoji = e || null;
   const big = sheet.querySelector('[data-emo-toggle]');
-  if (big) big.textContent = e;
+  if (big) { big.textContent = e || '＋'; big.classList.toggle('none', !e); }
   sheet.querySelectorAll('[data-emo]').forEach(b => b.classList.toggle('on', b.dataset.emo === e));
 }
 
@@ -879,6 +1006,7 @@ overlay.addEventListener('click', e => {
 
   const emo = t.closest('[data-emo]');
   if (emo) return setEmoji(emo.dataset.emo);
+  if (t.closest('[data-emo-none]')) return setEmoji(null);
   if (t.closest('[data-emo-toggle]')) { sheet.querySelector('.emo-wrap')?.toggleAttribute('hidden'); return; }
 
   if (t.closest('[data-dd-toggle]')) return setDdOpen(sheet.querySelector('.dd-panel')?.hidden);
@@ -977,7 +1105,7 @@ overlay.addEventListener('submit', e => {
     case 'newList': {
       const r = doc(col('lists'));
       fire(setDoc(r, { name: value.slice(0, 60), emoji: sheetEmoji, createdAt: Date.now() }));
-      closeSheet(); state.view = 'list'; state.listId = r.id; render(); window.scrollTo(0, 0);
+      closeSheet(); go('list', r.id);
       break;
     }
     case 'editList': {
@@ -996,7 +1124,11 @@ overlay.addEventListener('submit', e => {
     }
     case 'editItem': {
       const it = state.items.find(x => x.id === sheetTarget), title = value.slice(0, 200);
-      if (it && (it.title !== title || (it.sectionId || null) !== sheetSec)) fire(updateDoc(ref('items', it.id), { title, sectionId: sheetSec }));
+      const qty = (f.querySelector('[name="qty"]')?.value || '').trim().slice(0, 30);
+      const emoji = sheetEmoji || null;
+      if (it && (it.title !== title || (it.sectionId || null) !== sheetSec || (it.emoji || null) !== emoji || it.qty !== qty)) {
+        fire(updateDoc(ref('items', it.id), { title, sectionId: sheetSec, emoji, qty }));
+      }
       closeSheet(); break;
     }
     case 'settings': {
@@ -1012,14 +1144,26 @@ overlay.addEventListener('submit', e => {
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !overlay.hidden) closeSheet(); });
 
 // ================== Interactions ==================
-screen.addEventListener('click', e => {
+const pendingToggle = new Set();
+app.addEventListener('click', e => {
   const el = e.target.closest('[data-action]');
   if (!el) return;
   const id = el.dataset.id;
   switch (el.dataset.action) {
-    case 'open': state.view = 'list'; state.listId = id; render(); window.scrollTo(0, 0); break;
-    case 'back': state.view = 'home'; render(); window.scrollTo(0, 0); break;
-    case 'toggle': toggle(id); break;
+    case 'open': go('list', id); break;
+    case 'back': go('home'); break;
+    case 'toggle': {
+      const it = state.items.find(i => i.id === id);
+      if (!it || pendingToggle.has(id)) break;
+      if (!it.done) {
+        // petite animation avant de passer dans « Cochés »
+        pendingToggle.add(id);
+        el.classList.add('on'); el.innerHTML = ICON.check;
+        el.closest('.irow')?.classList.add('checking');
+        setTimeout(() => { pendingToggle.delete(id); toggle(id); }, 300);
+      } else toggle(id);
+      break;
+    }
     case 'editItem': { const it = state.items.find(i => i.id === id); if (it) openItemSheet(it); break; }
     case 'clearDone': clearDone(); break;
     case 'listMenu': { const l = currentList(); if (l) openListSheet(l); break; }
@@ -1030,7 +1174,7 @@ screen.addEventListener('click', e => {
     case 'houses': openHousesSheet(); break;
   }
 });
-screen.addEventListener('input', e => e.target.classList?.remove('err'));
+app.addEventListener('input', e => e.target.classList?.remove('err'));
 
 fab.addEventListener('click', () => openListSheet(null));
 
