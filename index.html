@@ -218,6 +218,28 @@
   .emo-big.none{color:var(--muted);font-size:22px}
   .emo-none{display:block;width:calc(100% - 16px);margin:8px 8px 0;border:1px dashed var(--line);background:none;border-radius:10px;padding:8px;font-size:14px;color:var(--muted)}
 
+  /* Commentaire */
+  .note{font-size:14px;line-height:1.35;color:var(--muted);margin-top:3px;white-space:pre-line;
+        display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .note.indent{padding-left:36px}
+  .done .note{opacity:.7}
+  textarea.field{resize:vertical;min-height:84px;line-height:1.4}
+
+  /* Membres */
+  .members-btn{padding:6px 8px}
+  .avatars{display:flex;align-items:center}
+  .avatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;flex:none;font-weight:600;font-size:13px;color:#fff;
+          background:hsl(var(--h,152) 45% 45%);border:2px solid var(--bg)}
+  .avatars .avatar + .avatar{margin-left:-9px}
+  .avatar.more{background:var(--muted)}
+  .avatar.lg{width:42px;height:42px;font-size:17px;border:0}
+  .avatar.off{background:color-mix(in srgb, var(--muted) 45%, transparent)}
+  .mrow{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .mname{font-weight:600;font-size:16px}
+  .mdev{font-size:13.5px;margin-top:3px}
+  .kick{flex:none;border:1px solid var(--line);background:none;color:var(--muted);border-radius:10px;padding:7px 11px;font-size:13.5px;font-weight:500}
+  .kick.sure{background:#C0392B;border-color:#C0392B;color:#fff}
+
   /* Animations */
   @keyframes viewIn{from{opacity:0;transform:translateX(26px)}to{opacity:1;transform:none}}
   @keyframes viewBack{from{opacity:0;transform:translateX(-26px)}to{opacity:1;transform:none}}
@@ -283,6 +305,7 @@ const ICON = {
   down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
   back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>',
   more: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>',
+  people: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
   invite: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>',
   gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>'
 };
@@ -410,6 +433,27 @@ function subscribe() {
     render();
   }, err));
 
+  unsubs.push(onSnapshot(col('members'), snap => {
+    state.members = snap.docs.map(d => {
+      const v = d.data();
+      const devs = v.devices && typeof v.devices === 'object' ? Object.entries(v.devices) : [];
+      return {
+        id: d.id, name: str(v.name, "Quelqu'un"), removed: v.removed === true,
+        devices: devs.map(([k, x]) => ({ id: k, label: str(x && x.label, 'Appareil'), lastSeen: Number(x && x.lastSeen) || 0 }))
+                     .sort((a, b) => b.lastSeen - a.lastSeen)
+      };
+    });
+    const mine = state.members.find(m => m.id === meId);
+    if (mine && mine.removed) {
+      const name = state.house?.name || 'la maison';
+      forgetHouse(state.code);
+      toast(`Tu as été retiré de « ${name} ».`);
+      return;
+    }
+    render();
+    if (sheetKind === 'members') openMembersSheet();
+  }, e => console.error('membres', e)));
+
   unsubs.push(onSnapshot(query(col('lists'), orderBy('createdAt')), snap => {
     state.lists = snap.docs.map(d => { const v = d.data(); return { id: d.id, name: str(v.name, 'Sans nom'), emoji: str(v.emoji, '📋') }; });
     got('lists');
@@ -428,7 +472,8 @@ function subscribe() {
                title: String(v.title ?? ''), done: v.done === true, byName: typeof v.byName === 'string' ? v.byName : '',
                by: typeof v.by === 'string' ? v.by : null,
                emoji: typeof v.emoji === 'string' && v.emoji ? v.emoji : null,
-               qty: typeof v.qty === 'string' ? v.qty.trim() : '' };
+               qty: typeof v.qty === 'string' ? v.qty.trim() : '',
+               note: typeof v.note === 'string' ? v.note.trim() : '' };
     });
     got('items');
   }, err));
@@ -451,6 +496,38 @@ saveLocal();
 // ----- Identité personnelle : la même personne sur tous ses appareils -----
 // Ton profil (prénom, maisons, favorite) est rangé en ligne sous un code secret à toi.
 let meId = store.get('maison.me') || null;
+
+// Cet appareil (pour afficher sur quels appareils chacun est connecté)
+let deviceId = store.get('maison.device');
+if (!deviceId) { deviceId = newCode(); store.set('maison.device', deviceId); }
+function deviceLabel() {
+  const ua = navigator.userAgent;
+  if (/iPad/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) return 'iPad';
+  if (/iPhone/.test(ua)) return 'iPhone';
+  if (/Android/.test(ua)) return /Mobile/.test(ua) ? 'Téléphone Android' : 'Tablette Android';
+  if (/Macintosh/.test(ua)) return 'Mac';
+  if (/Windows/.test(ua)) return 'PC Windows';
+  return 'Appareil';
+}
+const deviceIcon = label => /iPad|Tablette/.test(label) ? '📱' : /iPhone|Téléphone/.test(label) ? '📱' : /Mac|PC/.test(label) ? '💻' : '🔹';
+let lastTouch = 0;
+function touchMember(force) {
+  if (!db || !state.code || !meId || !state.myName) return;
+  const now = Date.now();
+  if (!force && now - lastTouch < 10 * 60 * 1000) return;
+  lastTouch = now;
+  fire(setDoc(ref('members', meId), { name: state.myName, devices: { [deviceId]: { label: deviceLabel(), lastSeen: now } } }, { merge: true }));
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') touchMember(false); });
+function ago(ts) {
+  if (!ts) return '';
+  const s = (Date.now() - ts) / 1000;
+  if (s < 15 * 60) return 'actif récemment';
+  if (s < 3600) return `vu il y a ${Math.round(s / 60)} min`;
+  if (s < 86400) return `vu il y a ${Math.round(s / 3600)} h`;
+  if (s < 172800) return 'vu hier';
+  return 'vu le ' + new Date(ts).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+}
 let unsubMe = null, firstProfile = true, profileReady = false, lastProfileJson = '';
 const personRef = () => doc(db, 'people', meId);
 const profileData = () => ({ name: state.myName || '', houses: houses.map(h => ({ code: h.code, name: h.name || '' })), fav: fav || null });
@@ -510,9 +587,10 @@ function enterHouse(code) {
   rememberHouse(code);
   store.set('maison.code', code);
   keepCodeInUrl();
-  state.view = 'home'; state.lists = []; state.sections = []; state.items = []; state.house = null;
+  state.view = 'home'; state.lists = []; state.sections = []; state.items = []; state.house = null; state.members = [];
   seenItems.clear(); itemsPrimed = false; state.anim = 'first';
   subscribe();
+  touchMember(true);
   render();
 }
 
@@ -606,6 +684,7 @@ screen.addEventListener('submit', e => {
     if (need('me')) return;
     state.myName = v('me').slice(0, 30); store.set('maison.name', state.myName);
     pushProfile();
+    touchMember(true);
     renderedKey = ''; render();
   } else if (f.dataset.form === 'me') {
     const id = paramFrom(v('link'), 'moi');
@@ -616,6 +695,14 @@ screen.addEventListener('submit', e => {
 });
 
 // ================== Rendu de l'app ==================
+const initial = name => (Array.from(String(name || '?').trim())[0] || '?').toUpperCase();
+function avatarStack() {
+  const ms = (state.members || []).filter(m => !m.removed);
+  if (!ms.length) return ICON.people;
+  const shown = ms.slice(0, 3).map(m => `<span class="avatar" style="--h:${hueOf(m.id)}">${esc(initial(m.name))}</span>`).join('');
+  return `<span class="avatars">${shown}${ms.length > 3 ? `<span class="avatar more">+${ms.length - 3}</span>` : ''}</span>`;
+}
+
 function renderHome() {
   const cnt = {};
   for (const i of state.items) {
@@ -627,7 +714,7 @@ function renderHome() {
       <button class="housebtn" data-action="houses" aria-label="Mes maisons"><h1>${esc(state.house?.name || 'Maison')}</h1><span class="caret">${ICON.down}</span></button>
       ${state.loading ? '<p class="sub">Chargement…</p>' : ''}</div>
       <div class="btns">
-        <button class="iconbtn" data-action="invite" aria-label="Inviter">${ICON.invite}</button>
+        <button class="iconbtn members-btn" data-action="members" aria-label="Membres">${avatarStack()}</button>
         <button class="iconbtn" data-action="settings" aria-label="Réglages">${ICON.gear}</button>
       </div></header>`;
   if (state.error) h += `<div class="banner">${esc(state.error)}</div>`;
@@ -658,6 +745,7 @@ function itemRow(i) {
     <button class="check ${i.done ? 'on' : ''}" data-action="toggle" data-id="${esc(i.id)}" aria-label="${i.done ? 'Décocher' : 'Cocher'}">${i.done ? ICON.check : ''}</button>
     <div class="itext" data-action="editItem" data-id="${esc(i.id)}">
       <div class="iline">${i.emoji ? `<span class="iemo">${esc(i.emoji)}</span>` : ''}<span class="ititle">${esc(i.title)}</span>${i.qty ? `<span class="qty">${esc(i.qty)}</span>` : ''}</div>
+      ${i.note ? `<div class="note ${i.emoji ? 'indent' : ''}">${esc(i.note)}</div>` : ''}
       ${by}
     </div>
   </div>`;
@@ -816,8 +904,37 @@ const secRows = secs => secs.length ? secs.map(s => `<div class="srow" data-row=
     <button type="button" class="del" data-del-sec="${esc(s.id)}" aria-label="Supprimer la catégorie">${ICON.x}</button></div>`).join('')
   : `<p class="hint">Aucune catégorie pour l'instant. Les catégories regroupent les éléments de la liste.</p>`;
 
-function openSheet(html) { sheet.innerHTML = html; overlay.hidden = false; sheet.scrollTop = 0; }
-function closeSheet() { overlay.hidden = true; sheet.innerHTML = ''; }
+let sheetKind = null;
+function openSheet(html) { sheetKind = null; sheet.innerHTML = html; overlay.hidden = false; sheet.scrollTop = 0; }
+function closeSheet() { sheetKind = null; overlay.hidden = true; sheet.innerHTML = ''; }
+
+function openMembersSheet() {
+  const keepScroll = sheetKind === 'members' ? sheet.scrollTop : 0;
+  const all = state.members || [];
+  const active = all.filter(m => !m.removed).sort((a, b) => (b.id === meId) - (a.id === meId) || a.name.localeCompare(b.name));
+  const removed = all.filter(m => m.removed);
+  const row = m => `<div class="mrow">
+      <span class="avatar lg" style="--h:${hueOf(m.id)}">${esc(initial(m.name))}</span>
+      <div class="grow">
+        <div class="mname">${esc(m.name)}${m.id === meId ? ' <span class="muted">(toi)</span>' : ''}</div>
+        ${m.devices.map(d => `<div class="mdev">${deviceIcon(d.label)} ${esc(d.label)}${d.id === deviceId ? ' · cet appareil' : ''} <span class="muted">· ${ago(d.lastSeen)}</span></div>`).join('')}
+      </div>
+      ${m.id !== meId ? `<button type="button" class="kick" data-kick="${esc(m.id)}">Retirer</button>` : ''}
+    </div>`;
+  openSheet(`<h3>Membres</h3>
+    ${active.length ? active.map(row).join('') : '<p class="hint">Personne pour l\'instant.</p>'}
+    ${removed.length ? `<div class="label">Retirés</div>${removed.map(m => `<div class="mrow">
+        <span class="avatar lg off">${esc(initial(m.name))}</span>
+        <div class="grow"><div class="mname muted">${esc(m.name)}</div></div>
+        <button type="button" class="link" data-unkick="${esc(m.id)}">Réintégrer</button></div>`).join('')}` : ''}
+    <p class="hint" style="margin-top:12px">Une personne retirée ne voit plus la maison sur ses appareils.</p>
+    <div class="actions">
+      <button type="button" class="btn ghost" data-close>Fermer</button>
+      <button type="button" class="btn primary" data-open-invite>Inviter quelqu'un</button>
+    </div>`);
+  sheetKind = 'members';
+  sheet.scrollTop = keepScroll;
+}
 
 function openInviteSheet() {
   const url = inviteUrl();
@@ -972,6 +1089,8 @@ function openItemSheet(item) {
         <input class="field" name="title" maxlength="200" value="${esc(item.title)}">
       </div>
       ${emojiPicker(false, true)}
+      <div class="label">Commentaire</div>
+      <textarea class="field note-field" name="note" maxlength="500" rows="3" placeholder="Des détails, une précision… (ex. la marque, où ranger, comment faire)">${esc(item.note)}</textarea>
       <div class="label">Quantité</div>
       <input class="field" name="qty" maxlength="30" placeholder="ex. 2, 500 g, 5 vis, 1 kilo…" value="${esc(item.qty)}" autocomplete="off">
       <div class="label">Catégorie</div>
@@ -1040,6 +1159,16 @@ overlay.addEventListener('click', e => {
   const favBtn = t.closest('[data-fav]');
   if (favBtn) { fav = favBtn.dataset.fav; saveHouses(); openHousesSheet(); toast('Maison favorite enregistrée.'); return; }
   if (t.closest('[data-open-create]')) return openCreateHouseSheet();
+  if (t.closest('[data-open-invite]')) return openInviteSheet();
+  const kick = t.closest('[data-kick]');
+  if (kick) {
+    if (!kick.classList.contains('sure')) { kick.classList.add('sure'); kick.textContent = 'Confirmer'; return; }
+    fire(updateDoc(ref('members', kick.dataset.kick), { removed: true, removedAt: Date.now(), removedBy: state.myName }));
+    toast('Personne retirée de la maison.');
+    return;
+  }
+  const unkick = t.closest('[data-unkick]');
+  if (unkick) { fire(updateDoc(ref('members', unkick.dataset.unkick), { removed: false })); return; }
   if (t.closest('[data-open-join]')) return openJoinHouseSheet();
 
   if (t.closest('[data-sec-new]')) return openSectionSheet(null);
@@ -1126,14 +1255,15 @@ overlay.addEventListener('submit', e => {
       const it = state.items.find(x => x.id === sheetTarget), title = value.slice(0, 200);
       const qty = (f.querySelector('[name="qty"]')?.value || '').trim().slice(0, 30);
       const emoji = sheetEmoji || null;
-      if (it && (it.title !== title || (it.sectionId || null) !== sheetSec || (it.emoji || null) !== emoji || it.qty !== qty)) {
-        fire(updateDoc(ref('items', it.id), { title, sectionId: sheetSec, emoji, qty }));
+      const note = (f.querySelector('[name="note"]')?.value || '').trim().slice(0, 500);
+      if (it && (it.title !== title || (it.sectionId || null) !== sheetSec || (it.emoji || null) !== emoji || it.qty !== qty || it.note !== note)) {
+        fire(updateDoc(ref('items', it.id), { title, sectionId: sheetSec, emoji, qty, note }));
       }
       closeSheet(); break;
     }
     case 'settings': {
       const me = (f.querySelector('[name="me"]').value || '').trim().slice(0, 30);
-      if (me) { state.myName = me; store.set('maison.name', me); pushProfile(); }
+      if (me) { state.myName = me; store.set('maison.name', me); pushProfile(); touchMember(true); }
       const house = value.slice(0, 40);
       if (house !== state.house?.name) fire(updateDoc(houseRef(), { name: house }));
       closeSheet(); render(); break;
@@ -1169,6 +1299,7 @@ app.addEventListener('click', e => {
     case 'listMenu': { const l = currentList(); if (l) openListSheet(l); break; }
     case 'newList': openListSheet(null); break;
     case 'invite': openInviteSheet(); break;
+    case 'members': openMembersSheet(); break;
     case 'settings': openSettingsSheet(); break;
     case 'leave': leaveHouse(); break;
     case 'houses': openHousesSheet(); break;
