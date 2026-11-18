@@ -8,7 +8,6 @@
 <meta name="apple-mobile-web-app-title" content="Maison">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#F6F3EE">
-<link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon-192.png">
 <title>Maison</title>
@@ -167,6 +166,12 @@
   .dd-empty{padding:12px 14px;color:var(--muted);font-size:14px}
 
   .logo{font-size:52px;margin-bottom:10px}
+  .housebtn{background:none;border:0;display:flex;align-items:center;gap:6px;text-align:left;padding:0;max-width:100%}
+  .housebtn h1{min-width:0}
+  .housebtn .caret{display:flex;flex:none;color:var(--muted)}
+  .housebtn .caret svg{width:24px;height:24px}
+  .star{font-size:24px;line-height:1;color:var(--muted);padding:8px 10px}
+  .star.on{color:#D9A21B}
   .toast{position:fixed;left:50%;bottom:calc(110px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);
          padding:11px 16px;border-radius:12px;font-size:14px;z-index:30;max-width:calc(100% - 40px);text-align:center}
 </style>
@@ -245,18 +250,26 @@ function newCode() {
   const bytes = crypto.getRandomValues(new Uint8Array(20));
   return Array.from(bytes, b => abc[b % abc.length]).join('');
 }
+function paramFrom(text, key) {
+  const m = String(text || '').trim().match(new RegExp('[?&#]' + key + '=([a-z0-9]{16,40})', 'i'));
+  return m ? m[1].toLowerCase() : null;
+}
 function codeFrom(text) {
+  const p = paramFrom(text, 'maison');
+  if (p) return p;
   const t = String(text || '').trim();
-  const m = t.match(/[?&#]maison=([a-z0-9]{16,40})/i);
-  if (m) return m[1].toLowerCase();
   return /^[a-z0-9]{16,40}$/i.test(t) ? t.toLowerCase() : null;
 }
-const inviteUrl = () => `${location.origin}${location.pathname}?maison=${state.code}`;
+const baseUrl = () => `${location.origin}${location.pathname}`;
+const inviteUrl = () => `${baseUrl()}?maison=${state.code}`;   // pour inviter quelqu'un
+const meUrl = () => `${baseUrl()}?moi=${meId}`;                 // pour tes autres appareils
 
 function keepCodeInUrl() {
-  // Le code reste dans l'adresse : "Sur l'écran d'accueil" le garde dans l'icône.
-  const url = state.code ? `${location.pathname}?maison=${state.code}` : location.pathname;
-  history.replaceState(null, '', url);
+  // Ton identité et la maison restent dans l'adresse : "Sur l'écran d'accueil" les garde dans l'icône.
+  const qs = [];
+  if (meId) qs.push('moi=' + meId);
+  if (state.code) qs.push('maison=' + state.code);
+  history.replaceState(null, '', location.pathname + (qs.length ? '?' + qs.join('&') : ''));
 }
 
 let toastTimer;
@@ -312,7 +325,10 @@ function subscribe() {
       ? 'Accès refusé : vérifie les règles Firebase.' : 'Impossible de charger les listes pour le moment.'; render(); };
 
   unsubs.push(onSnapshot(houseRef(), { includeMetadataChanges: true }, snap => {
-    if (snap.exists()) { state.house = snap.data(); state.houseMissing = false; state.houseChecked = true; }
+    if (snap.exists()) {
+      state.house = snap.data(); state.houseMissing = false; state.houseChecked = true;
+      if (typeof state.house.name === 'string') rememberHouse(state.code, state.house.name);
+    }
     else if (!snap.metadata.fromCache) { state.house = null; state.houseMissing = true; state.houseChecked = true; }
     render();
   }, err));
@@ -329,14 +345,87 @@ function subscribe() {
     state.items = snap.docs.map(d => {
       const v = d.data();
       return { id: d.id, listId: v.listId, sectionId: typeof v.sectionId === 'string' ? v.sectionId : null,
-               title: String(v.title ?? ''), done: v.done === true, byName: typeof v.byName === 'string' ? v.byName : '' };
+               title: String(v.title ?? ''), done: v.done === true, byName: typeof v.byName === 'string' ? v.byName : '',
+               by: typeof v.by === 'string' ? v.by : null };
     });
     got('items');
   }, err));
 }
 
+// ----- Mes maisons (gardées sur cet iPhone) + maison favorite -----
+function loadHouses() {
+  try {
+    const a = JSON.parse(store.get('maison.houses') || '[]');
+    return Array.isArray(a) ? a.filter(h => h && typeof h.code === 'string') : [];
+  } catch (_) { return []; }
+}
+let houses = loadHouses();
+const legacyCode = store.get('maison.code');
+if (legacyCode && !houses.some(h => h.code === legacyCode)) houses.push({ code: legacyCode, name: '' });
+let fav = store.get('maison.fav') || null;
+const saveLocal = () => { store.set('maison.houses', JSON.stringify(houses)); store.set('maison.fav', fav); };
+saveLocal();
+
+// ----- Identité personnelle : la même personne sur tous ses appareils -----
+// Ton profil (prénom, maisons, favorite) est rangé en ligne sous un code secret à toi.
+let meId = store.get('maison.me') || null;
+let unsubMe = null, firstProfile = true, profileReady = false, lastProfileJson = '';
+const personRef = () => doc(db, 'people', meId);
+const profileData = () => ({ name: state.myName || '', houses: houses.map(h => ({ code: h.code, name: h.name || '' })), fav: fav || null });
+
+function pushProfile() {
+  if (!db || !meId || !profileReady) return;   // jamais avant d'avoir lu le profil en ligne
+  const data = profileData(), j = JSON.stringify(data);
+  if (j === lastProfileJson) return;
+  lastProfileJson = j;
+  fire(setDoc(personRef(), { ...data, updatedAt: Date.now() }));
+}
+const saveHouses = () => { saveLocal(); pushProfile(); };
+
+function watchProfile() {
+  if (!db || !meId) return;
+  if (unsubMe) unsubMe();
+  firstProfile = true; profileReady = false; lastProfileJson = '';
+  unsubMe = onSnapshot(personRef(), snap => {
+    if (!snap.exists()) { if (!snap.metadata.fromCache) { firstProfile = false; profileReady = true; pushProfile(); } return; }
+    profileReady = true;
+    const p = snap.data();
+    const remote = Array.isArray(p.houses) ? p.houses.filter(h => h && typeof h.code === 'string').map(h => ({ code: h.code, name: String(h.name || '') })) : [];
+    if (firstProfile) {
+      // Première synchro : on fusionne ce que cet appareil connaît avec ton profil.
+      for (const h of houses) if (!remote.some(r => r.code === h.code)) remote.push(h);
+      firstProfile = false;
+    }
+    houses = remote;
+    if (p.fav && houses.some(h => h.code === p.fav)) fav = p.fav;
+    else if (!houses.some(h => h.code === fav)) fav = houses[0]?.code || null;
+    if (typeof p.name === 'string' && p.name.trim()) { state.myName = p.name; store.set('maison.name', p.name); }
+    lastProfileJson = JSON.stringify({ name: typeof p.name === 'string' ? p.name : '', houses: Array.isArray(p.houses) ? p.houses.map(h => ({ code: h.code, name: h.name || '' })) : [], fav: p.fav || null });
+    saveLocal();
+    pushProfile();   // n'écrit que si la fusion a ajouté quelque chose
+    if (!state.code && houses.length) enterHouse(fav || houses[0].code);
+    else { renderedKey = renderedKey === 'askName' ? '' : renderedKey; render(); }
+  }, e => console.error(e));
+}
+
+function adoptMe(id) {
+  meId = id;
+  store.set('maison.me', id);
+  keepCodeInUrl();
+  watchProfile();
+}
+
+function rememberHouse(code, name) {
+  const h = houses.find(x => x.code === code);
+  if (h) { if (name && h.name !== name) h.name = name; }
+  else houses.push({ code, name: name || '' });
+  if (!fav || !houses.some(x => x.code === fav)) fav = code;
+  saveHouses();
+}
+
 function enterHouse(code) {
   state.code = code;
+  rememberHouse(code);
   store.set('maison.code', code);
   keepCodeInUrl();
   state.view = 'home'; state.lists = []; state.sections = []; state.items = []; state.house = null;
@@ -344,13 +433,28 @@ function enterHouse(code) {
   render();
 }
 
-function leaveHouse() {
+function createHouse(name) {
+  const code = newCode();
+  fire(setDoc(doc(db, 'households', code), { name: name.slice(0, 40), createdAt: Date.now() }));
+  enterHouse(code);
+  rememberHouse(code, name.slice(0, 40));
+  setTimeout(openInviteSheet, 400);
+}
+
+// Retire la maison de cet iPhone (les listes restent en ligne pour les autres)
+function forgetHouse(code) {
+  houses = houses.filter(h => h.code !== code);
+  if (fav === code) fav = houses[0]?.code || null;
+  saveHouses();
+  closeSheet();
+  if (houses.length) { enterHouse(fav || houses[0].code); return; }
   unsubs.forEach(u => u()); unsubs = [];
   state.code = null; state.house = null;
   store.set('maison.code', null);
   keepCodeInUrl();
-  closeSheet(); render();
+  render();
 }
+const leaveHouse = () => forgetHouse(state.code);
 
 // ================== Écrans d'accueil (créer / rejoindre) ==================
 function renderSetup() {
@@ -374,6 +478,12 @@ function renderWelcome() {
       <input class="field" name="link" placeholder="Lien d'invitation">
       <input class="field" name="me" maxlength="30" placeholder="Ton prénom" value="${esc(state.myName)}">
       <button class="btn primary full" type="submit">Rejoindre</button>
+    </form>
+    <form class="card pad sec stack" data-form="me" autocomplete="off">
+      <h2>Tu utilises déjà Maison ailleurs ?</h2>
+      <p class="hint">Sur ton autre appareil, va dans Réglages ⚙️ > « Tes autres appareils », envoie-toi le lien, puis ouvre-le ici ou colle-le.</p>
+      <input class="field" name="link" placeholder="Ton lien personnel">
+      <button class="btn ghost full" type="submit">Me retrouver</button>
     </form>`;
 }
 
@@ -402,11 +512,7 @@ screen.addEventListener('submit', e => {
   if (f.dataset.form === 'create') {
     if (need('house') || need('me')) return;
     state.myName = v('me').slice(0, 30); store.set('maison.name', state.myName);
-    const code = newCode();
-    state.code = code;
-    fire(setDoc(houseRef(), { name: v('house').slice(0, 40), createdAt: Date.now() }));
-    enterHouse(code);
-    setTimeout(openInviteSheet, 400);
+    createHouse(v('house'));
   } else if (f.dataset.form === 'join') {
     const code = codeFrom(v('link'));
     if (!code) { const el = f.querySelector('[name="link"]'); el.classList.add('err'); el.focus(); toast('Ce lien ne semble pas valide.'); return; }
@@ -416,7 +522,13 @@ screen.addEventListener('submit', e => {
   } else if (f.dataset.form === 'name') {
     if (need('me')) return;
     state.myName = v('me').slice(0, 30); store.set('maison.name', state.myName);
+    pushProfile();
     renderedKey = ''; render();
+  } else if (f.dataset.form === 'me') {
+    const id = paramFrom(v('link'), 'moi');
+    if (!id) { const el = f.querySelector('[name="link"]'); el.classList.add('err'); el.focus(); toast("Ce n'est pas un lien personnel valide."); return; }
+    adoptMe(id);
+    toast('Profil retrouvé, tes maisons arrivent…');
   }
 });
 
@@ -427,7 +539,8 @@ function renderHome() {
     const c = cnt[i.listId] || (cnt[i.listId] = { todo: 0, done: 0 });
     i.done ? c.done++ : c.todo++;
   }
-  let h = `<header class="hometop"><div class="grow"><h1>${esc(state.house?.name || 'Maison')}</h1>
+  let h = `<header class="hometop"><div class="grow">
+      <button class="housebtn" data-action="houses" aria-label="Mes maisons"><h1>${esc(state.house?.name || 'Maison')}</h1><span class="caret">${ICON.down}</span></button>
       ${state.loading ? '<p class="sub">Chargement…</p>' : ''}</div>
       <div class="btns">
         <button class="iconbtn" data-action="invite" aria-label="Inviter">${ICON.invite}</button>
@@ -453,7 +566,8 @@ function renderHome() {
 }
 
 function itemRow(i) {
-  const by = i.byName && i.byName !== state.myName ? `<div class="by">ajouté par ${esc(i.byName)}</div>` : '';
+  const mine = i.by ? i.by === meId : i.byName === state.myName;
+  const by = i.byName && !mine ? `<div class="by">ajouté par ${esc(i.byName)}</div>` : '';
   return `<div class="irow ${i.done ? 'done' : ''}">
     <button class="check ${i.done ? 'on' : ''}" data-action="toggle" data-id="${esc(i.id)}" aria-label="${i.done ? 'Décocher' : 'Cocher'}">${i.done ? ICON.check : ''}</button>
     <div class="itext" data-action="editItem" data-id="${esc(i.id)}"><div class="ititle">${esc(i.title)}</div>${by}</div>
@@ -606,9 +720,52 @@ function openSettingsSheet() {
       <input class="field" name="me" maxlength="30" value="${esc(state.myName)}">
       ${actions('Enregistrer')}
     </form>
+    <div class="sep"></div>
+    <div class="label">Tes autres appareils</div>
+    <p class="hint" style="margin-bottom:10px">Pour être la même personne sur ton iPad ou un autre téléphone, avec tes maisons et ta favorite : envoie-toi ce lien et ouvre-le dans Safari sur l'autre appareil.</p>
+    <div class="linkbox">${esc(meUrl())}</div>
+    <div class="actions">
+      ${navigator.share ? `<button type="button" class="btn primary" data-share-me>M'envoyer le lien</button>` : ''}
+      <button type="button" class="btn ${navigator.share ? 'ghost' : 'primary'}" data-copy-me>Copier</button>
+    </div>
+    <p class="hint" style="text-align:center;margin-top:8px">🔒 Ce lien, c'est toi : ne le donne à personne d'autre. Pour inviter quelqu'un, utilise le bouton 👤+.</p>
     <div class="sep" style="margin-bottom:16px"></div>
-    <button type="button" class="btn danger full" data-leave>Quitter cette maison sur cet iPhone</button>
-    <p class="hint" style="text-align:center">Les listes ne sont pas supprimées. Tu pourras revenir avec le lien d'invitation.</p>`);
+    <button type="button" class="btn danger full" data-leave>Retirer cette maison de mes appareils</button>
+    <p class="hint" style="text-align:center">Les listes ne sont pas supprimées pour les autres. Tu pourras revenir avec le lien d'invitation.</p>`);
+}
+
+function openHousesSheet() {
+  const rows = houses.map(h => {
+    const name = (h.code === state.code ? state.house?.name : '') || h.name || 'Maison';
+    return `<div class="srow">
+      <button type="button" class="srow-btn" data-go="${esc(h.code)}"><span class="e">🏠</span><span class="t">${esc(name)}</span>
+        ${h.code === state.code ? '<span class="muted" style="font-size:13px;margin-left:auto;flex:none">ouverte</span>' : ''}</button>
+      <button type="button" class="del star ${h.code === fav ? 'on' : ''}" data-fav="${esc(h.code)}" aria-label="Maison favorite">${h.code === fav ? '★' : '☆'}</button>
+    </div>`;
+  }).join('');
+  openSheet(`<h3>Mes maisons</h3>${rows}
+    <p class="hint" style="margin-top:10px">★ = ta maison favorite, celle qui s'ouvre au lancement de l'app.</p>
+    <div class="actions">
+      <button type="button" class="btn ghost" data-open-join>Rejoindre</button>
+      <button type="button" class="btn primary" data-open-create>Créer une maison</button>
+    </div>`);
+}
+
+function openCreateHouseSheet() {
+  openSheet(`<h3>Créer une maison</h3>
+    <form data-form="createHouse" autocomplete="off">
+      <input class="field" name="house" maxlength="40" placeholder="Nom de la maison (ex. Chez mes parents)">
+      ${actions('Créer')}
+    </form>`);
+}
+
+function openJoinHouseSheet() {
+  openSheet(`<h3>Rejoindre une maison</h3>
+    <form data-form="joinHouse" autocomplete="off">
+      <p class="hint" style="margin-bottom:10px">Colle le lien d'invitation que quelqu'un t'a envoyé.</p>
+      <input class="field" name="link" placeholder="Lien d'invitation">
+      ${actions('Rejoindre')}
+    </form>`);
 }
 
 function openListSheet(list) {
@@ -742,6 +899,21 @@ overlay.addEventListener('click', e => {
   if (t.closest('[data-copy]')) return copyInvite();
   if (t.closest('[data-leave]')) return leaveHouse();
 
+  if (t.closest('[data-share-me]')) {
+    navigator.share({ title: 'Maison', text: 'Mon lien personnel Maison (à ouvrir sur mon autre appareil) :', url: meUrl() }).catch(() => {});
+    return;
+  }
+  if (t.closest('[data-copy-me]')) {
+    navigator.clipboard.writeText(meUrl()).then(() => toast('Lien copié.'), () => toast('Sélectionne le lien et copie-le.'));
+    return;
+  }
+  const go = t.closest('[data-go]');
+  if (go) { closeSheet(); if (go.dataset.go !== state.code) enterHouse(go.dataset.go); return; }
+  const favBtn = t.closest('[data-fav]');
+  if (favBtn) { fav = favBtn.dataset.fav; saveHouses(); openHousesSheet(); toast('Maison favorite enregistrée.'); return; }
+  if (t.closest('[data-open-create]')) return openCreateHouseSheet();
+  if (t.closest('[data-open-join]')) return openJoinHouseSheet();
+
   if (t.closest('[data-sec-new]')) return openSectionSheet(null);
   const edit = t.closest('[data-sec-edit]');
   if (edit) { const s = state.sections.find(x => x.id === edit.dataset.secEdit); if (s) openSectionSheet(s); return; }
@@ -786,9 +958,20 @@ overlay.addEventListener('input', e => {
 overlay.addEventListener('submit', e => {
   e.preventDefault();
   const f = e.target;
+
+  if (f.dataset.form === 'joinHouse') {
+    const el = f.querySelector('[name="link"]');
+    const code = codeFrom(el.value);
+    if (!code) { el.classList.add('err'); el.focus(); toast('Ce lien ne semble pas valide.'); return; }
+    closeSheet(); enterHouse(code);
+    return;
+  }
+
   const field = f.querySelector('[name="name"], [name="title"], [name="house"]');
   const value = (field?.value || '').trim();
   if (!value) { field?.classList.add('err'); field?.focus(); return; }
+
+  if (f.dataset.form === 'createHouse') { closeSheet(); createHouse(value); return; }
 
   switch (f.dataset.form) {
     case 'newList': {
@@ -818,7 +1001,7 @@ overlay.addEventListener('submit', e => {
     }
     case 'settings': {
       const me = (f.querySelector('[name="me"]').value || '').trim().slice(0, 30);
-      if (me) { state.myName = me; store.set('maison.name', me); }
+      if (me) { state.myName = me; store.set('maison.name', me); pushProfile(); }
       const house = value.slice(0, 40);
       if (house !== state.house?.name) fire(updateDoc(houseRef(), { name: house }));
       closeSheet(); render(); break;
@@ -844,6 +1027,7 @@ screen.addEventListener('click', e => {
     case 'invite': openInviteSheet(); break;
     case 'settings': openSettingsSheet(); break;
     case 'leave': leaveHouse(); break;
+    case 'houses': openHousesSheet(); break;
   }
 });
 screen.addEventListener('input', e => e.target.classList?.remove('err'));
@@ -861,13 +1045,21 @@ $('#composerForm').addEventListener('submit', e => {
   const title = input.value.trim().slice(0, 200);
   if (!title || !state.listId) return;
   input.value = ''; input.focus();
-  fire(setDoc(doc(col('items')), { listId: state.listId, sectionId: null, title, done: false, createdAt: Date.now(), byName: state.myName }));
+  fire(setDoc(doc(col('items')), { listId: state.listId, sectionId: null, title, done: false, createdAt: Date.now(), byName: state.myName, by: meId }));
 });
 
 // ================== Démarrage ==================
 if (configured) {
+  // Ton identité : celle du lien personnel ouvert, sinon celle de cet appareil, sinon une nouvelle.
+  const meFromUrl = paramFrom(location.search, 'moi') || paramFrom(location.hash, 'moi');
+  if (meFromUrl) { meId = meFromUrl; store.set('maison.me', meId); }
+  if (!meId) { meId = newCode(); store.set('maison.me', meId); }
+  watchProfile();
+
   const fromUrl = codeFrom(location.search) || codeFrom(location.hash);
-  const code = fromUrl || store.get('maison.code');
+  // Nouveau lien d'invitation → on ouvre cette maison. Sinon → la maison favorite.
+  const isNewInvite = fromUrl && !houses.some(h => h.code === fromUrl);
+  const code = isNewInvite ? fromUrl : (fav || houses[0]?.code || fromUrl);
   if (code) enterHouse(code);
 }
 render();
