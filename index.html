@@ -344,6 +344,58 @@
   .mentioncard .bell{font-size:22px;animation:pop .6s ease}
   .mentioncard:active{transform:scale(.985)}
 
+  /* Personnes : couleurs et surlignage */
+  .minis{display:inline-flex;flex:none;margin-left:6px}
+  .mini{width:20px;height:20px;border-radius:50%;display:inline-grid;place-items:center;font-size:10.5px;font-weight:700;color:#fff;
+        background:hsl(var(--h) 55% 48%);box-shadow:0 0 0 2px var(--card)}
+  .minis .mini + .mini{margin-left:-6px}
+  .pchips{display:flex;flex-wrap:wrap;gap:8px}
+  .pchip{display:inline-flex;align-items:center;gap:7px;border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:5px 12px 5px 5px;font-size:14.5px;font-weight:500;transition:all .15s}
+  .pchip .mini{box-shadow:none}
+  .pchip.on{border-color:hsl(var(--h) 55% 48%);background:hsl(var(--h) 70% 58% / .16)}
+  .irow.assigned{box-shadow:inset 4px 0 0 0 transparent;background-image:var(--pg);background-size:4px 100%;background-repeat:no-repeat}
+  .irow.forme:not(.done){background-color:color-mix(in srgb, #E8A317 7%, var(--card))}
+  .ev.withpeople{background:var(--pg), var(--card)}
+  .ev.withpeople .evbar{background:var(--pgs)}
+  .hl{border-radius:6px;padding:1px 5px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+  .tdev .minis{margin-left:auto}
+  .catbar{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:16px -18px 0;padding:2px 18px 4px}
+  .catbar::-webkit-scrollbar{display:none}
+  .catchip{flex:none;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 12px;font-size:14px;font-weight:500;white-space:nowrap;transition:transform .12s}
+  .catchip:active{transform:scale(.95)}
+  .catchip .e{font-size:16px}
+  .catchip .n{font-size:12px;font-weight:700;color:#fff;background:var(--lc);border-radius:999px;min-width:19px;height:19px;padding:0 5px;display:inline-grid;place-items:center}
+  .catchip.add{border-style:dashed;color:var(--muted);background:transparent}
+  .dd-new{padding:12px 14px;border-top:1px solid var(--line)}
+  .dd-new-t{font-size:13.5px;color:var(--muted);margin-bottom:6px}
+  .dd-emos{display:grid;grid-template-columns:repeat(auto-fill, minmax(38px, 1fr));margin-bottom:10px}
+  .dd-emos .emo{height:38px;font-size:21px}
+  .shortlink{display:inline-flex;align-items:center;gap:2px;color:var(--accent);font-weight:500;text-decoration:none;background:color-mix(in srgb, var(--accent) 10%, transparent);border-radius:8px;padding:1px 7px;word-break:break-all}
+  .ithumb{flex:none;width:44px;height:44px;border-radius:10px;overflow:hidden;border:0;padding:0;background:var(--line)}
+  .ithumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .photofield{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .pfthumb{position:relative;display:inline-block}
+  .pfthumb img{width:72px;height:72px;object-fit:cover;border-radius:12px;display:block;background:var(--line)}
+  .pfthumb .prevx{top:-6px;right:-6px;width:26px;height:26px}
+
+  /* Réponses */
+  .pactions{margin-top:10px;border-top:1px solid var(--line);padding-top:8px;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+  .plast{border:0;background:color-mix(in srgb, var(--ink) 5%, transparent);border-radius:12px;padding:7px 10px;font-size:14px;text-align:left;width:100%;color:var(--ink)}
+  .preply{border:0;background:none;color:var(--accent);font-weight:600;font-size:14px;padding:4px 2px}
+  .tpost{padding-bottom:12px;border-bottom:1px solid var(--line)}
+  .tthumb{display:block;max-width:100%;max-height:200px;border-radius:12px;margin-top:8px;background:var(--line)}
+  .replies{display:flex;flex-direction:column;gap:12px;padding:14px 0}
+  .reply{display:flex;gap:10px;align-items:flex-start}
+  .rbubble{background:color-mix(in srgb, var(--ink) 6%, var(--card));border-radius:4px 16px 16px 16px;padding:8px 12px;font-size:15px}
+  .rbubble b{font-size:13.5px}
+  .rtext{white-space:pre-wrap;word-break:break-word;margin-top:1px}
+  .reply .ptime{margin:3px 0 0 4px}
+  .rdel{font-size:12.5px;padding:0;color:var(--muted)}
+  .rdel.sure{color:#C0392B;font-weight:600}
+  .replyform{position:sticky;bottom:calc(-22px - env(safe-area-inset-bottom));display:flex;gap:8px;align-items:flex-end;background:var(--card);padding:10px 0 4px}
+  .replyform textarea{min-height:46px;resize:none}
+  .replyform .btn{width:48px;height:46px;padding:0;font-size:18px;flex:none}
+
   /* Résumé du jour (accueil) */
   .todaycard{padding:14px 16px;cursor:pointer;transition:transform .12s}
   .todaycard:active{transform:scale(.985)}
@@ -503,7 +555,7 @@ import {
 import {
   initializeFirestore, getFirestore, persistentLocalCache, persistentMultipleTabManager,
   collection, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, writeBatch,
-  arrayUnion, arrayRemove, limit
+  arrayUnion, arrayRemove, limit, getDocFromCache
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 // ================== Outils ==================
@@ -710,7 +762,7 @@ function watchProfile(u) {
 
     if (state.code && !houses.some(h => h.code === state.code)) closeHouse();
     if (!state.code && houses.length) enterHouse(fav || houses[0].code);
-    else if (renderedKey === 'notes') renderTabbar(true);
+    else if (renderedKey === 'notes' || renderedKey === 'cal') renderTabbar(true);
     else render();
   }, e => { console.error(e); state.profileLoading = false; state.error = 'Impossible de charger ton compte.'; render(); });
 }
@@ -847,7 +899,8 @@ function subscribe() {
       const v = d.data();
       return { id: d.id, title: str(v.title, 'Sans titre'), emoji: typeof v.emoji === 'string' && v.emoji ? v.emoji : null,
                date: typeof v.date === 'string' ? v.date : '', allDay: v.allDay !== false, time: typeof v.time === 'string' ? v.time : '',
-               end: typeof v.end === 'string' ? v.end : '', note: typeof v.note === 'string' ? v.note : '', byName: typeof v.byName === 'string' ? v.byName : '' };
+               end: typeof v.end === 'string' ? v.end : '', note: typeof v.note === 'string' ? v.note : '', byName: typeof v.byName === 'string' ? v.byName : '',
+               people: Array.isArray(v.people) ? v.people.filter(x => typeof x === 'string') : [] };
     }).filter(e => e.date);
     if (state.tab === 'cal' || (state.tab === 'lists' && state.view !== 'list')) render();
   }, soft('Calendrier')));
@@ -861,12 +914,20 @@ function subscribe() {
       return { id: d.id, text: typeof v.text === 'string' ? v.text : '', photo: typeof v.photo === 'string' && v.photo.startsWith('data:image/') ? v.photo : null,
                w: Number(v.w) || 0, h: Number(v.h) || 0, by: typeof v.by === 'string' ? v.by : null, byName: typeof v.byName === 'string' ? v.byName : '',
                createdAt: Number(v.createdAt) || 0, pinned: v.pinned === true,
-               mentions: Array.isArray(v.mentions) ? v.mentions.filter(x => typeof x === 'string') : [] };
+               mentions: Array.isArray(v.mentions) ? v.mentions.filter(x => typeof x === 'string') : [],
+               photoId: typeof v.photoId === 'string' ? v.photoId : null, editedAt: Number(v.editedAt) || 0 };
     });
     if (state.tab === 'notes' || (state.tab === 'lists' && state.view !== 'list')) render();
     else renderTabbar(true);
     if (sheetKind === 'post' && !state.posts.some(p => p.id === sheetTarget)) closeSheet();
   }, soft('Notes')));
+
+  unsubs.push(onSnapshot(query(col('replies'), orderBy('createdAt'), limit(500)), snap => {
+    state.replies = snap.docs.map(d => { const v = d.data(); return { id: d.id, postId: v.postId, text: String(v.text || ''),
+      by: typeof v.by === 'string' ? v.by : null, byName: typeof v.byName === 'string' ? v.byName : '', createdAt: Number(v.createdAt) || 0 }; });
+    if (state.tab === 'notes' || (state.tab === 'lists' && state.view !== 'list')) render(); else renderTabbar(true);
+    if (sheetKind === 'thread') openThread(sheetTarget);
+  }, soft('Réponses')));
 
   unsubs.push(onSnapshot(query(col('items'), orderBy('createdAt')), snap => {
     const fresh = new Set();
@@ -880,9 +941,13 @@ function subscribe() {
                emoji: typeof v.emoji === 'string' && v.emoji ? v.emoji : null,
                qty: typeof v.qty === 'string' ? v.qty.trim() : '',
                note: typeof v.note === 'string' ? v.note.trim() : '',
-               order: typeof v.order === 'number' ? v.order : (v.createdAt || 0) };
+               order: typeof v.order === 'number' ? v.order : (v.createdAt || 0),
+               assignees: Array.isArray(v.assignees) ? v.assignees.filter(x => typeof x === 'string') : [],
+               assignedAt: Number(v.assignedAt) || 0, assignedBy: typeof v.assignedBy === 'string' ? v.assignedBy : '',
+               photoId: typeof v.photoId === 'string' ? v.photoId : null };
     }).sort(byOrder);
     got('items');
+    if (state.tab !== 'lists') renderTabbar(true);
     if (sheetKind === 'sec') openSecView(sheetTarget);
   }, err));
 }
@@ -891,7 +956,7 @@ function enterHouse(code) {
   state.code = code;
   if (state.view !== 'admin') state.view = 'home';
   state.house = null; state.members = []; state.lists = []; state.sections = []; state.items = [];
-  state.events = []; state.posts = []; state.newMentions = new Set(); pendingTags.clear();
+  state.events = []; state.posts = []; state.replies = []; state.newMentions = new Set(); pendingTags.clear();
   seenItems.clear(); itemsPrimed = false; state.anim = 'first';
   subscribe();
   touchMember(true);
@@ -1188,6 +1253,22 @@ function renderHome() {
       </div></header>`;
   if (state.error) h += `<div class="banner">${esc(state.error)}</div>`;
   if (state.loading) return h;
+  const ua = unreadAssigned();
+  if (ua.length) {
+    const names = [...new Set(ua.map(i => i.assignedBy || "Quelqu'un"))];
+    h += `<div class="card mentioncard assigncard sec" role="button" tabindex="0" data-action="goAssigned">
+      <span class="bell">📌</span>
+      <span class="grow"><b>${esc(names.slice(0, 2).join(' et '))}</b> ${ua.length > 1 ? `t'a confié ${ua.length} éléments` : `t'a confié « ${esc(ua[0].title)} »`}</span>
+      <span class="chev">${ICON.chev}</span></div>`;
+  }
+  const ur = unreadReplies();
+  if (ur.length) {
+    const names = [...new Set(ur.map(r => r.byName || "Quelqu'un"))];
+    h += `<div class="card mentioncard sec" role="button" tabindex="0" data-action="goNotes">
+      <span class="bell">💬</span>
+      <span class="grow"><b>${esc(names.slice(0, 2).join(' et '))}</b> ${ur.length > 1 ? `ont répondu à tes notes (${ur.length})` : 'a répondu à ta note'}</span>
+      <span class="chev">${ICON.chev}</span></div>`;
+  }
   const um = unreadMentions();
   if (um.length) {
     const names = [...new Set(um.map(p => p.byName || "Quelqu'un"))];
@@ -1219,13 +1300,15 @@ function renderHome() {
 function itemRow(i) {
   const mine = i.by === meId || i.byName === state.myName;
   const by = i.byName && !mine ? `<div class="by">ajouté par ${esc(i.byName)}</div>` : '';
-  return `<div class="irow ${i.done ? 'done' : ''} ${state.fresh.has(i.id) ? 'enter' : ''}" data-id="${esc(i.id)}">
+  const asg = i.assignees || [];
+  return `<div class="irow ${i.done ? 'done' : ''} ${state.fresh.has(i.id) ? 'enter' : ''} ${asg.length ? 'assigned' : ''} ${asg.includes(meId) && !i.done ? 'forme' : ''}" data-id="${esc(i.id)}" ${asg.length ? `style="--pg:${peopleGrad(asg, 1)}"` : ''}>
     <button class="check ${i.done ? 'on' : ''}" data-action="toggle" data-id="${esc(i.id)}" aria-label="${i.done ? 'Décocher' : 'Cocher'}">${i.done ? ICON.check : ''}</button>
     <div class="itext" data-action="editItem" data-id="${esc(i.id)}">
-      <div class="iline">${i.emoji ? `<span class="iemo">${esc(i.emoji)}</span>` : ''}<span class="ititle">${esc(i.title)}</span>${i.qty ? `<span class="qty">${esc(i.qty)}</span>` : ''}</div>
-      ${i.note ? `<div class="note ${i.emoji ? 'indent' : ''}">${esc(i.note)}</div>` : ''}
-      ${by}
+      <div class="iline">${i.emoji ? `<span class="iemo">${esc(i.emoji)}</span>` : ''}<span class="ititle">${esc(i.title)}</span>${i.qty ? `<span class="qty">${esc(i.qty)}</span>` : ''}${miniAvatars(asg)}</div>
+      ${i.note ? `<div class="note ${i.emoji ? 'indent' : ''}">${linkify(esc(i.note))}</div>` : ''}
+      ${asg.length ? `<div class="by">pour ${asg.map(id => esc(id === meId ? 'toi' : memberName(id))).join(', ')}</div>` : by}
     </div>
+    ${i.photoId ? `<button type="button" class="ithumb" data-action="viewItemPhoto" data-id="${esc(i.photoId)}"><img data-media="${esc(i.photoId)}" alt=""></button>` : ''}
     ${i.done ? '' : `<span class="drag" aria-label="Déplacer">${ICON.grip}</span>`}
   </div>`;
 }
@@ -1253,7 +1336,10 @@ function renderList(l) {
   const its = state.items.filter(i => i.listId === l.id);
   const todo = its.filter(i => !i.done), done = its.filter(i => i.done);
   const secs = sectionsOf(l.id), secIds = new Set(secs.map(s => s.id));
-  let h = '';
+  let h = `<nav class="catbar">${secs.map(s => {
+      const n = todo.filter(i => i.sectionId === s.id).length;
+      return `<button type="button" class="catchip" data-action="openSec" data-id="${esc(s.id)}"><span class="e">${esc(s.emoji)}</span>${esc(s.name)}${n ? `<span class="n">${n}</span>` : ''}</button>`;
+    }).join('')}<button type="button" class="catchip add" data-action="newSec">＋ Catégorie</button></nav>`;
 
   if (!todo.length) {
     h += `<section class="sec"><div class="card"><div class="pad muted">${
@@ -1285,6 +1371,84 @@ const draft = { sec: {}, qty: '', note: '', emoji: null, open: null };
 const pendingSecs = new Map();   // catégories tout juste créées, pas encore revenues du serveur
 function renderSecChips() {}
 
+function shortLink(url) {
+  try {
+    const u = new URL(url.replace(/&amp;/g, '&'));
+    const host = u.hostname.replace(/^www\./, '');
+    const seg = u.pathname.split('/').map(x => decodeURIComponent(x)).find(x => x && x.length > 2 && !/^(dp|p|r|s|gp|product|products|item|itm|fr|en|ref=.*)$/i.test(x) && !/^[A-Z0-9]{8,}$/.test(x));
+    let label = host + (seg ? '/' + seg : '');
+    if (label.length > 34) label = label.slice(0, 32) + '…';
+    return label;
+  } catch (_) { return url.slice(0, 30) + '…'; }
+}
+const linkify = html => html.replace(/(https?:\/\/[^\s<]+)/g, m => `<a class="shortlink" href="${m}" target="_blank" rel="noopener">🔗 ${esc(shortLink(m))}</a>`);
+
+// ====== Photos rangées à part (chargées une seule fois, puis gardées sur l'appareil) ======
+const mediaCache = new Map(), mediaLoading = new Map();
+function loadMedia(id) {
+  if (mediaCache.has(id)) return Promise.resolve(mediaCache.get(id));
+  if (mediaLoading.has(id)) return mediaLoading.get(id);
+  const r = ref('media', id);
+  const pr = getDocFromCache(r).then(x => { if (!x.exists()) throw 0; return x; }).catch(() => getDoc(r))
+    .then(x => { const d = x.exists() ? x.data().data : null; if (d) mediaCache.set(id, d); mediaLoading.delete(id); return d; })
+    .catch(() => { mediaLoading.delete(id); return null; });
+  mediaLoading.set(id, pr);
+  return pr;
+}
+function hydrateMedia(root = document) {
+  root.querySelectorAll('img[data-media]:not([src])').forEach(img => {
+    const id = img.dataset.media;
+    if (mediaCache.has(id)) { img.src = mediaCache.get(id); return; }
+    loadMedia(id).then(d => { if (d) document.querySelectorAll(`img[data-media="${CSS.escape(id)}"]`).forEach(x => { x.src = d; }); });
+  });
+}
+function saveMedia(photo) {
+  const r = doc(col('media'));
+  mediaCache.set(r.id, photo.data);
+  fire(setDoc(r, { data: photo.data, w: photo.w, h: photo.h, by: meId, createdAt: Date.now() }));
+  return r.id;
+}
+function viewMedia(id, inline) {
+  const src = inline || mediaCache.get(id);
+  lightbox.innerHTML = `<img ${src ? `src="${src}"` : `data-media="${esc(id)}"`} alt=""><button type="button" class="sheet-x lbx" aria-label="Fermer">${ICON.x}</button>`;
+  lightbox.hidden = false;
+  hydrateMedia(lightbox);
+}
+// Bouton photo dans une fenêtre (élément)
+let sheetPhoto = null;   // { id } photo déjà enregistrée, ou { data, w, h } nouvelle photo, ou null
+function photoField() {
+  const src = sheetPhoto ? (sheetPhoto.data || mediaCache.get(sheetPhoto.id)) : null;
+  return `<div class="photofield" data-photofield>
+    ${sheetPhoto ? `<span class="pfthumb"><img ${src ? `src="${src}"` : `data-media="${esc(sheetPhoto.id)}"`} alt=""><button type="button" class="prevx" data-photo-drop aria-label="Retirer la photo">${ICON.x}</button></span>` : ''}
+    <label class="chip photo-btn">📷 ${sheetPhoto ? 'Changer la photo' : 'Ajouter une photo'}<input type="file" accept="image/*" data-photo-input hidden></label>
+  </div>`;
+}
+function refreshPhotoField() {
+  const box = sheet.querySelector('[data-photofield]');
+  if (box) { box.outerHTML = photoField(); hydrateMedia(sheet); }
+}
+
+// ----- Couleur de chaque personne (la même que son rond) et surlignage multicolore -----
+const personColor = (id, a = 1, l = 58) => `hsl(${hueOf(id)} 70% ${l}% / ${a})`;
+function peopleGrad(ids, a) {
+  if (!ids || !ids.length) return '';
+  const c = ids.map(id => personColor(id, a));
+  return c.length === 1 ? `linear-gradient(${c[0]}, ${c[0]})` : `linear-gradient(90deg, ${c.join(', ')})`;
+}
+function miniAvatars(ids) {
+  if (!ids || !ids.length) return '';
+  return `<span class="minis">${ids.slice(0, 4).map(id => `<span class="mini" style="--h:${hueOf(id)}" title="${esc(memberName(id))}">${esc(initial(memberName(id)))}</span>`).join('')}</span>`;
+}
+// Sélecteur de personnes dans une fenêtre (sheetPeople = sélection en cours)
+let sheetPeople = new Set();
+function peoplePicker(includeMe = true) {
+  const ms = houseMembers().filter(m => includeMe || m.id !== meId)
+    .sort((a, b) => (b.id === meId) - (a.id === meId) || a.name.localeCompare(b.name));
+  if (!ms.length) return '<p class="hint">Personne d\'autre dans la maison pour l\'instant.</p>';
+  return `<div class="pchips">${ms.map(m => `<button type="button" class="pchip ${sheetPeople.has(m.id) ? 'on' : ''}" style="--h:${hueOf(m.id)}" data-pick-person="${esc(m.id)}">
+      <span class="mini">${esc(initial(m.name))}</span>${esc(m.id === meId ? 'Moi' : m.name)}</button>`).join('')}</div>`;
+}
+
 // ----- Fenêtre « Nouvel élément » : tout se remplit au même endroit, et elle reste ouverte pour enchaîner -----
 function openAddSheet() {
   const l = currentList();
@@ -1293,6 +1457,8 @@ function openAddSheet() {
   sheetSec = draft.sec[l.id] || null;
   if (sheetSec && !state.sections.some(s => s.id === sheetSec) && !pendingSecs.has(sheetSec)) sheetSec = null;
   sheetEmoji = null;
+  sheetPeople = new Set();
+  sheetPhoto = null;
   openSheet(`<div class="view" style="--h:${hueOf(l.id)}">
     <h3>Nouvel élément</h3>
     <form data-form="addItem" autocomplete="off">
@@ -1314,6 +1480,10 @@ function openAddSheet() {
       </div>
       <div class="label">Commentaire</div>
       <textarea class="field" name="note" maxlength="500" rows="1" placeholder="Facultatif"></textarea>
+      <div class="label">Pour qui ? <span class="muted">(la personne est prévenue)</span></div>
+      <div data-people>${peoplePicker(true)}</div>
+      <div class="label">Photo <span class="muted">(facultatif)</span></div>
+      ${photoField()}
       <button class="btn primary full addsubmit" type="submit">Ajouter</button>
       <div class="addedlog" id="addedLog"></div>
     </form>
@@ -1326,10 +1496,13 @@ function submitAddItem(f, title) {
   const listId = sheetListId;
   if (!listId) return;
   const qtyEl = f.querySelector('[name="qty"]'), noteEl = f.querySelector('[name="note"]'), titleEl = f.querySelector('[name="title"]');
+  const photoId = sheetPhoto?.data ? saveMedia(sheetPhoto) : null;
   fire(setDoc(doc(col('items')), {
+    photoId,
     listId, sectionId: sheetSec || null, title: title.slice(0, 200), done: false, createdAt: Date.now(), order: Date.now(),
     qty: qtyEl.value.trim().slice(0, 30), note: noteEl.value.trim().slice(0, 500), emoji: sheetEmoji || null,
-    byName: state.myName, by: meId
+    byName: state.myName, by: meId,
+    assignees: [...sheetPeople], assignedAt: sheetPeople.size ? Date.now() : 0, assignedBy: sheetPeople.size ? state.myName : ''
   }));
   draft.sec[listId] = sheetSec || null;        // la catégorie reste choisie pour le suivant
   // petit rappel de ce qui vient d'être ajouté
@@ -1341,6 +1514,9 @@ function submitAddItem(f, title) {
     log.prepend(chip);
   }
   titleEl.value = ''; qtyEl.value = ''; noteEl.value = ''; noteEl.style.height = '';
+  sheetPeople = new Set();
+  sheet.querySelectorAll('[data-pick-person]').forEach(b => b.classList.remove('on'));
+  sheetPhoto = null; refreshPhotoField();
   setEmoji(null);
   sheet.querySelector('.emo-wrap')?.setAttribute('hidden', '');
   titleEl.focus();
@@ -1441,6 +1617,7 @@ function render() {
     markMentionsSeen();
     state.anim = null;
     body.innerHTML = `<div class="wall">${renderWall()}</div>`;
+    hydrateMedia(body);
     state.freshPosts = new Set();
     renderedKey = 'notes';
     return;
@@ -1467,6 +1644,7 @@ function render() {
   }
   state.fresh = new Set();
   initSortables();
+  hydrateMedia(body);
   updateStuck();
 }
 
@@ -1707,9 +1885,11 @@ function openSectionSheet(sec) {
 
 // --- Liste déroulante de catégorie avec recherche ---
 function ddLabel() {
-  const s = state.sections.find(x => x.id === sheetSec);
+  const s = state.sections.find(x => x.id === sheetSec) || pendingSecs.get(sheetSec);
   return s ? `<span class="e">${esc(s.emoji)}</span>${esc(s.name)}` : '<span class="muted">Sans catégorie</span>';
 }
+let ddNewEmoji = '🏷️';
+const QUICK_EMOJIS = '🏷️ 🥛 🥦 🍎 🥩 🐟 🥖 🧀 🥫 🍝 🍫 🥤 🍷 ❄️ 🧴 🧻 🧹 🧽 🧺 🔧 🔨 💡 🪴 🎁 💊 🐶 👶 📦 🛒 ✅ ⭐ ❤️'.split(' ');
 function renderDdList() {
   const box = sheet.querySelector('[data-dd-list]');
   if (!box) return;
@@ -1721,7 +1901,11 @@ function renderDdList() {
   let h = '';
   if (!q || norm('Sans catégorie').includes(q)) h += `<button type="button" class="dd-opt" data-dd-opt=""><span class="e">–</span><span class="t muted">Sans catégorie</span>${tick(null)}</button>`;
   h += secs.map(s => `<button type="button" class="dd-opt" data-dd-opt="${esc(s.id)}"><span class="e">${esc(s.emoji)}</span><span class="t">${esc(s.name)}</span>${tick(s.id)}</button>`).join('');
-  if (q && !all.some(s => norm(s.name) === q)) h += `<button type="button" class="dd-opt create" data-dd-create><span class="e">＋</span><span class="t">Créer « ${esc(typed.slice(0, 40))} »</span></button>`;
+  if (q && !all.some(s => norm(s.name) === q)) h += `<div class="dd-new">
+      <div class="dd-new-t">Nouvelle catégorie « ${esc(typed.slice(0, 40))} » — choisis son émoji :</div>
+      <div class="dd-emos">${QUICK_EMOJIS.map(e => `<button type="button" class="emo ${e === ddNewEmoji ? 'on' : ''}" data-dd-emo="${e}">${e}</button>`).join('')}</div>
+      <button type="button" class="btn primary full" data-dd-create>${esc(ddNewEmoji)} Créer « ${esc(typed.slice(0, 40))} »</button>
+    </div>`;
   box.innerHTML = h || `<div class="dd-empty">Aucune catégorie trouvée.</div>`;
 }
 function setDdOpen(open) {
@@ -1794,6 +1978,8 @@ function openItemSheet(item) {
   sheetTarget = item.id; sheetListId = item.listId;
   sheetSec = secs.some(s => s.id === item.sectionId) ? item.sectionId : null;
   sheetEmoji = item.emoji || null;
+  sheetPeople = new Set(item.assignees || []);
+  sheetPhoto = item.photoId ? { id: item.photoId } : null;
   openSheet(`<h3>Modifier l'élément</h3>
     <form data-form="editItem" autocomplete="off">
       <div class="emo-row">
@@ -1805,6 +1991,10 @@ function openItemSheet(item) {
       <textarea class="field note-field" name="note" maxlength="500" rows="3" placeholder="Des détails, une précision… (ex. la marque, où ranger, comment faire)">${esc(item.note)}</textarea>
       <div class="label">Quantité</div>
       <input class="field" name="qty" maxlength="30" placeholder="ex. 2, 500 g, 5 vis, 1 kilo…" value="${esc(item.qty)}" autocomplete="off">
+      <div class="label">Pour qui ?</div>
+      <div data-people>${peoplePicker(true)}</div>
+      <div class="label">Photo</div>
+      ${photoField()}
       <div class="label">Catégorie</div>
       <div class="dd" data-dd>
         <button type="button" class="dd-btn" data-dd-toggle><span class="v" data-dd-label>${ddLabel()}</span>${ICON.down}</button>
@@ -1817,6 +2007,7 @@ function openItemSheet(item) {
     </form>
     <div class="sep" style="margin-bottom:16px"></div>
     <button type="button" class="btn danger full" data-delete-item>Supprimer l'élément</button>`);
+  hydrateMedia(sheet);
 }
 
 function setEmoji(e) {
@@ -1853,10 +2044,12 @@ overlay.addEventListener('click', e => {
   if (t.closest('[data-dd-create]')) {
     const name = (sheet.querySelector('[data-dd-search]')?.value || '').trim().slice(0, 40);
     if (!name) return;
-    const newId = addSection(sheetListId, name, '🏷️');
+    const emo = ddNewEmoji;
+    const newId = addSection(sheetListId, name, emo);
+    ddNewEmoji = '🏷️';
     if (sheetKind === 'draftCat') return chooseSection(newId);
     sheetSec = newId;
-    sheet.querySelector('[data-dd-label]').innerHTML = `<span class="e">🏷️</span>${esc(name)}`;
+    sheet.querySelector('[data-dd-label]').innerHTML = `<span class="e">${esc(emo)}</span>${esc(name)}`;
     return setDdOpen(false);
   }
 
@@ -1900,6 +2093,11 @@ overlay.addEventListener('click', e => {
 
   if (t.closest('[data-sec-new]')) return openSectionSheet(null);
   if (t.closest('[data-sec-manage-open]')) return openSectionsSheet();
+  if (t.closest('[data-photo-drop]')) { sheetPhoto = null; refreshPhotoField(); return; }
+  const dEmo = t.closest('[data-dd-emo]');
+  if (dEmo) { ddNewEmoji = dEmo.dataset.ddEmo; renderDdList(); return; }
+  const pp = t.closest('[data-pick-person]');
+  if (pp) { const id = pp.dataset.pickPerson; sheetPeople.has(id) ? sheetPeople.delete(id) : sheetPeople.add(id); pp.classList.toggle('on', sheetPeople.has(id)); return; }
   const tg = t.closest('[data-tag]');
   if (tg) { const id = tg.dataset.tag; pendingTags.has(id) ? pendingTags.delete(id) : pendingTags.add(id); tg.classList.toggle('on', pendingTags.has(id)); showPendingTags(); return; }
   const delEv = t.closest('[data-del-event]');
@@ -1914,7 +2112,21 @@ overlay.addEventListener('click', e => {
   const dp = t.closest('[data-del-post]');
   if (dp) {
     if (!dp.classList.contains('sure')) { dp.classList.add('sure'); dp.textContent = 'Confirmer la suppression'; return; }
-    fire(deleteDoc(ref('posts', dp.dataset.delPost))); closeSheet(); toast('Note supprimée.'); return;
+    const p = state.posts.find(x => x.id === dp.dataset.delPost);
+    const b = writeBatch(db);
+    b.delete(ref('posts', dp.dataset.delPost));
+    if (p?.photoId) b.delete(ref('media', p.photoId));
+    repliesOf(dp.dataset.delPost).forEach(r => b.delete(ref('replies', r.id)));
+    fire(b.commit()); closeSheet(); toast('Note supprimée.'); return;
+  }
+  const ep = t.closest('[data-edit-post]');
+  if (ep) { const p = state.posts.find(x => x.id === ep.dataset.editPost); if (p) openEditPost(p); return; }
+  const rp = t.closest('[data-reply-post]');
+  if (rp) { openThread(rp.dataset.replyPost); return; }
+  const dr = t.closest('[data-del-reply]');
+  if (dr) {
+    if (!dr.classList.contains('sure')) { dr.classList.add('sure'); dr.textContent = 'Confirmer'; return; }
+    fire(deleteDoc(ref('replies', dr.dataset.delReply))); return;
   }
   const svT = t.closest('[data-sv-toggle]');
   if (svT) { toggle(svT.dataset.svToggle); return; }
@@ -1946,20 +2158,31 @@ overlay.addEventListener('click', e => {
   }
   if (t.closest('[data-delete-item]')) {
     const id = sheetTarget; closeSheet();
+    const it = state.items.find(x => x.id === id);
+    if (it?.photoId) fire(deleteDoc(ref('media', it.photoId)));
     fire(deleteDoc(ref('items', id)));
   }
 });
 
-overlay.addEventListener('change', e => {
+overlay.addEventListener('change', async e => {
+  if (e.target.matches('[data-photo-input]')) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    try { sheetPhoto = await compressImage(file); refreshPhotoField(); }
+    catch (err) { console.error(err); toast('Impossible de lire cette photo.'); }
+    return;
+  }
   if (e.target.name === 'allDay') sheet.querySelector('.times').hidden = e.target.checked;
 });
 overlay.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey && e.target.name === 'reply') { e.preventDefault(); sendReply(e.target.closest('form')); return; }
   if (e.key === 'Enter' && e.target.matches('[data-dd-search]')) {
     e.preventDefault();
     sheet.querySelector('[data-dd-list] .dd-opt')?.click();
   }
 });
 overlay.addEventListener('input', e => {
+  if (e.target.name === 'reply') { e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight, 160) + 'px'; }
   if (e.target.matches('[data-dd-search]')) return renderDdList();
   if (e.target.matches('[data-emo-custom]')) { const g = firstGrapheme(e.target.value); if (g) setEmoji(g); }
   e.target.classList?.remove('err');
@@ -1969,6 +2192,12 @@ overlay.addEventListener('submit', e => {
   e.preventDefault();
   const f = e.target;
 
+  if (f.dataset.form === 'reply') { sendReply(f); return; }
+  if (f.dataset.form === 'editPost') {
+    const text = (f.querySelector('[name="text"]').value || '').trim().slice(0, 2000);
+    fire(updateDoc(ref('posts', sheetTarget), { text, mentions: [...sheetPeople], editedAt: Date.now() }));
+    closeSheet(); return;
+  }
   if (f.dataset.form === 'secAdd') {
     const el = f.querySelector('[name="title"]');
     const title = el.value.trim().slice(0, 200);
@@ -2022,8 +2251,16 @@ overlay.addEventListener('submit', e => {
       const qty = (f.querySelector('[name="qty"]')?.value || '').trim().slice(0, 30);
       const emoji = sheetEmoji || null;
       const note = (f.querySelector('[name="note"]')?.value || '').trim().slice(0, 500);
-      if (it && (it.title !== title || (it.sectionId || null) !== sheetSec || (it.emoji || null) !== emoji || it.qty !== qty || it.note !== note)) {
-        fire(updateDoc(ref('items', it.id), { title, sectionId: sheetSec, emoji, qty, note }));
+      const asg = [...sheetPeople];
+      const added = asg.some(id => !(it?.assignees || []).includes(id));
+      const asgChanged = it && (asg.length !== it.assignees.length || added);
+      let photoId = it ? it.photoId : null;
+      if (sheetPhoto?.data) photoId = saveMedia(sheetPhoto); else if (!sheetPhoto) photoId = null;
+      const photoChanged = it && photoId !== it.photoId;
+      if (photoChanged && it.photoId) fire(deleteDoc(ref('media', it.photoId)));
+      if (it && (it.title !== title || (it.sectionId || null) !== sheetSec || (it.emoji || null) !== emoji || it.qty !== qty || it.note !== note || asgChanged || photoChanged)) {
+        fire(updateDoc(ref('items', it.id), { title, sectionId: sheetSec, emoji, qty, note, assignees: asg, photoId,
+          ...(added ? { assignedAt: Date.now(), assignedBy: state.myName } : {}) }));
       }
       closeSheet(); break;
     }
@@ -2042,11 +2279,12 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && !overlay.h
 // ================== Interactions ==================
 const pendingToggle = new Set();
 app.addEventListener('click', e => {
+  if (e.target.closest('a[href]')) return;   // un lien s'ouvre, sans modifier l'élément
   const el = e.target.closest('[data-action]');
   if (!el) return;
   const id = el.dataset.id;
   switch (el.dataset.action) {
-    case 'open': go('list', id); break;
+    case 'open': markAssignedSeen(id); go('list', id); break;
     case 'back': go('home'); break;
     case 'toggle': {
       const it = state.items.find(i => i.id === id);
@@ -2067,6 +2305,11 @@ app.addEventListener('click', e => {
     case 'invite': openInviteSheet(); break;
     case 'members': openMembersSheet(); break;
     case 'openSec': openSecView(id); break;
+    case 'goAssigned': {
+      const first = unreadAssigned()[0];
+      if (first) { markAssignedSeen(); go('list', first.listId); }
+      break;
+    }
     case 'goNotes': state.tab = 'notes'; state.anim = 'in'; renderedKey = ''; render(); window.scrollTo(0, 0); break;
     case 'tagPeople': openTagSheet(); break;
     case 'untag': pendingTags.delete(id); showPendingTags(); break;
@@ -2077,8 +2320,11 @@ app.addEventListener('click', e => {
     case 'calToday': setCalDay(todayYmd()); break;
     case 'newEvent': openEventSheet(null, state.calDay); break;
     case 'openEvent': { const ev = state.events.find(x => x.id === id); if (ev) openEventSheet(ev); break; }
+    case 'thread': openThread(id); break;
     case 'postMenu': { const p = state.posts.find(x => x.id === id); if (p) openPostMenu(p); break; }
-    case 'viewPhoto': { const p = state.posts.find(x => x.id === id); if (p && p.photo) viewPhoto(p); break; }
+    case 'viewPhoto': { const p = state.posts.find(x => x.id === id); if (p) p.photoId ? viewMedia(p.photoId) : (p.photo && viewMedia(null, p.photo)); break; }
+    case 'viewItemPhoto': viewMedia(id); break;
+    case 'newSec': openSectionSheet(null); break;
     case 'dropPhoto': pendingPhoto = null; showPendingPhoto(); break;
     case 'pw-toggle': {
       // afficher / masquer tous les mots de passe du formulaire
@@ -2122,8 +2368,9 @@ function todayWidget() {
   const evToday = state.events.filter(e => e.date === today).sort(evSort);
   const next = state.events.filter(e => e.date > today && e.date <= in7).sort(evSort);
   const dateLabel = cap(now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }));
-  const row = e => `<div class="tdev" style="--h:${hueOf(e.id)}"><span class="tdtime">${e.allDay ? 'Journée' : esc(e.time)}</span><span class="evbar"></span>
-      <span class="tdname">${e.emoji ? esc(e.emoji) + ' ' : ''}${esc(e.title)}</span></div>`;
+  const hl = (e, inner) => (e.people || []).length ? `<span class="hl" style="background:${peopleGrad(e.people, .32)}">${inner}</span>` : inner;
+  const row = e => `<div class="tdev" style="--h:${hueOf(e.id)}"><span class="tdtime">${e.allDay ? 'Journée' : esc(e.time)}</span><span class="evbar" ${(e.people || []).length ? `style="background:${peopleGrad(e.people, 1).replace('90deg', '180deg')}"` : ''}></span>
+      <span class="tdname">${hl(e, (e.emoji ? esc(e.emoji) + ' ' : '') + esc(e.title))}</span>${miniAvatars(e.people)}</div>`;
   return `<div class="card todaycard sec" role="button" tabindex="0" data-action="goCal">
     <div class="tdhead">
       <span class="tdcal"><small>${now.toLocaleDateString('fr-FR', { month: 'short' }).replace('.', '')}</small><b>${now.getDate()}</b></span>
@@ -2134,7 +2381,7 @@ function todayWidget() {
       ? evToday.slice(0, 3).map(row).join('') + (evToday.length > 3 ? `<div class="tdmore">+ ${evToday.length - 3} autre${evToday.length - 3 > 1 ? 's' : ''}</div>` : '')
       : `<div class="tdnone">Rien de prévu aujourd'hui 🌿</div>`}</div>
     <div class="tdnext">${next.length
-      ? `<span class="muted">Bientôt :</span> ${next.slice(0, 2).map(e => `${e.emoji ? esc(e.emoji) + ' ' : ''}<b>${esc(e.title)}</b> ${relDay(e.date)}`).join(' · ')}${next.length > 2 ? ` <span class="muted">et ${next.length - 2} autre${next.length - 2 > 1 ? 's' : ''}</span>` : ''}`
+      ? `<span class="muted">Bientôt :</span> ${next.slice(0, 3).map(e => hl(e, `${e.emoji ? esc(e.emoji) + ' ' : ''}<b>${esc(e.title)}</b> ${relDay(e.date)}`)).join(' · ')}${next.length > 3 ? ` <span class="muted">et ${next.length - 3} autre${next.length - 3 > 1 ? 's' : ''}</span>` : ''}`
       : '<span class="muted">Rien de prévu les 7 prochains jours.</span>'}</div>
   </div>`;
 }
@@ -2150,9 +2397,11 @@ function renderTabbar(show) {
   tabbar.hidden = !show;
   if (!show) return;
   const t = state.tab;
-  const n = t === 'notes' ? 0 : unreadMentions().length;
+  const n = t === 'notes' ? 0 : unreadMentions().length + unreadReplies().length;
+  const a = unreadAssigned().length;
+  const badge = k => k === 'notes' && n ? `<i class="tabbadge">${n}</i>` : k === 'lists' && a ? `<i class="tabbadge">${a}</i>` : '';
   tabbar.innerHTML = [['lists', 'Listes'], ['cal', 'Calendrier'], ['notes', 'Notes']].map(([k, label]) =>
-    `<button type="button" class="tab ${t === k ? 'on' : ''}" data-tab="${k}">${TAB_ICONS[k]}<span>${label}</span>${k === 'notes' && n ? `<i class="tabbadge">${n}</i>` : ''}</button>`).join('');
+    `<button type="button" class="tab ${t === k ? 'on' : ''}" data-tab="${k}">${TAB_ICONS[k]}<span>${label}</span>${badge(k)}</button>`).join('');
 }
 tabbar.addEventListener('click', e => {
   const b = e.target.closest('[data-tab]');
@@ -2199,13 +2448,15 @@ const evTime = e => e.allDay ? 'Journée' : (e.time || '') + (e.end ? `<small>${
 
 function eventCard(e, showDate) {
   const d = fromYmd(e.date);
-  return `<button type="button" class="ev" style="--h:${hueOf(e.id)}" data-action="openEvent" data-id="${esc(e.id)}">
+  const pp = e.people || [];
+  return `<button type="button" class="ev ${pp.length ? 'withpeople' : ''} ${pp.includes(meId) ? 'forme' : ''}" style="--h:${hueOf(e.id)};${pp.length ? `--pg:${peopleGrad(pp, .2)};--pgs:${peopleGrad(pp, 1)}` : ''}" data-action="openEvent" data-id="${esc(e.id)}">
     <span class="evtime">${showDate ? `<b>${d.getDate()}</b><small>${d.toLocaleDateString('fr-FR', { month: 'short' })}</small>` : evTime(e)}</span>
     <span class="evbar"></span>
     <span class="grow">
       <span class="evtitle">${e.emoji ? `<span class="evemo">${esc(e.emoji)}</span>` : ''}${esc(e.title)}</span>
-      <span class="evmeta">${showDate ? (e.allDay ? 'Toute la journée' : esc(e.time) + (e.end ? ' – ' + esc(e.end) : '')) + ' · ' : ''}${e.note ? esc(e.note) : (e.byName ? 'ajouté par ' + esc(e.byName) : '')}</span>
+      <span class="evmeta">${showDate ? (e.allDay ? 'Toute la journée' : esc(e.time) + (e.end ? ' – ' + esc(e.end) : '')) + ' · ' : ''}${pp.length ? 'pour ' + pp.map(id => esc(id === meId ? 'toi' : memberName(id))).join(', ') + (e.note ? ' · ' + esc(e.note) : '') : (e.note ? esc(e.note) : (e.byName ? 'ajouté par ' + esc(e.byName) : ''))}</span>
     </span>
+    ${miniAvatars(pp)}
   </button>`;
 }
 
@@ -2224,7 +2475,7 @@ function renderCalendar() {
     const evs = (byDay[key] || []).sort(evSort);
     cells += `<button type="button" class="cday ${d.getMonth() !== month ? 'other' : ''} ${key === today ? 'today' : ''} ${key === sel ? 'sel' : ''}" data-action="calDay" data-day="${key}">
       <span class="num">${d.getDate()}</span>
-      <span class="dots">${evs.slice(0, 3).map(e => `<i style="--h:${hueOf(e.id)}"></i>`).join('')}</span>
+      <span class="dots">${evs.slice(0, 3).map(e => (e.people || []).length ? `<i style="background:${peopleGrad(e.people, 1)}"></i>` : `<i style="--h:${hueOf(e.id)}"></i>`).join('')}</span>
     </button>`;
   }
   const monthLabel = cap(m.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }));
@@ -2283,6 +2534,7 @@ function shiftMonth(n) {
 function openEventSheet(ev, day) {
   sheetTarget = ev ? ev.id : null;
   sheetEmoji = ev ? (ev.emoji || null) : null;
+  sheetPeople = new Set(ev ? (ev.people || []) : []);
   const allDay = ev ? ev.allDay : false;
   openSheet(`<h3>${ev ? "Modifier l'événement" : 'Nouvel événement'}</h3>
     <form data-form="event" autocomplete="off">
@@ -2298,6 +2550,8 @@ function openEventSheet(ev, day) {
         <div><div class="label">Début</div><input class="field" type="time" name="time" value="${esc(ev?.time || '')}"></div>
         <div><div class="label">Fin <span class="muted">(facultatif)</span></div><input class="field" type="time" name="end" value="${esc(ev?.end || '')}"></div>
       </div>
+      <div class="label">Qui est concerné ?</div>
+      ${peoplePicker(true)}
       <div class="label">Commentaire</div>
       <textarea class="field" name="note" maxlength="500" rows="2" placeholder="Lieu, détails…">${esc(ev?.note || '')}</textarea>
       ${actions(ev ? 'Enregistrer' : 'Ajouter')}
@@ -2316,7 +2570,8 @@ function saveEvent(f, title) {
   const data = {
     title: title.slice(0, 80), emoji: sheetEmoji || null, date, allDay,
     time: allDay ? '' : time, end: allDay ? '' : (f.querySelector('[name="end"]').value || ''),
-    note: (f.querySelector('[name="note"]').value || '').trim().slice(0, 500)
+    note: (f.querySelector('[name="note"]').value || '').trim().slice(0, 500),
+    people: [...sheetPeople]
   };
   if (sheetTarget) fire(updateDoc(ref('events', sheetTarget), data));
   else fire(setDoc(doc(col('events')), { ...data, by: meId, byName: state.myName, createdAt: Date.now() }));
@@ -2356,9 +2611,19 @@ function unreadMentions() {
   const seen = Number(state.profile?.mentionSeen?.[state.code]) || 0;
   return state.posts.filter(p => p.by !== meId && (p.mentions || []).includes(meId) && p.createdAt > seen);
 }
+// Éléments qu'on m'a confiés (par quelqu'un d'autre), pas encore vus et pas faits
+function unreadAssigned() {
+  const seen = Number(state.profile?.assignSeen?.[state.code]) || 0;
+  return state.items.filter(i => !i.done && (i.assignees || []).includes(meId) && i.assignedAt > seen && i.assignedBy && i.assignedBy !== state.myName);
+}
+function markAssignedSeen(listId) {
+  const un = unreadAssigned().filter(i => !listId || i.listId === listId);
+  if (!un.length) return;
+  fire(updateDoc(userRef(), { [`assignSeen.${state.code}`]: Date.now() }));
+}
 function markMentionsSeen() {
   const un = unreadMentions();
-  if (!un.length) return;
+  if (!un.length && !unreadReplies().length) return;
   un.forEach(p => state.newMentions.add(p.id));
   fire(updateDoc(userRef(), { [`mentionSeen.${state.code}`]: Date.now() }));
 }
@@ -2374,7 +2639,7 @@ function whenFr(ts) {
   return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', ...(d.getFullYear() !== now.getFullYear() ? { year: 'numeric' } : {}) }) + ` à ${hm}`;
 }
 // Liens cliquables dans les messages
-const linkify = html => html.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+// Liens affichés en version courte : https://www.amazon.fr/echo-dot-max/dp/B0… → 🔗 amazon.fr/echo-dot-max
 
 function renderNotesHead() {
   return `${pageHead('Notes', 'Un mot, une photo, pour toute la maison.')}
@@ -2398,14 +2663,80 @@ function postCard(p) {
     ${tagged ? `<div class="mtag">🔔 ${state.newMentions.has(p.id) ? '<b>Nouveau</b> · ' : ''}Tu es identifié dans cette note</div>` : ''}
     <div class="phead">
       <span class="avatar" style="--h:${hueOf(p.by || p.byName)}">${esc(initial(p.byName))}</span>
-      <div class="grow"><div class="pname">${esc(p.byName || "Quelqu'un")}${mine ? ' <span class="muted">(toi)</span>' : ''}</div><div class="ptime">${whenFr(p.createdAt)}</div></div>
+      <div class="grow"><div class="pname">${esc(p.byName || "Quelqu'un")}${mine ? ' <span class="muted">(toi)</span>' : ''}</div><div class="ptime">${whenFr(p.createdAt)}${p.editedAt ? ' · modifié' : ''}</div></div>
       ${p.pinned ? '<span class="pin" title="Épinglé">📌</span>' : ''}
       <button type="button" class="iconbtn pmore" data-action="postMenu" data-id="${esc(p.id)}" aria-label="Options">${ICON.more}</button>
     </div>
     ${p.text ? `<div class="ptext">${linkify(esc(p.text))}</div>` : ''}
-    ${p.photo ? `<button type="button" class="pphoto" data-action="viewPhoto" data-id="${esc(p.id)}"><img src="${p.photo}" alt="" loading="lazy" ${p.w && p.h ? `width="${p.w}" height="${p.h}"` : ''}></button>` : ''}
+    ${p.photoId || p.photo ? `<button type="button" class="pphoto" data-action="viewPhoto" data-id="${esc(p.id)}"><img ${p.photoId ? `data-media="${esc(p.photoId)}"` : `src="${p.photo}"`} alt="" ${p.w && p.h ? `width="${p.w}" height="${p.h}"` : ''}></button>` : ''}
     ${(p.mentions || []).length ? `<div class="ptags">avec ${p.mentions.map(id => `<span class="ptag ${id === meId ? 'me' : ''}">${esc(id === meId ? 'toi' : memberName(id))}</span>`).join(' ')}</div>` : ''}
+    ${replyStrip(p)}
   </article>`;
+}
+
+// ----- Réponses -----
+state.replies = [];
+const repliesOf = postId => state.replies.filter(r => r.postId === postId);
+function replyStrip(p) {
+  const rs = repliesOf(p.id), last = rs[rs.length - 1];
+  return `<div class="pactions">
+    ${last ? `<button type="button" class="plast" data-action="thread" data-id="${esc(p.id)}"><b>${esc(last.byName || "Quelqu'un")}</b> ${esc(last.text.slice(0, 90))}${last.text.length > 90 ? '…' : ''}</button>` : ''}
+    <button type="button" class="preply" data-action="thread" data-id="${esc(p.id)}">💬 ${rs.length ? `${rs.length} réponse${rs.length > 1 ? 's' : ''} · Répondre` : 'Répondre'}</button>
+  </div>`;
+}
+function openThread(postId) {
+  const p = state.posts.find(x => x.id === postId);
+  if (!p) { if (sheetKind === 'thread') closeSheet(); return; }
+  const again = sheetKind === 'thread' && sheetTarget === postId;
+  const keepVal = again ? (sheet.querySelector('[name="reply"]')?.value || '') : '';
+  const hadFocus = again && document.activeElement?.name === 'reply';
+  const rs = repliesOf(postId);
+  openSheet(`<h3>Réponses</h3>
+    <div class="tpost">
+      <div class="phead"><span class="avatar" style="--h:${hueOf(p.by || p.byName)}">${esc(initial(p.byName))}</span>
+        <div class="grow"><div class="pname">${esc(p.byName || "Quelqu'un")}</div><div class="ptime">${whenFr(p.createdAt)}</div></div></div>
+      ${p.text ? `<div class="ptext">${linkify(esc(p.text))}</div>` : ''}
+      ${p.photoId ? `<img class="tthumb" data-media="${esc(p.photoId)}" alt="">` : p.photo ? `<img class="tthumb" src="${p.photo}" alt="">` : ''}
+    </div>
+    <div class="replies">${rs.length ? rs.map(r => `<div class="reply">
+        <span class="avatar" style="--h:${hueOf(r.by || r.byName)}">${esc(initial(r.byName))}</span>
+        <div class="grow"><div class="rbubble"><b>${esc(r.byName || "Quelqu'un")}</b><div class="rtext">${linkify(esc(r.text))}</div></div>
+          <div class="ptime">${whenFr(r.createdAt)} · <button type="button" class="link rdel" data-del-reply="${esc(r.id)}">Supprimer</button></div></div>
+      </div>`).join('') : '<p class="hint" style="text-align:center;margin:10px 0">Pas encore de réponse.</p>'}</div>
+    <form data-form="reply" class="replyform" autocomplete="off">
+      <textarea class="field" name="reply" maxlength="1000" rows="1" placeholder="Écrire une réponse…">${esc(keepVal)}</textarea>
+      <button type="submit" class="btn primary" aria-label="Envoyer">➤</button>
+    </form>`);
+  sheetKind = 'thread'; sheetTarget = postId;
+  hydrateMedia(sheet);
+  const replies = sheet.querySelector('.replies');
+  if (replies && again) sheet.scrollTop = sheet.scrollHeight;
+  if (hadFocus || !again) sheet.querySelector('[name="reply"]')?.focus();
+}
+function sendReply(f) {
+  const ta = f.querySelector('[name="reply"]');
+  const text = ta.value.trim().slice(0, 1000);
+  if (!text) { ta.focus(); return; }
+  fire(setDoc(doc(col('replies')), { postId: sheetTarget, text, by: meId, byName: state.myName, createdAt: Date.now() }));
+  ta.value = ''; ta.style.height = '';
+  ta.focus();
+}
+function openEditPost(p) {
+  sheetPeople = new Set(p.mentions || []);
+  openSheet(`<h3>Modifier la note</h3>
+    <form data-form="editPost" autocomplete="off">
+      <textarea class="field" name="text" maxlength="2000" rows="5" placeholder="Écris quelque chose…">${esc(p.text)}</textarea>
+      <div class="label">Personnes identifiées</div>
+      ${peoplePicker(false)}
+      ${actions('Enregistrer')}
+    </form>`);
+  sheetKind = 'editPost'; sheetTarget = p.id;
+}
+// Réponses à mes notes, pas encore vues
+function unreadReplies() {
+  const seen = Number(state.profile?.mentionSeen?.[state.code]) || 0;
+  const mine = new Set(state.posts.filter(p => p.by === meId).map(p => p.id));
+  return state.replies.filter(r => mine.has(r.postId) && r.by !== meId && r.createdAt > seen);
 }
 
 function renderWall() {
@@ -2457,7 +2788,7 @@ function publishPost() {
   const ta = $('#wallText');
   const text = (ta?.value || '').trim().slice(0, 2000);
   if (!text && !pendingPhoto && !pendingTags.size) { ta?.focus(); return; }
-  const data = { text, photo: pendingPhoto ? pendingPhoto.data : null, w: pendingPhoto?.w || 0, h: pendingPhoto?.h || 0,
+  const data = { text, photoId: pendingPhoto ? saveMedia(pendingPhoto) : null, w: pendingPhoto?.w || 0, h: pendingPhoto?.h || 0,
                  by: meId, byName: state.myName, createdAt: Date.now(), pinned: false, mentions: [...pendingTags] };
   setDoc(doc(col('posts')), data).catch(err => {
     console.error(err);
@@ -2469,12 +2800,13 @@ function publishPost() {
 }
 
 function openPostMenu(p) {
-  const canDelete = p.by === meId || state.isAdmin;
   openSheet(`<h3>Note</h3>
     <div class="stack">
+      ${p.by === meId ? `<button type="button" class="btn ghost full" data-edit-post="${esc(p.id)}">✏️ Modifier</button>` : ''}
+      <button type="button" class="btn ghost full" data-reply-post="${esc(p.id)}">💬 Répondre</button>
       <button type="button" class="btn ghost full" data-pin-post="${esc(p.id)}">${p.pinned ? '📌 Désépingler' : '📌 Épingler en haut'}</button>
       ${p.text ? `<button type="button" class="btn ghost full" data-copy-post="${esc(p.id)}">📋 Copier le texte</button>` : ''}
-      ${canDelete ? `<button type="button" class="btn danger full" data-del-post="${esc(p.id)}">Supprimer la note</button>` : ''}
+      <button type="button" class="btn danger full" data-del-post="${esc(p.id)}">Supprimer la note</button>
     </div>`);
   sheetKind = 'post'; sheetTarget = p.id;
 }
