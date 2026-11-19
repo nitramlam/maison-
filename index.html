@@ -318,6 +318,32 @@
   .addedlog{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
   .addedchip{font-size:13px;padding:5px 10px;border-radius:999px;color:var(--lc);background:color-mix(in srgb, var(--lc) 12%, transparent);animation:rise .3s ease}
 
+  /* Identifications et notifications */
+  .online{display:inline-block;width:8px;height:8px;border-radius:50%;background:#2EAD5B;margin-right:6px;vertical-align:1px}
+  .walltags{display:flex;flex-wrap:wrap;gap:6px;margin:4px 4px 8px}
+  .tagchip{display:inline-flex;align-items:center;gap:4px;font-size:13.5px;font-weight:500;padding:4px 4px 4px 10px;border-radius:999px;
+           background:color-mix(in srgb, var(--accent) 12%, transparent);color:var(--accent)}
+  .tagchip button{border:0;background:none;color:inherit;width:22px;height:22px;display:grid;place-items:center;padding:0}
+  .tagchip svg{width:14px;height:14px}
+  .tagrow{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;padding:11px 14px;text-align:left;font-size:16px}
+  .tagrow + .tagrow{border-top:1px solid var(--line)}
+  .tagck{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;color:transparent;flex:none;transition:all .15s}
+  .tagck svg{width:14px;height:14px}
+  .tagrow.on .tagck{background:var(--accent);border-color:var(--accent);color:#fff}
+  .chip.set{background:color-mix(in srgb, var(--accent) 14%, var(--card));border-color:color-mix(in srgb, var(--accent) 40%, var(--line));color:var(--accent)}
+  .post.mentioned{box-shadow:0 0 0 2px color-mix(in srgb, #E8A317 70%, transparent), var(--shadow)}
+  .mtag{font-size:13px;color:#A86F00;background:color-mix(in srgb, #E8A317 14%, transparent);border-radius:10px;padding:6px 10px;margin:-2px 0 10px}
+  .ptags{margin-top:10px;font-size:13.5px;color:var(--muted)}
+  .ptag{display:inline-block;font-weight:600;color:var(--accent);background:color-mix(in srgb, var(--accent) 10%, transparent);border-radius:999px;padding:2px 9px;margin:2px 2px 0 0}
+  .ptag.me{color:#A86F00;background:color-mix(in srgb, #E8A317 16%, transparent)}
+  .tab{position:relative}
+  .tabbadge{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#E0453A;color:#fff;
+            font-style:normal;font-size:11px;font-weight:700;display:grid;place-items:center;box-shadow:0 0 0 2px var(--bg);animation:pop .4s ease}
+  .mentioncard{display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer;font-size:15px;
+               background:color-mix(in srgb, #E8A317 12%, var(--card));box-shadow:0 0 0 1px color-mix(in srgb, #E8A317 35%, transparent)}
+  .mentioncard .bell{font-size:22px;animation:pop .6s ease}
+  .mentioncard:active{transform:scale(.985)}
+
   /* Résumé du jour (accueil) */
   .todaycard{padding:14px 16px;cursor:pointer;transition:transform .12s}
   .todaycard:active{transform:scale(.985)}
@@ -684,6 +710,7 @@ function watchProfile(u) {
 
     if (state.code && !houses.some(h => h.code === state.code)) closeHouse();
     if (!state.code && houses.length) enterHouse(fav || houses[0].code);
+    else if (renderedKey === 'notes') renderTabbar(true);
     else render();
   }, e => { console.error(e); state.profileLoading = false; state.error = 'Impossible de charger ton compte.'; render(); });
 }
@@ -706,7 +733,7 @@ function onSignedOut() {
   if (unsubProfile) { unsubProfile(); unsubProfile = null; }
   if (unsubUsers) { unsubUsers(); unsubUsers = null; }
   meId = null; houses = []; fav = null; migrated = false;
-  Object.assign(state, { user: null, profile: null, blocked: false, isAdmin: false, myName: '', users: [], view: 'home', authMode: 'login' });
+  Object.assign(state, { user: null, profile: null, blocked: false, isAdmin: false, myName: '', users: [], view: 'home', authMode: 'login', tab: 'lists' });
   closeSheet();
   render();
 }
@@ -833,9 +860,11 @@ function subscribe() {
       const v = d.data();
       return { id: d.id, text: typeof v.text === 'string' ? v.text : '', photo: typeof v.photo === 'string' && v.photo.startsWith('data:image/') ? v.photo : null,
                w: Number(v.w) || 0, h: Number(v.h) || 0, by: typeof v.by === 'string' ? v.by : null, byName: typeof v.byName === 'string' ? v.byName : '',
-               createdAt: Number(v.createdAt) || 0, pinned: v.pinned === true };
+               createdAt: Number(v.createdAt) || 0, pinned: v.pinned === true,
+               mentions: Array.isArray(v.mentions) ? v.mentions.filter(x => typeof x === 'string') : [] };
     });
-    if (state.tab === 'notes') render();
+    if (state.tab === 'notes' || (state.tab === 'lists' && state.view !== 'list')) render();
+    else renderTabbar(true);
     if (sheetKind === 'post' && !state.posts.some(p => p.id === sheetTarget)) closeSheet();
   }, soft('Notes')));
 
@@ -862,7 +891,7 @@ function enterHouse(code) {
   state.code = code;
   if (state.view !== 'admin') state.view = 'home';
   state.house = null; state.members = []; state.lists = []; state.sections = []; state.items = [];
-  state.events = []; state.posts = [];
+  state.events = []; state.posts = []; state.newMentions = new Set(); pendingTags.clear();
   seenItems.clear(); itemsPrimed = false; state.anim = 'first';
   subscribe();
   touchMember(true);
@@ -931,8 +960,12 @@ function kickMember(uid) {
   fire(b.commit());
 }
 // Réautoriser : la personne pourra revenir avec le code de la maison.
-function allowBack(uid) {
-  fire(updateDoc(houseRef(), { banned: arrayRemove(uid) }));
+// Supprimer définitivement une personne retirée : elle disparaît et pourra revenir avec le code.
+function purgeMember(uid) {
+  const b = writeBatch(db);
+  b.update(houseRef(), { banned: arrayRemove(uid) });
+  b.delete(ref('members', uid));
+  fire(b.commit());
 }
 
 function changeJoinCode() {
@@ -1155,6 +1188,14 @@ function renderHome() {
       </div></header>`;
   if (state.error) h += `<div class="banner">${esc(state.error)}</div>`;
   if (state.loading) return h;
+  const um = unreadMentions();
+  if (um.length) {
+    const names = [...new Set(um.map(p => p.byName || "Quelqu'un"))];
+    h += `<div class="card mentioncard sec" role="button" tabindex="0" data-action="goNotes">
+      <span class="bell">🔔</span>
+      <span class="grow"><b>${esc(names.slice(0, 2).join(' et '))}${names.length > 2 ? ' et d\'autres' : ''}</b> ${um.length > 1 ? `t'ont identifié dans ${um.length} notes` : "t'a identifié dans une note"}</span>
+      <span class="chev">${ICON.chev}</span></div>`;
+  }
   h += todayWidget();
 
   if (!state.lists.length) {
@@ -1396,7 +1437,8 @@ function render() {
   }
   if (state.tab === 'notes') {
     // l'en-tête contient le champ de saisie : on ne le redessine pas à chaque nouveau message
-    if (renderedKey !== 'notes') { screen.innerHTML = `<div class="${state.anim ? 'anim-' + state.anim : ''}">${renderNotesHead()}</div>`; showPendingPhoto(); }
+    if (renderedKey !== 'notes') { screen.innerHTML = `<div class="${state.anim ? 'anim-' + state.anim : ''}">${renderNotesHead()}</div>`; showPendingPhoto(); showPendingTags(); }
+    markMentionsSeen();
     state.anim = null;
     body.innerHTML = `<div class="wall">${renderWall()}</div>`;
     state.freshPosts = new Set();
@@ -1522,6 +1564,7 @@ function openSheet(html) {
 })();
 function closeSheet() { sheetKind = null; overlay.hidden = true; sheet.innerHTML = ''; }
 
+const lastSeenOf = m => Math.max(0, ...(m.devices || []).map(d => d.lastSeen || 0));
 function openMembersSheet() {
   const keepScroll = sheetKind === 'members' ? sheet.scrollTop : 0;
   const all = state.members || [];
@@ -1533,17 +1576,17 @@ function openMembersSheet() {
       <span class="avatar lg" style="--h:${hueOf(m.id)}">${esc(initial(m.name))}</span>
       <div class="grow">
         <div class="mname">${esc(m.name)}${m.id === meId ? ' <span class="muted">(toi)</span>' : ''}</div>
-        ${m.devices.map(d => `<div class="mdev">${deviceIcon(d.label)} ${esc(d.label)}${d.id === deviceId ? ' · cet appareil' : ''} <span class="muted">· ${ago(d.lastSeen)}</span></div>`).join('')}
+        <div class="mdev muted">${lastSeenOf(m) && Date.now() - lastSeenOf(m) < 15 * 60 * 1000 ? '<span class="online"></span>' : ''}${ago(lastSeenOf(m)) || 'pas encore connecté'}</div>
       </div>
       ${m.id !== meId ? `<button type="button" class="kick" data-kick="${esc(m.id)}">Retirer</button>` : ''}
     </div>`;
   openSheet(`<h3>Membres</h3>
     ${active.length ? active.map(row).join('') : '<p class="hint">Personne pour l\'instant.</p>'}
-    ${removed.length ? `<div class="label">Retirés</div>${removed.map(m => `<div class="mrow">
+    ${removed.length ? `<div class="label">Retirés · ne peuvent pas revenir</div>${removed.map(m => `<div class="mrow">
         <span class="avatar lg off">${esc(initial(m.name))}</span>
         <div class="grow"><div class="mname muted">${esc(m.name)}</div></div>
-        ${banned.has(m.id) ? `<button type="button" class="link" data-unkick="${esc(m.id)}">Autoriser à revenir</button>` : '<span class="hint">peut revenir avec le code</span>'}</div>`).join('')}` : ''}
-    <p class="hint" style="margin-top:12px">Une personne retirée perd l'accès à la maison sur tous ses appareils, et ne peut pas revenir, même avec le code, sauf si tu l'y autorises.</p>
+        <button type="button" class="kick" data-purge="${esc(m.id)}">Supprimer</button></div>`).join('')}` : ''}
+    <p class="hint" style="margin-top:12px"><b>Retirer</b> : la personne perd l'accès à la maison et ne peut plus revenir, même avec le code.<br><b>Supprimer</b> (dans « Retirés ») : elle disparaît de la liste et pourra revenir normalement avec le code.</p>
     <div class="actions">
       <button type="button" class="btn ghost" data-close>Fermer</button>
       <button type="button" class="btn primary" data-open-invite>Inviter quelqu'un</button>
@@ -1848,12 +1891,17 @@ overlay.addEventListener('click', e => {
     toast('Personne retirée de la maison.');
     return;
   }
-  const unkick = t.closest('[data-unkick]');
-  if (unkick) { allowBack(unkick.dataset.unkick); toast('Elle pourra revenir avec le code de la maison.'); return; }
+  const purge = t.closest('[data-purge]');
+  if (purge) {
+    if (!purge.classList.contains('sure')) { purge.classList.add('sure'); purge.textContent = 'Confirmer'; return; }
+    purgeMember(purge.dataset.purge); toast('Personne supprimée. Elle pourra revenir avec le code.'); return;
+  }
   if (t.closest('[data-open-join]')) return openJoinHouseSheet();
 
   if (t.closest('[data-sec-new]')) return openSectionSheet(null);
   if (t.closest('[data-sec-manage-open]')) return openSectionsSheet();
+  const tg = t.closest('[data-tag]');
+  if (tg) { const id = tg.dataset.tag; pendingTags.has(id) ? pendingTags.delete(id) : pendingTags.add(id); tg.classList.toggle('on', pendingTags.has(id)); showPendingTags(); return; }
   const delEv = t.closest('[data-del-event]');
   if (delEv) {
     if (!delEv.classList.contains('sure')) { delEv.classList.add('sure'); delEv.textContent = 'Confirmer la suppression'; return; }
@@ -2019,6 +2067,9 @@ app.addEventListener('click', e => {
     case 'invite': openInviteSheet(); break;
     case 'members': openMembersSheet(); break;
     case 'openSec': openSecView(id); break;
+    case 'goNotes': state.tab = 'notes'; state.anim = 'in'; renderedKey = ''; render(); window.scrollTo(0, 0); break;
+    case 'tagPeople': openTagSheet(); break;
+    case 'untag': pendingTags.delete(id); showPendingTags(); break;
     case 'goCal': state.tab = 'cal'; state.anim = 'in'; renderedKey = ''; setCalDay(todayYmd()); window.scrollTo(0, 0); break;
     case 'calDay': setCalDay(el.dataset.day); break;
     case 'calPrev': shiftMonth(-1); break;
@@ -2099,8 +2150,9 @@ function renderTabbar(show) {
   tabbar.hidden = !show;
   if (!show) return;
   const t = state.tab;
+  const n = t === 'notes' ? 0 : unreadMentions().length;
   tabbar.innerHTML = [['lists', 'Listes'], ['cal', 'Calendrier'], ['notes', 'Notes']].map(([k, label]) =>
-    `<button type="button" class="tab ${t === k ? 'on' : ''}" data-tab="${k}">${TAB_ICONS[k]}<span>${label}</span></button>`).join('');
+    `<button type="button" class="tab ${t === k ? 'on' : ''}" data-tab="${k}">${TAB_ICONS[k]}<span>${label}</span>${k === 'notes' && n ? `<i class="tabbadge">${n}</i>` : ''}</button>`).join('');
 }
 tabbar.addEventListener('click', e => {
   const b = e.target.closest('[data-tab]');
@@ -2275,6 +2327,42 @@ function saveEvent(f, title) {
 
 // ================== Notes (mur de messages) ==================
 let pendingPhoto = null;
+const pendingTags = new Set();   // personnes identifiées dans la note en cours
+const memberName = id => state.members.find(m => m.id === id)?.name || "Quelqu'un";
+const houseMembers = () => { const inH = new Set(state.house?.members || []); return state.members.filter(m => inH.has(m.id)); };
+
+function showPendingTags() {
+  const box = $('#wallTags');
+  if (!box) return;
+  const ids = [...pendingTags];
+  box.hidden = !ids.length;
+  box.innerHTML = ids.map(id => `<span class="tagchip">👤 ${esc(memberName(id))}<button type="button" data-action="untag" data-id="${esc(id)}" aria-label="Retirer">${ICON.x}</button></span>`).join('');
+  const btn = $('#tagBtn'); if (btn) btn.classList.toggle('set', ids.length > 0);
+}
+function openTagSheet() {
+  const ms = houseMembers().filter(m => m.id !== meId);
+  openSheet(`<h3>Identifier</h3>
+    <p class="hint" style="margin-bottom:10px">Les personnes identifiées verront une notification dans l'app.</p>
+    ${ms.length ? `<div class="card">${ms.map(m => `<button type="button" class="tagrow ${pendingTags.has(m.id) ? 'on' : ''}" data-tag="${esc(m.id)}">
+        <span class="avatar" style="--h:${hueOf(m.id)}">${esc(initial(m.name))}</span><span class="grow">${esc(m.name)}</span>
+        <span class="tagck">${ICON.check}</span></button>`).join('')}</div>`
+      : `<div class="card pad muted">Personne d'autre dans la maison pour l'instant.</div>`}
+    <button type="button" class="btn primary full" style="margin-top:14px" data-close>OK</button>`);
+  sheetKind = 'tags';
+}
+
+// Notes où je suis identifié, que je n'ai pas encore vues
+function unreadMentions() {
+  const seen = Number(state.profile?.mentionSeen?.[state.code]) || 0;
+  return state.posts.filter(p => p.by !== meId && (p.mentions || []).includes(meId) && p.createdAt > seen);
+}
+function markMentionsSeen() {
+  const un = unreadMentions();
+  if (!un.length) return;
+  un.forEach(p => state.newMentions.add(p.id));
+  fire(updateDoc(userRef(), { [`mentionSeen.${state.code}`]: Date.now() }));
+}
+state.newMentions = new Set();
 
 function whenFr(ts) {
   if (!ts) return '';
@@ -2293,8 +2381,10 @@ function renderNotesHead() {
     <form class="card wallform sec" id="wallForm" autocomplete="off">
       <textarea class="field" id="wallText" maxlength="2000" rows="2" placeholder="Écris quelque chose…"></textarea>
       <div class="wallprev" id="wallPrev" hidden></div>
+      <div class="walltags" id="wallTags" hidden></div>
       <div class="wallbar">
         <label class="chip photo-btn">📷 Photo<input type="file" accept="image/*" id="wallFile" hidden></label>
+        <button type="button" class="chip" data-action="tagPeople" id="tagBtn">👤 Identifier</button>
         <span class="grow"></span>
         <button class="btn primary" type="submit" id="wallSend">Publier</button>
       </div>
@@ -2303,7 +2393,9 @@ function renderNotesHead() {
 
 function postCard(p) {
   const mine = p.by === meId;
-  return `<article class="post card ${state.freshPosts?.has(p.id) ? 'enter' : ''}">
+  const tagged = (p.mentions || []).includes(meId);
+  return `<article class="post card ${state.freshPosts?.has(p.id) ? 'enter' : ''} ${tagged ? 'mentioned' : ''}">
+    ${tagged ? `<div class="mtag">🔔 ${state.newMentions.has(p.id) ? '<b>Nouveau</b> · ' : ''}Tu es identifié dans cette note</div>` : ''}
     <div class="phead">
       <span class="avatar" style="--h:${hueOf(p.by || p.byName)}">${esc(initial(p.byName))}</span>
       <div class="grow"><div class="pname">${esc(p.byName || "Quelqu'un")}${mine ? ' <span class="muted">(toi)</span>' : ''}</div><div class="ptime">${whenFr(p.createdAt)}</div></div>
@@ -2312,6 +2404,7 @@ function postCard(p) {
     </div>
     ${p.text ? `<div class="ptext">${linkify(esc(p.text))}</div>` : ''}
     ${p.photo ? `<button type="button" class="pphoto" data-action="viewPhoto" data-id="${esc(p.id)}"><img src="${p.photo}" alt="" loading="lazy" ${p.w && p.h ? `width="${p.w}" height="${p.h}"` : ''}></button>` : ''}
+    ${(p.mentions || []).length ? `<div class="ptags">avec ${p.mentions.map(id => `<span class="ptag ${id === meId ? 'me' : ''}">${esc(id === meId ? 'toi' : memberName(id))}</span>`).join(' ')}</div>` : ''}
   </article>`;
 }
 
@@ -2363,15 +2456,16 @@ screen.addEventListener('change', async e => {
 function publishPost() {
   const ta = $('#wallText');
   const text = (ta?.value || '').trim().slice(0, 2000);
-  if (!text && !pendingPhoto) { ta?.focus(); return; }
+  if (!text && !pendingPhoto && !pendingTags.size) { ta?.focus(); return; }
   const data = { text, photo: pendingPhoto ? pendingPhoto.data : null, w: pendingPhoto?.w || 0, h: pendingPhoto?.h || 0,
-                 by: meId, byName: state.myName, createdAt: Date.now(), pinned: false };
+                 by: meId, byName: state.myName, createdAt: Date.now(), pinned: false, mentions: [...pendingTags] };
   setDoc(doc(col('posts')), data).catch(err => {
     console.error(err);
     toast(err && err.code === 'permission-denied' ? 'Publication refusée : mets à jour les règles Firebase.' : "La note n'a pas pu être publiée.");
   });
   ta.value = ''; ta.style.height = '';
   pendingPhoto = null; showPendingPhoto();
+  pendingTags.clear(); showPendingTags();
 }
 
 function openPostMenu(p) {
