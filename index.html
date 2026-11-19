@@ -624,6 +624,59 @@
   .addtile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:118px;border:2px dashed var(--line);border-radius:18px;background:none;color:var(--muted);font:600 13.5px Inter,system-ui,sans-serif}
   .addtile span{font-size:24px;line-height:1}
   .addtile:active{background:color-mix(in srgb, var(--ink) 5%, transparent)}
+
+  /* Listes : courses (toucher = cocher) et menu d'appui long */
+  .tiles .irow.shop .itext{cursor:pointer}
+  .tiles .irow.checking{transform:scale(.92);opacity:.5;transition:transform .25s,opacity .25s}
+  .donemark{position:absolute;top:7px;left:7px;width:22px;height:22px;border-radius:50%;background:var(--lc);color:#fff;display:grid;place-items:center;z-index:2}
+  .donemark svg{width:12px;height:12px}
+  .tiles .irow.done .ititle{text-decoration:line-through;opacity:.7}
+  .shopsw{margin-top:14px;align-items:flex-start}
+  .shopsw small{font-size:12.5px;font-weight:400}
+  .imenu-h{display:flex;align-items:center;gap:12px;margin:2px 0 14px}
+  .imenu-h .iemo{font-size:30px;width:auto}
+  .imenu-h b{font-size:18px}
+  .imenu{display:flex;flex-direction:column;background:var(--card);border-radius:16px;overflow:hidden;border:1px solid var(--line)}
+  .imenu button{border:0;background:none;color:var(--ink);text-align:left;padding:15px 16px;font:500 16px Inter,system-ui,sans-serif}
+  .imenu button + button{border-top:1px solid var(--line)}
+  .imenu button:active{background:color-mix(in srgb, var(--ink) 6%, transparent)}
+  .imenu .danger-t,.imenu .danger-t.sure{color:#D2412B}
+
+  /* Fenêtres adaptées au téléphone (clavier, bouton toujours visible) */
+  .overlay{top:var(--vvt,0);bottom:auto;height:var(--vvh,100%)}
+  .sheet{--sheet-pb:calc(22px + env(safe-area-inset-bottom));padding-bottom:var(--sheet-pb);max-height:calc(var(--vvh,100vh) - 14px)}
+  body.kb-open .sheet{--sheet-pb:10px;max-height:calc(var(--vvh,100vh) - 6px);border-radius:18px 18px 0 0}
+  body.kb-open .sheet .grab{display:none}
+  .sheet .actions{position:sticky;bottom:calc(-1 * var(--sheet-pb));z-index:4;background:var(--card);margin:20px -20px 0;padding:12px 20px var(--sheet-pb);
+    box-shadow:0 -10px 14px -12px rgba(0,0,0,.28)}
+  .sheet .stickybar{margin-top:16px}
+  .sheet .stickybar .addsubmit{margin-top:0}
+  .replyform{bottom:calc(-1 * var(--sheet-pb));padding-bottom:var(--sheet-pb);margin:0 -20px;padding-left:20px;padding-right:20px}
+  .addflash{position:sticky;top:-8px;z-index:5;margin:-4px 0 10px;padding:11px 14px;border-radius:14px;font-size:15px;
+    background:color-mix(in srgb, var(--lc, var(--accent)) 16%, var(--card));color:var(--ink);border:1px solid color-mix(in srgb, var(--lc, var(--accent)) 40%, transparent);
+    box-shadow:0 6px 18px rgba(0,0,0,.12)}
+  .addflash b{font-weight:700}
+  .addflash.pop{animation:flashpop .35s cubic-bezier(.2,.9,.3,1.3)}
+  @keyframes flashpop{from{transform:translateY(-8px) scale(.96);opacity:0}to{transform:none;opacity:1}}
+
+  /* Messages vocaux */
+  .iconchip{font-size:18px;padding:6px 12px}
+  .vplayer{display:flex;align-items:center;gap:10px;margin-top:10px;padding:8px 12px 8px 8px;border-radius:999px;background:color-mix(in srgb, var(--accent) 10%, var(--card));max-width:300px}
+  .rbubble .vplayer{background:color-mix(in srgb, var(--accent) 14%, transparent);margin-top:6px}
+  .vpbtn{width:36px;height:36px;border-radius:50%;border:0;background:var(--accent);color:#fff;font-size:13px;flex:none;display:grid;place-items:center;padding:0}
+  .vpbar{flex:1;height:4px;border-radius:2px;background:color-mix(in srgb, var(--ink) 15%, transparent);overflow:hidden;min-width:60px}
+  .vpbar i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s linear}
+  .vpt{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;min-width:32px;text-align:right}
+  .recbar{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:14px;background:color-mix(in srgb, #E0533D 10%, var(--card));margin:8px 0 4px;flex-wrap:wrap}
+  .recbar #recTime{font-weight:700;font-variant-numeric:tabular-nums}
+  .recbar .muted{font-size:13px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .recbar .recstop{padding:8px 14px;font-size:14px}
+  .recdot{width:12px;height:12px;border-radius:50%;background:#E0533D;animation:recblink 1s ease-in-out infinite}
+  @keyframes recblink{50%{opacity:.25}}
+  .recprev{position:relative;display:inline-flex;align-items:center;gap:6px;margin:6px 0 4px}
+  .recprev .vplayer{margin-top:0}
+  .recprev .prevx{position:static}
+  .wallaudio[hidden]{display:none}
   /* ===== Éléments en cases ===== */
   .card.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;background:transparent;box-shadow:none;border:0;padding:0;overflow:visible}
   .tiles .irow{position:relative;display:block;padding:0;min-height:0;border:0!important;border-radius:18px;background-color:var(--card);
@@ -927,6 +980,9 @@ function hueOf(id) { let h = 0; for (const c of String(id)) h = (h * 31 + c.char
 const byOrder = (a, b) => (a.order - b.order) || 0;
 const sectionsOf = listId => state.sections.filter(s => s.listId === listId).sort(byOrder);
 const currentList = () => state.lists.find(l => l.id === state.listId);
+// Liste de courses : toucher un élément le coche / le décoche. Les autres listes n'ont pas de cases à cocher.
+const isShopList = listId => !!state.lists.find(l => l.id === listId)?.shopping;
+const isDoneItem = i => i.done && isShopList(i.listId);
 
 // ================== Firebase ==================
 const configured = firebaseConfig && firebaseConfig.projectId && !String(firebaseConfig.projectId).includes('COLLE');
@@ -1161,7 +1217,8 @@ function subscribe() {
   }, e => { if (e && e.code === 'permission-denied') return; console.error('membres', e); }));
 
   unsubs.push(onSnapshot(query(col('lists'), orderBy('createdAt')), snap => {
-    state.lists = snap.docs.map(d => { const v = d.data(); return { id: d.id, name: str(v.name, 'Sans nom'), emoji: typeof v.emoji === 'string' ? clipIcon(v.emoji) : '', order: typeof v.order === 'number' ? v.order : (v.createdAt || 0) }; }).sort(byOrder);
+    state.lists = snap.docs.map(d => { const v = d.data(); return { id: d.id, name: str(v.name, 'Sans nom'), emoji: typeof v.emoji === 'string' ? clipIcon(v.emoji) : '', order: typeof v.order === 'number' ? v.order : (v.createdAt || 0),
+      shopping: v.shopping === true || (v.shopping === undefined && /^courses?$/.test(norm(str(v.name, ''))) ) }; }).sort(byOrder);
     got('lists');
   }, err));
   unsubs.push(onSnapshot(query(col('sections'), orderBy('createdAt')), snap => {
@@ -1192,7 +1249,8 @@ function subscribe() {
                w: Number(v.w) || 0, h: Number(v.h) || 0, by: typeof v.by === 'string' ? v.by : null, byName: typeof v.byName === 'string' ? v.byName : '',
                createdAt: Number(v.createdAt) || 0, pinned: v.pinned === true,
                mentions: Array.isArray(v.mentions) ? v.mentions.filter(x => typeof x === 'string') : [],
-               photoId: typeof v.photoId === 'string' ? v.photoId : null, editedAt: Number(v.editedAt) || 0, reactions: cleanReactions(v.reactions) };
+               photoId: typeof v.photoId === 'string' ? v.photoId : null, editedAt: Number(v.editedAt) || 0, reactions: cleanReactions(v.reactions),
+               audioId: typeof v.audioId === 'string' ? v.audioId : null, dur: Number(v.dur) || 0 };
     });
     if (state.tab === 'notes' || (state.tab === 'lists' && state.view !== 'list')) render();
     else renderTabbar(true);
@@ -1202,7 +1260,8 @@ function subscribe() {
   unsubs.push(onSnapshot(query(col('replies'), orderBy('createdAt', 'desc'), limit(300)), snap => {
     state.replies = snap.docs.map(d => { const v = d.data(); return { id: d.id, postId: v.postId, text: String(v.text || ''),
       by: typeof v.by === 'string' ? v.by : null, byName: typeof v.byName === 'string' ? v.byName : '', createdAt: Number(v.createdAt) || 0,
-      photoId: typeof v.photoId === 'string' ? v.photoId : null, w: Number(v.w) || 0, h: Number(v.h) || 0, reactions: cleanReactions(v.reactions) }; }).sort((x, y) => x.createdAt - y.createdAt);
+      photoId: typeof v.photoId === 'string' ? v.photoId : null, w: Number(v.w) || 0, h: Number(v.h) || 0, reactions: cleanReactions(v.reactions),
+      audioId: typeof v.audioId === 'string' ? v.audioId : null, dur: Number(v.dur) || 0 }; }).sort((x, y) => x.createdAt - y.createdAt);
     if (state.tab === 'notes' || (state.tab === 'lists' && state.view !== 'list')) render(); else renderTabbar(true);
     if (sheetKind === 'thread') openThread(sheetTarget);
   }, soft('Réponses')));
@@ -1260,7 +1319,7 @@ function createHouse(name) {
 function seedHouse(id, name) {
   const t = Date.now(), c = sub => collection(db, 'households', id, sub);
   const lists = [
-    { name: 'Courses', emoji: '🛒' },
+    { name: 'Courses', emoji: '🛒', shopping: true },
     { name: 'Idées repas', emoji: '🍝' },
     { name: 'Achats', emoji: '🛍️' },
     { name: 'Travaux', emoji: '🔨' }
@@ -1668,8 +1727,9 @@ function renderHome() {
   const cnt = {};
   for (const i of state.items) {
     const c = cnt[i.listId] || (cnt[i.listId] = { todo: 0, done: 0, imp: 0 });
-    i.done ? c.done++ : c.todo++;
-    if (i.important && !i.done) c.imp++;
+    const dn = isDoneItem(i);
+    dn ? c.done++ : c.todo++;
+    if (i.important && !dn) c.imp++;
   }
   let h = `<header class="hometop"><div class="grow">
       ${state.myName ? `<div class="hello">Bonjour ${esc(state.myName)} 👋</div>` : ''}
@@ -1754,16 +1814,16 @@ function itemRow(i) {
   const vid = i.link ? videoThumb(i.link, !state.selecting, i) : '';
   if (state.selecting) {
     const on = state.selected.has(i.id);
-    return `<div class="irow ${vid ? 'hasvid' : ''} selmode ${on ? 'picked' : ''} ${i.done ? 'done' : ''}" data-id="${esc(i.id)}" data-action="pick">
+    return `<div class="irow ${vid ? 'hasvid' : ''} selmode ${on ? 'picked' : ''} ${isDoneItem(i) ? 'done' : ''}" data-id="${esc(i.id)}" data-action="pick">
       <span class="pickbox">${on ? ICON.check : ''}</span>
       ${vid}<div class="itext">${inner}</div>
     </div>`;
   }
-  return `<div class="irow ${vid ? 'hasvid' : ''} ${i.important && !i.done ? 'imp' : ''} ${i.done ? 'done' : ''} ${state.fresh.has(i.id) ? 'enter' : ''} ${asg.length ? 'assigned' : ''} ${asg.includes(meId) && !i.done ? 'forme' : ''}" data-id="${esc(i.id)}" ${asg.length ? `style="--pg:${peopleGrad(asg, 1)}"` : ''}>
-    <button class="check ${i.done ? 'on' : ''}" data-action="toggle" data-id="${esc(i.id)}" aria-label="${i.done ? 'Décocher' : 'Cocher'}">${i.done ? ICON.check : ''}</button>
-    ${i.done ? '' : `<span class="drag" aria-label="Déplacer">${ICON.grip}</span>`}
-    ${i.important && !i.done ? '<span class="impbadge" aria-label="Important">!</span>' : ''}
-    ${vid}<div class="itext" data-action="editItem" data-id="${esc(i.id)}">${inner}</div>
+  const shop = isShopList(i.listId), dn = shop && i.done;
+  return `<div class="irow ${shop ? 'shop' : ''} ${vid ? 'hasvid' : ''} ${i.important && !dn ? 'imp' : ''} ${dn ? 'done' : ''} ${state.fresh.has(i.id) ? 'enter' : ''} ${asg.length ? 'assigned' : ''} ${asg.includes(meId) && !i.done ? 'forme' : ''}" data-id="${esc(i.id)}" ${asg.length ? `style="--pg:${peopleGrad(asg, 1)}"` : ''}>
+    ${dn ? `<span class="donemark">${ICON.check}</span>` : `<span class="drag" aria-label="Déplacer">${ICON.grip}</span>`}
+    ${i.important && !dn ? '<span class="impbadge" aria-label="Important">!</span>' : ''}
+    ${vid}<div class="itext" data-action="${shop ? 'toggle' : 'editItem'}" data-id="${esc(i.id)}">${inner}</div>
   </div>`;
 }
 
@@ -1792,7 +1852,8 @@ function renderListHead(l) {
 
 function renderList(l) {
   const its = state.items.filter(i => i.listId === l.id);
-  const todo = its.filter(i => !i.done), done = its.filter(i => i.done);
+  const shop = !!l.shopping;
+  const todo = shop ? its.filter(i => !i.done) : its, done = shop ? its.filter(i => i.done) : [];
   const secs = sectionsOf(l.id), secIds = new Set(secs.map(s => s.id));
   let h = `<nav class="catbar">${secs.map(s => {
       const n = todo.filter(i => i.sectionId === s.id).length;
@@ -1842,7 +1903,7 @@ function renderSelbar(show) {
       <button type="button" class="link" data-sel="all">Tout</button></div>
     <div class="selacts">
       <button type="button" class="selact" data-sel="cat" ${n ? '' : 'disabled'}><span>🏷️</span>Catégorie</button>
-      <button type="button" class="selact" data-sel="check" ${n ? '' : 'disabled'}><span>${allDone ? '↩️' : '✅'}</span>${allDone ? 'Décocher' : 'Cocher'}</button>
+      ${currentList()?.shopping ? `<button type="button" class="selact" data-sel="check" ${n ? '' : 'disabled'}><span>${allDone ? '↩️' : '✅'}</span>${allDone ? 'Décocher' : 'Cocher'}</button>` : ''}
       <button type="button" class="selact danger-t" data-sel="del" ${n ? '' : 'disabled'}><span>🗑️</span>Supprimer</button>
     </div>`;
 }
@@ -1905,14 +1966,47 @@ selbar.addEventListener('click', e => {
   }
 });
 
-// Appui long sur un élément = commencer la sélection
+// Appui long sur un élément : menu Modifier / Sélectionner / Supprimer
+function openItemMenu(id) {
+  const it = state.items.find(i => i.id === id); if (!it) return;
+  const shop = isShopList(it.listId);
+  openSheet(`<div class="imenu-h"><span class="iemo">${esc(it.emoji || initial(it.title))}</span><b>${esc(it.title)}</b></div>
+    <div class="imenu">
+      <button type="button" data-im="edit">✏️ Modifier</button>
+      ${shop ? `<button type="button" data-im="toggle">${it.done ? '↩️ Remettre dans la liste' : '✅ Cocher'}</button>` : ''}
+      <button type="button" data-im="select">☑️ Sélectionner plusieurs éléments</button>
+      <button type="button" class="danger-t" data-im="delete">🗑️ Supprimer</button>
+    </div>
+    <div class="actions"><button type="button" class="btn ghost" data-close>Annuler</button></div>`);
+  sheetKind = 'itemMenu'; sheetTarget = id;
+}
+overlay.addEventListener('click', e => {
+  if (sheetKind !== 'itemMenu') return;
+  const b = e.target.closest('[data-im]'); if (!b) return;
+  const id = sheetTarget, it = state.items.find(i => i.id === id);
+  if (!it) return closeSheet();
+  switch (b.dataset.im) {
+    case 'edit': closeSheet(); openItemSheet(it); break;
+    case 'toggle': closeSheet(); toggle(id); break;
+    case 'select': closeSheet(); setSelecting(true, id); break;
+    case 'delete':
+      if (!b.classList.contains('sure')) { b.classList.add('sure'); b.textContent = '🗑️ Confirmer la suppression'; return; }
+      closeSheet();
+      if (it.photoId) fire(deleteDoc(ref('media', it.photoId)));
+      fire(deleteDoc(ref('items', id)));
+      toast(`« ${it.title} » supprimé.`);
+      break;
+  }
+});
+
+// Appui long sur un élément
 (() => {
   let timer = null, startX = 0, startY = 0, fired = false;
   body.addEventListener('pointerdown', e => {
     const row = e.target.closest('.irow[data-id]');
-    if (!row || state.selecting || e.target.closest('.drag, .check, a, .ithumb')) return;
+    if (!row || state.selecting || e.target.closest('.drag, a, .ithumb')) return;
     startX = e.clientX; startY = e.clientY; fired = false;
-    timer = setTimeout(() => { fired = true; navigator.vibrate?.(15); setSelecting(true, row.dataset.id); }, 480);
+    timer = setTimeout(() => { fired = true; navigator.vibrate?.(15); openItemMenu(row.dataset.id); }, 480);
   });
   const cancel = e => { if (timer && (!e || e.type !== 'pointermove' || Math.hypot(e.clientX - startX, e.clientY - startY) > 8)) { clearTimeout(timer); timer = null; } };
   body.addEventListener('pointermove', cancel);
@@ -2110,6 +2204,7 @@ function openAddSheet() {
   sheetPhoto = null;
   openSheet(`<div class="view" style="--h:${hueOf(l.id)}">
     <h3>Nouvel élément</h3>
+    <div class="addflash" id="addFlash" hidden></div>
     <form data-form="addItem" autocomplete="off">
       <div class="emo-row">
         ${iconInput()}
@@ -2136,8 +2231,8 @@ function openAddSheet() {
       <div data-people>${peoplePicker(true)}</div>
       <div class="label">Photo <span class="muted">(facultatif · pour une vidéo, une capture d'écran sert de miniature)</span></div>
       ${photoField()}
-      <button class="btn primary full addsubmit" type="submit">Ajouter</button>
       <div class="addedlog" id="addedLog"></div>
+      <div class="actions stickybar"><button class="btn primary full addsubmit" type="submit">Ajouter</button></div>
     </form>
   </div>`);
   sheetKind = 'add';
@@ -2166,7 +2261,18 @@ function submitAddItem(f, title) {
     chip.className = 'addedchip';
     chip.textContent = `✓ ${important ? '❗ ' : ''}${sheetEmoji ? sheetEmoji + ' ' : ''}${title}${qtyEl.value.trim() ? ' · ' + qtyEl.value.trim() : ''}`;
     log.prepend(chip);
+    while (log.children.length > 6) log.lastChild.remove();
   }
+  // confirmation bien visible en haut de la fenêtre (même avec le clavier ouvert)
+  const flash = $('#addFlash');
+  if (flash) {
+    const secName = sheetSec ? (state.sections.find(x => x.id === sheetSec)?.name || pendingSecs.get?.(sheetSec)?.name || '') : '';
+    flash.innerHTML = `✓ <b>${esc(title)}</b> ajouté${secName ? ` dans ${esc(secName)}` : ''}`;
+    flash.hidden = false;
+    flash.classList.remove('pop'); void flash.offsetWidth; flash.classList.add('pop');
+    clearTimeout(flash._t); flash._t = setTimeout(() => { flash.hidden = true; }, 2600);
+  }
+  navigator.vibrate?.(12);
   titleEl.value = ''; qtyEl.value = ''; noteEl.value = ''; noteEl.style.height = ''; if (impEl) impEl.checked = false; if (linkEl) linkEl.value = '';
   sheetPeople = new Set();
   sheet.querySelectorAll('[data-pick-person]').forEach(b => b.classList.remove('on'));
@@ -2293,7 +2399,7 @@ function render() {
   }
   if (state.tab === 'notes') {
     // l'en-tête contient le champ de saisie : on ne le redessine pas à chaque nouveau message
-    if (renderedKey !== 'notes') { screen.innerHTML = `<div class="${state.anim ? 'anim-' + state.anim : ''}">${renderNotesHead()}</div>`; showPendingPhoto(); showPendingTags(); }
+    if (renderedKey !== 'notes') { screen.innerHTML = `<div class="${state.anim ? 'anim-' + state.anim : ''}">${renderNotesHead()}</div>`; showPendingPhoto(); showPendingAudio('wall'); showPendingTags(); }
     markMentionsSeen();
     state.anim = null;
     body.innerHTML = `<div class="wall">${renderWall()}</div>`;
@@ -2393,6 +2499,23 @@ const secRows = secs => secs.length ? secs.map(s => `<div class="srow" data-row=
   : `<p class="hint">Aucune catégorie pour l'instant. Les catégories regroupent les éléments de la liste.</p>`;
 
 let sheetKind = null;
+// Clavier du téléphone : la fenêtre reste dans la partie visible de l'écran
+(() => {
+  const vv = window.visualViewport;
+  const root = document.documentElement;
+  function sync() {
+    if (!vv) return;
+    root.style.setProperty('--vvh', vv.height + 'px');
+    root.style.setProperty('--vvt', vv.offsetTop + 'px');
+    document.body.classList.toggle('kb-open', innerHeight - vv.height > 120);
+  }
+  if (vv) { vv.addEventListener('resize', sync); vv.addEventListener('scroll', sync); sync(); }
+  sheet.addEventListener('focusin', e => {
+    if (!e.target.matches('input:not([type=checkbox]):not([type=file]), textarea')) return;
+    setTimeout(() => { try { e.target.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (_) {} }, 350);
+  });
+})();
+
 function openSheet(html) {
   sheetKind = null;
   sheet.innerHTML = `<div class="grab"></div><button type="button" class="sheet-x" data-close aria-label="Fermer">${ICON.x}</button>` + html;
@@ -2511,7 +2634,7 @@ function openSettingsSheet() {
     <div class="sep"></div>
     <div class="label">Ton compte</div>
     <p class="hint">Connecté avec <b>${esc(state.user?.email || '')}</b>. Connecte-toi avec ce même compte sur ton iPad ou ton autre téléphone : tu y retrouves tout.</p>
-    <p class="hint" style="font-size:11.5px;opacity:.6">Version de l'app : 19 nov. 20 h 35</p>
+    <p class="hint" style="font-size:11.5px;opacity:.6">Version de l'app : 19 nov. 21 h 45</p>
     <div class="actions" style="margin-top:12px">
       <button type="button" class="btn ghost" data-reset-pw>Changer de mot de passe</button>
       <button type="button" class="btn ghost" data-logout>Se déconnecter</button>
@@ -2562,6 +2685,7 @@ function openListSheet(list) {
   let h = `<h3>${list ? 'Modifier la liste' : 'Nouvelle liste'}</h3>
     <form data-form="${list ? 'editList' : 'newList'}" autocomplete="off">
       ${nameRow(list ? list.name : '', 'Nom de la liste')}${emojiPicker(!list)}
+      <label class="switch shopsw"><input type="checkbox" name="shopping" ${list?.shopping ? 'checked' : ''}><span class="sw"></span><span>🛒 Liste de courses<br><small class="muted">Toucher un élément le coche, le retoucher le remet dans la liste.</small></span></label>
       ${actions(list ? 'Enregistrer' : 'Créer')}
     </form>`;
   if (list) {
@@ -2847,6 +2971,7 @@ overlay.addEventListener('click', e => {
     const b = writeBatch(db);
     b.delete(ref('posts', dp.dataset.delPost));
     if (p?.photoId) b.delete(ref('media', p.photoId));
+    if (p?.audioId) b.delete(ref('media', p.audioId));
     repliesOf(dp.dataset.delPost).forEach(r => b.delete(ref('replies', r.id)));
     fire(b.commit()); closeSheet(); toast('Note supprimée.'); return;
   }
@@ -2862,6 +2987,7 @@ overlay.addEventListener('click', e => {
     if (!dr.classList.contains('sure')) { dr.classList.add('sure'); dr.textContent = 'Confirmer'; return; }
     const rr = state.replies.find(x => x.id === dr.dataset.delReply);
     if (rr?.photoId) fire(deleteDoc(ref('media', rr.photoId)));
+    if (rr?.audioId) fire(deleteDoc(ref('media', rr.audioId)));
     fire(deleteDoc(ref('replies', dr.dataset.delReply))); return;
   }
   const svT = t.closest('[data-sv-toggle]');
@@ -2976,14 +3102,16 @@ overlay.addEventListener('submit', e => {
   switch (f.dataset.form) {
     case 'newList': {
       const r = doc(col('lists'));
-      fire(setDoc(r, { name: value.slice(0, 60), emoji: sheetEmoji, createdAt: Date.now(), order: Date.now() }));
+      const shopping = !!f.querySelector('[name="shopping"]')?.checked;
+      fire(setDoc(r, { name: value.slice(0, 60), emoji: sheetEmoji, createdAt: Date.now(), order: Date.now(), shopping }));
       state.pendingList = r.id;
       closeSheet(); go('list', r.id);
       break;
     }
     case 'editList': {
       const l = state.lists.find(x => x.id === sheetTarget), name = value.slice(0, 60);
-      if (l && (l.name !== name || l.emoji !== sheetEmoji)) fire(updateDoc(ref('lists', l.id), { name, emoji: sheetEmoji }));
+      const shopping = !!f.querySelector('[name="shopping"]')?.checked;
+      if (l && (l.name !== name || l.emoji !== sheetEmoji || l.shopping !== shopping)) fire(updateDoc(ref('lists', l.id), { name, emoji: sheetEmoji, shopping }));
       closeSheet(); break;
     }
     case 'newSec': {
@@ -3040,12 +3168,12 @@ app.addEventListener('click', e => {
     case 'toggle': {
       const it = state.items.find(i => i.id === id);
       if (!it || pendingToggle.has(id)) break;
+      navigator.vibrate?.(10);
       if (!it.done) {
         // petite animation avant de passer dans « Cochés »
         pendingToggle.add(id);
-        el.classList.add('on'); el.innerHTML = ICON.check;
         el.closest('.irow')?.classList.add('checking');
-        setTimeout(() => { pendingToggle.delete(id); toggle(id); }, 300);
+        setTimeout(() => { pendingToggle.delete(id); toggle(id); }, 260);
       } else toggle(id);
       break;
     }
@@ -3615,9 +3743,11 @@ function renderNotesHead() {
     <form class="card wallform sec" id="wallForm" autocomplete="off">
       <textarea class="field" id="wallText" maxlength="2000" rows="2" placeholder="Écris quelque chose…"></textarea>
       <div class="wallprev" id="wallPrev" hidden></div>
+      <div class="wallaudio" id="wallAudio" hidden></div>
       <div class="walltags" id="wallTags" hidden></div>
       <div class="wallbar">
-        <label class="chip photo-btn">📷 Photo<input type="file" accept="image/*" id="wallFile" hidden></label>
+        <label class="chip photo-btn iconchip" aria-label="Ajouter une photo">📷<input type="file" accept="image/*" id="wallFile" hidden></label>
+        <button type="button" class="chip iconchip" data-rec="wall" aria-label="Message vocal">🎤</button>
         <button type="button" class="chip" data-action="tagPeople" id="tagBtn">👤 Identifier</button>
         <span class="grow"></span>
         <button class="btn primary" type="submit" id="wallSend">Publier</button>
@@ -3637,6 +3767,7 @@ function postCard(p) {
       <button type="button" class="iconbtn pmore" data-action="postMenu" data-id="${esc(p.id)}" aria-label="Options">${ICON.more}</button>
     </div>
     ${p.text ? `<div class="ptext" data-react-tap="posts:${esc(p.id)}">${linkify(esc(p.text))}</div>` : ''}
+    ${p.audioId ? voicePlayer(p.audioId, p.dur) : ''}
     ${p.photoId || p.photo ? `<button type="button" class="pphoto" data-action="viewPhoto" data-id="${esc(p.id)}"><img ${p.photoId ? `data-media="${esc(p.photoId)}"` : `src="${p.photo}"`} alt="" ${p.w && p.h ? `width="${p.w}" height="${p.h}"` : ''}></button>` : ''}
     ${reactRow('posts', p)}
     ${(p.mentions || []).length ? `<div class="ptags">avec ${p.mentions.map(id => `<span class="ptag ${id === meId ? 'me' : ''}">${esc(id === meId ? 'toi' : memberName(id))}</span>`).join(' ')}</div>` : ''}
@@ -3650,7 +3781,7 @@ const repliesOf = postId => state.replies.filter(r => r.postId === postId);
 function replyStrip(p) {
   const rs = repliesOf(p.id), last = rs[rs.length - 1];
   return `<div class="pactions">
-    ${last ? `<button type="button" class="plast" data-action="thread" data-id="${esc(p.id)}"><b>${esc(last.byName || "Quelqu'un")}</b> ${last.photoId && !last.text ? '📷 Photo' : esc(last.text.slice(0, 90)) + (last.text.length > 90 ? '…' : '')}</button>` : ''}
+    ${last ? `<button type="button" class="plast" data-action="thread" data-id="${esc(p.id)}"><b>${esc(last.byName || "Quelqu'un")}</b> ${!last.text ? (last.audioId ? '🎤 Message vocal' : '📷 Photo') : esc(last.text.slice(0, 90)) + (last.text.length > 90 ? '…' : '')}</button>` : ''}
     <span class="prow"><button type="button" class="preact" data-react-open="posts:${esc(p.id)}" aria-label="Réagir">☺＋</button>
     <button type="button" class="preply" data-action="thread" data-id="${esc(p.id)}">💬 ${rs.length ? `${rs.length} réponse${rs.length > 1 ? 's' : ''} · Répondre` : 'Répondre'}</button></span>
   </div>`;
@@ -3672,19 +3803,22 @@ function openThread(postId) {
     <div class="replies">${rs.length ? rs.map(r => `<div class="reply">
         <span class="avatar" style="--h:${pHue(r.by || r.byName)}">${esc(initial(r.byName))}</span>
         <div class="grow"><div class="rbubble" data-react-tap="replies:${esc(r.id)}"><b>${esc(r.byName || "Quelqu'un")}</b>${r.text ? `<div class="rtext">${linkify(esc(r.text))}</div>` : ''}
+            ${r.audioId ? voicePlayer(r.audioId, r.dur) : ''}
             ${r.photoId ? `<button type="button" class="rphoto" data-view-media="${esc(r.photoId)}"><img data-media="${esc(r.photoId)}" alt="" ${r.w && r.h ? `width="${r.w}" height="${r.h}"` : ''}></button>` : ''}</div>
           ${reactRow('replies', r)}
           <div class="ptime">${whenFr(r.createdAt)} · <button type="button" class="link rreact" data-react-open="replies:${esc(r.id)}">Réagir</button> · <button type="button" class="link rdel" data-del-reply="${esc(r.id)}">Supprimer</button></div></div>
       </div>`).join('') : '<p class="hint" style="text-align:center;margin:10px 0">Pas encore de réponse.</p>'}</div>
     <form data-form="reply" class="replyform" autocomplete="off">
       <div class="rpending" id="replyPending"></div>
+      <div class="rpending" id="replyAudio"></div>
       <label class="rcam" aria-label="Ajouter une photo">📷<input type="file" accept="image/*" data-reply-photo hidden></label>
+      <button type="button" class="rcam" data-rec="reply" aria-label="Message vocal">🎤</button>
       <textarea class="field" name="reply" maxlength="1000" rows="1" placeholder="Écrire une réponse…">${esc(keepVal)}</textarea>
       <button type="submit" class="btn primary" aria-label="Envoyer">➤</button>
     </form>`);
   sheetKind = 'thread'; sheetTarget = postId;
-  if (!again) replyPhoto = null;
-  showReplyPhoto();
+  if (!again) { replyPhoto = null; if (!rec.on) pendingAudio.reply = null; }
+  showReplyPhoto(); showPendingAudio('reply');
   hydrateMedia(sheet);
   const replies = sheet.querySelector('.replies');
   if (replies && again) sheet.scrollTop = sheet.scrollHeight;
@@ -3698,8 +3832,10 @@ function showReplyPhoto() {
 function sendReply(f) {
   const ta = f.querySelector('[name="reply"]');
   const text = ta.value.trim().slice(0, 1000);
-  if (!text && !replyPhoto) { ta.focus(); return; }
+  if (rec.on) { toast("Arrête d'abord l'enregistrement."); return; }
+  if (!text && !replyPhoto && !pendingAudio.reply) { ta.focus(); return; }
   const data = { postId: sheetTarget, text, by: meId, byName: state.myName, createdAt: Date.now() };
+  if (pendingAudio.reply) { data.audioId = saveAudio(pendingAudio.reply); data.dur = pendingAudio.reply.dur; pendingAudio.reply = null; showPendingAudio('reply'); }
   if (replyPhoto) { data.photoId = saveMedia(replyPhoto); data.w = replyPhoto.w; data.h = replyPhoto.h; }
   fire(setDoc(doc(col('replies')), data));
   replyPhoto = null; showReplyPhoto();
@@ -3821,6 +3957,7 @@ async function compressImage(file) {
   } finally { URL.revokeObjectURL(url); }
 }
 
+function showPendingPhotoAndAudio() { showPendingPhoto(); showPendingAudio('wall'); }
 function showPendingPhoto() {
   const box = $('#wallPrev');
   if (!box) return;
@@ -3841,12 +3978,129 @@ screen.addEventListener('change', async e => {
   if (send) { send.disabled = false; send.textContent = 'Publier'; }
 });
 
+// ================== Messages vocaux ==================
+const VOICE_MAX = 60;                      // secondes (un document Firestore fait 1 Mo max)
+const pendingAudio = { wall: null, reply: null };
+const rec = { on: false, where: null, mr: null, chunks: [], t0: 0, timer: null, stream: null };
+const fmtDur = sec => { sec = Math.max(0, Math.round(sec)); return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`; };
+function saveAudio(a) {
+  const r = doc(col('media'));
+  mediaCache.set(r.id, a.data);
+  fire(setDoc(r, { data: a.data, kind: 'audio', dur: a.dur, by: meId, createdAt: Date.now() }));
+  return r.id;
+}
+function recMime() {
+  if (!window.MediaRecorder) return null;
+  for (const m of ['audio/mp4', 'audio/aac', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus'])
+    if (MediaRecorder.isTypeSupported?.(m)) return m;
+  return '';
+}
+async function startRec(where) {
+  if (rec.on) return;
+  const mime = recMime();
+  if (mime === null || !navigator.mediaDevices?.getUserMedia) { toast("L'enregistrement vocal n'est pas possible sur cet appareil."); return; }
+  try {
+    rec.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+  } catch (e) { toast("Micro refusé : autorise-le dans les réglages de l'iPhone (Safari > Micro)."); return; }
+  rec.chunks = []; rec.where = where; rec.on = true; rec.t0 = Date.now();
+  try { rec.mr = new MediaRecorder(rec.stream, { ...(mime ? { mimeType: mime } : {}), audioBitsPerSecond: 32000 }); }
+  catch (_) { rec.mr = new MediaRecorder(rec.stream); }
+  rec.mr.ondataavailable = e => { if (e.data && e.data.size) rec.chunks.push(e.data); };
+  rec.mr.start(250);
+  navigator.vibrate?.(15);
+  rec.timer = setInterval(() => {
+    const sec = (Date.now() - rec.t0) / 1000;
+    const t = document.querySelector('#recTime'); if (t) t.textContent = fmtDur(sec);
+    if (sec >= VOICE_MAX) stopRec(true);
+  }, 250);
+  showPendingAudio(where);
+}
+function stopRec(keep) {
+  if (!rec.on) return;
+  clearInterval(rec.timer);
+  const where = rec.where, dur = Math.min(VOICE_MAX, (Date.now() - rec.t0) / 1000), mr = rec.mr;
+  rec.on = false;
+  const finish = () => {
+    rec.stream?.getTracks().forEach(t => t.stop()); rec.stream = null;
+    if (!keep || dur < 0.8) { pendingAudio[where] = null; showPendingAudio(where); if (keep) toast('Message trop court.'); return; }
+    const blob = new Blob(rec.chunks, { type: mr.mimeType || 'audio/mp4' });
+    const fr = new FileReader();
+    fr.onload = () => {
+      const data = String(fr.result || '');
+      if (data.length > 950000) { toast('Message trop long, réessaie plus court.'); pendingAudio[where] = null; }
+      else pendingAudio[where] = { data, dur: Math.round(dur) };
+      showPendingAudio(where);
+    };
+    fr.readAsDataURL(blob);
+  };
+  if (mr && mr.state !== 'inactive') { mr.onstop = finish; try { mr.stop(); } catch (_) { finish(); } } else finish();
+}
+function showPendingAudio(where) {
+  const box = where === 'wall' ? $('#wallAudio') : sheet.querySelector('#replyAudio');
+  if (!box) return;
+  if (rec.on && rec.where === where) {
+    box.hidden = false;
+    box.innerHTML = `<div class="recbar"><span class="recdot"></span><span id="recTime">${fmtDur((Date.now() - rec.t0) / 1000)}</span>
+      <span class="muted grow">Enregistrement…</span>
+      <button type="button" class="chip" data-rec-cancel>Annuler</button><button type="button" class="btn primary recstop" data-rec-stop>■ Terminer</button></div>`;
+  } else if (pendingAudio[where]) {
+    box.hidden = false;
+    box.innerHTML = `<div class="recprev">${voicePlayer(null, pendingAudio[where].dur, pendingAudio[where].data)}<button type="button" class="prevx" data-rec-drop="${where}" aria-label="Retirer le vocal">${ICON.x}</button></div>`;
+  } else { box.hidden = where === 'wall'; box.innerHTML = ''; }
+}
+function voicePlayer(id, dur, inline) {
+  return `<div class="vplayer" ${id ? `data-audio="${esc(id)}"` : ''} ${inline ? `data-inline="1"` : ''} data-dur="${Number(dur) || 0}">
+    <button type="button" class="vpbtn" aria-label="Écouter">▶</button>
+    <div class="vpbar"><i></i></div><span class="vpt">${fmtDur(dur)}</span></div>`;
+}
+// un seul lecteur à la fois
+const vAudio = new Audio(); vAudio.preload = 'auto';
+let vCur = null;
+function vReset() {
+  if (!vCur) return;
+  vCur.classList.remove('playing'); vCur.querySelector('.vpbtn').textContent = '▶';
+  vCur.querySelector('.vpbar i').style.width = '0%'; vCur.querySelector('.vpt').textContent = fmtDur(vCur.dataset.dur);
+  vCur = null;
+}
+vAudio.addEventListener('timeupdate', () => {
+  if (!vCur) return;
+  const d = isFinite(vAudio.duration) && vAudio.duration > 0 ? vAudio.duration : Number(vCur.dataset.dur) || 1;
+  vCur.querySelector('.vpbar i').style.width = Math.min(100, vAudio.currentTime / d * 100) + '%';
+  vCur.querySelector('.vpt').textContent = fmtDur(d - vAudio.currentTime);
+});
+vAudio.addEventListener('ended', vReset);
+async function playVoice(pl) {
+  if (vCur === pl) { if (vAudio.paused) { vAudio.play(); pl.querySelector('.vpbtn').textContent = '❚❚'; } else { vAudio.pause(); pl.querySelector('.vpbtn').textContent = '▶'; } return; }
+  vAudio.pause(); vReset();
+  vCur = pl; pl.classList.add('playing'); pl.querySelector('.vpbtn').textContent = '…';
+  let src = null;
+  if (pl.dataset.inline) {
+    const kind = pl.closest('#wallAudio') ? 'wall' : 'reply';
+    src = pendingAudio[kind]?.data;
+  } else src = await loadMedia(pl.dataset.audio);
+  if (vCur !== pl) return;
+  if (!src) { toast('Vocal introuvable.'); vReset(); return; }
+  vAudio.src = src;
+  try { await vAudio.play(); pl.querySelector('.vpbtn').textContent = '❚❚'; }
+  catch (e) { console.warn(e); toast("Impossible de lire ce vocal sur cet appareil."); vReset(); }
+}
+document.addEventListener('click', e => {
+  const t = e.target;
+  const pb = t.closest('.vpbtn'); if (pb) { e.stopPropagation(); playVoice(pb.closest('.vplayer')); return; }
+  const rs = t.closest('[data-rec]'); if (rs) { e.preventDefault(); rec.on ? stopRec(true) : startRec(rs.dataset.rec); return; }
+  if (t.closest('[data-rec-stop]')) { stopRec(true); return; }
+  if (t.closest('[data-rec-cancel]')) { stopRec(false); return; }
+  const dr = t.closest('[data-rec-drop]'); if (dr) { if (vCur?.dataset.inline) { vAudio.pause(); vReset(); } pendingAudio[dr.dataset.recDrop] = null; showPendingAudio(dr.dataset.recDrop); }
+}, true);
+
 function publishPost() {
   const ta = $('#wallText');
   const text = (ta?.value || '').trim().slice(0, 2000);
-  if (!text && !pendingPhoto && !pendingTags.size) { ta?.focus(); return; }
+  if (rec.on) { toast("Arrête d'abord l'enregistrement."); return; }
+  if (!text && !pendingPhoto && !pendingAudio.wall && !pendingTags.size) { ta?.focus(); return; }
   const data = { text, photoId: pendingPhoto ? saveMedia(pendingPhoto) : null, w: pendingPhoto?.w || 0, h: pendingPhoto?.h || 0,
                  by: meId, byName: state.myName, createdAt: Date.now(), pinned: false, mentions: [...pendingTags] };
+  if (pendingAudio.wall) { data.audioId = saveAudio(pendingAudio.wall); data.dur = pendingAudio.wall.dur; pendingAudio.wall = null; showPendingAudio('wall'); }
   setDoc(doc(col('posts')), data).catch(err => {
     console.error(err);
     toast(err && err.code === 'permission-denied' ? 'Publication refusée : mets à jour les règles Firebase.' : "La note n'a pas pu être publiée.");
