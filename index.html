@@ -720,6 +720,7 @@
   .ucard.isblocked{opacity:.75}
   .urow{display:flex;align-items:center;gap:12px;margin-bottom:8px}
   .umeta{font-size:14px;margin-top:4px}
+  .adminbadge{display:inline-block;font-size:11px;font-weight:700;color:var(--accent);background:color-mix(in srgb, var(--accent) 13%, transparent);border-radius:999px;padding:2px 8px;vertical-align:2px;letter-spacing:.02em}
   .badge{display:inline-block;font-size:12px;font-weight:600;color:#fff;background:#C0392B;border-radius:999px;padding:2px 8px;vertical-align:2px}
   .ucard .btn.sure{background:#C0392B;color:#fff}
   .deluser{color:#C0392B}
@@ -995,7 +996,6 @@ const newProfile = (u, pseudo) => ({
 function onSignedIn(u) {
   meId = u.uid;
   state.user = u;
-  getDoc(doc(db, 'admins', u.uid)).then(s => { state.isAdmin = s.exists(); if (sheetKind === 'settings') openSettingsSheet(); render(); }).catch(() => {});
   watchProfile(u);
 }
 
@@ -1079,8 +1079,10 @@ function subscribe() {
     state.house = snap.data();
     if (Array.isArray(state.house.members) && !state.house.members.includes(meId) && !snap.metadata.hasPendingWrites) return lost();
     if (typeof state.house.name === 'string') rememberHouse(code, state.house.name);
+    if (!Array.isArray(state.house.admins) && houseAdmins()[0] === meId && !snap.metadata.fromCache) fire(updateDoc(houseRef(), { admins: [meId] }));
     render();
     if (sheetKind === 'members') openMembersSheet();
+    if (sheetKind === 'manage' && !amAdmin()) closeSheet();
     if (sheetKind === 'invite') openInviteSheet();
   }, err));
 
@@ -1182,7 +1184,7 @@ function createHouse(name) {
   name = String(name || '').trim().slice(0, 40) || 'Ma maison';
   const id = newCode(), jc = newJoinCode();
   const b = writeBatch(db);
-  b.set(doc(db, 'households', id), { name, createdAt: Date.now(), createdBy: meId, members: [meId], banned: [], code: jc });
+  b.set(doc(db, 'households', id), { name, createdAt: Date.now(), createdBy: meId, members: [meId], admins: [meId], banned: [], code: jc });
   b.set(doc(db, 'joinCodes', jc), { houseId: id });
   fire(b.commit());
   houses.push({ code: id, name });
@@ -1218,13 +1220,32 @@ async function joinWithCode(raw) {
 }
 
 // Quitter une maison : tu n'en fais plus partie (les listes restent pour les autres).
-function leaveHouse() {
-  const id = state.code;
-  if (!id) return;
+// ----- Administrateurs de la maison : le créateur au départ, il peut nommer d'autres personnes -----
+function houseAdmins(h = state.house) {
+  if (!h) return [];
+  if (Array.isArray(h.admins)) return h.admins;
+  return h.createdBy ? [h.createdBy] : (Array.isArray(h.members) && h.members[0] ? [h.members[0]] : []);
+}
+const amAdmin = () => !!meId && houseAdmins().includes(meId);
+
+function setAdmin(uid, on) {
+  const cur = houseAdmins();
+  if (!on && cur.length <= 1 && cur.includes(uid)) { toast('Il faut au moins un administrateur.'); return; }
+  const next = on ? [...new Set([...cur, uid])] : cur.filter(x => x !== uid);
+  fire(updateDoc(houseRef(), { admins: next }));
+  toast(on ? `${memberName(uid)} est administrateur.` : `${memberName(uid)} n'est plus administrateur.`);
+}
+
+// Retirer quelqu'un : il perd l'accès, mais peut revenir avec le code (sauf si on change le code)
+function removeMember(uid) {
   const b = writeBatch(db);
-  b.delete(ref('members', meId));
-  b.update(houseRef(), { members: arrayRemove(meId) });
+  b.update(houseRef(), { members: arrayRemove(uid), admins: houseAdmins().filter(x => x !== uid) });
+  b.delete(ref('members', uid));
   fire(b.commit());
+  toast(`${memberName(uid)} a été retiré de la maison.`);
+}
+
+function forgetHouseLocally(id) {
   houses = houses.filter(h => h.code !== id);
   if (fav === id) fav = houses[0]?.code || null;
   saveHouses();
@@ -1233,12 +1254,63 @@ function leaveHouse() {
   if (houses.length) enterHouse(fav || houses[0].code); else render();
 }
 
-function kickMember(uid) {
-  const b = writeBatch(db);
-  b.update(houseRef(), { members: arrayRemove(uid), banned: arrayUnion(uid) });
-  b.set(ref('members', uid), { removed: true, removedAt: Date.now(), removedBy: state.myName }, { merge: true });
-  fire(b.commit());
+// Quitter : un admin seul doit d'abord passer la main ; s'il n'y a plus personne, la maison est supprimée
+function startLeave() {
+  const others = (state.house?.members || []).filter(x => x !== meId);
+  const lastAdmin = amAdmin() && houseAdmins().filter(x => x !== meId).length === 0;
+  if (!lastAdmin) return leaveHouse();
+  if (others.length) return openTransferSheet(others);
+  openSheet(`<h3>Supprimer la maison ?</h3>
+    <p class="hint">Tu es la dernière personne dans <b>${esc(state.house?.name || 'cette maison')}</b>. En partant, la maison et tout son contenu (listes, calendrier, notes, photos) seront <b>supprimés définitivement</b>.</p>
+    <div class="actions"><button type="button" class="btn ghost" data-close>Annuler</button>
+      <button type="button" class="btn danger" data-delete-house>Supprimer et quitter</button></div>`);
+  sheetKind = 'leaveDelete';
 }
+let transferTo = null;
+function openTransferSheet(others) {
+  transferTo = null;
+  const ms = others.map(id => ({ id, name: memberName(id) }));
+  openSheet(`<h3>Avant de partir</h3>
+    <p class="hint" style="margin-bottom:12px">Tu es l'administrateur de la maison. Choisis qui reprend les droits :</p>
+    <div class="card">${ms.map(m => `<button type="button" class="tagrow" data-transfer="${esc(m.id)}">
+        <span class="avatar" style="--h:${pHue(m.id)}">${esc(initial(m.name))}</span><span class="grow">${esc(m.name)}</span><span class="tagck">${ICON.check}</span></button>`).join('')}</div>
+    <div class="actions"><button type="button" class="btn ghost" data-close>Annuler</button>
+      <button type="button" class="btn danger" data-transfer-go disabled>Transférer et quitter</button></div>`);
+  sheetKind = 'transfer';
+}
+function leaveHouse(newAdmin) {
+  const id = state.code;
+  if (!id) return;
+  const b = writeBatch(db);
+  b.delete(ref('members', meId));
+  const upd = { members: arrayRemove(meId) };
+  if (newAdmin) upd.admins = [newAdmin];
+  else if (amAdmin()) upd.admins = houseAdmins().filter(x => x !== meId);
+  b.update(houseRef(), upd);
+  fire(b.commit());
+  forgetHouseLocally(id);
+}
+async function deleteHouse() {
+  const id = state.code, jc = state.house?.code;
+  if (!id) return;
+  closeSheet();
+  toast('Suppression de la maison…');
+  try {
+    for (const c of ['items', 'sections', 'lists', 'events', 'replies', 'posts', 'media', 'members']) {
+      const sn = await getDocs(collection(db, 'households', id, c));
+      for (let i = 0; i < sn.docs.length; i += 400) {
+        const b = writeBatch(db);
+        sn.docs.slice(i, i + 400).forEach(d => b.delete(doc(db, 'households', id, c, d.id)));
+        await b.commit();
+      }
+    }
+    if (jc) await deleteDoc(doc(db, 'joinCodes', jc)).catch(() => {});
+    await deleteDoc(doc(db, 'households', id));
+    toast('Maison supprimée.');
+  } catch (e) { console.error(e); toast("La suppression n'a pas pu aller jusqu'au bout."); }
+  forgetHouseLocally(id);
+}
+
 // Réautoriser : la personne pourra revenir avec le code de la maison.
 // Supprimer définitivement une personne retirée : elle disparaît et pourra revenir avec le code.
 function purgeMember(uid) {
@@ -1334,7 +1406,7 @@ function renderOnboarding() {
       <input class="field codefield" name="code" maxlength="7" placeholder="CODE" autocapitalize="characters" autocomplete="off" spellcheck="false">
       <button class="btn primary full" type="submit">Rejoindre</button>
     </form>
-    <p class="authswitch">${state.isAdmin ? `<button class="link" data-action="admin">Administration</button> · ` : ''}<button class="link" data-action="logout">Se déconnecter</button></p>`;
+    <p class="authswitch"><button class="link" data-action="logout">Se déconnecter</button></p>`;
 }
 
 function renderBlocked() {
@@ -2183,26 +2255,38 @@ function openMembersSheet() {
   const keepScroll = sheetKind === 'members' ? sheet.scrollTop : 0;
   const all = state.members || [];
   const inHouse = new Set(state.house?.members || []);
-  // Plus de « retirés » : les anciennes interdictions sont levées
-  if ((state.house?.banned || []).length) fire(updateDoc(houseRef(), { banned: [] }));
-  const active = all.filter(m => inHouse.has(m.id)).sort((a, b) => (b.id === meId) - (a.id === meId) || a.name.localeCompare(b.name));
+  const admins = new Set(houseAdmins()), me = amAdmin();
+  if (me && (state.house?.banned || []).length) fire(updateDoc(houseRef(), { banned: [] }));
+  const active = all.filter(m => inHouse.has(m.id)).sort((a, b) => (b.id === meId) - (a.id === meId) || admins.has(b.id) - admins.has(a.id) || a.name.localeCompare(b.name));
   const row = m => `<div class="mrow">
       <span class="avatar lg" style="--h:${pHue(m.id)}">${esc(initial(m.name))}</span>
       <div class="grow">
-        <div class="mname">${esc(m.name)}${m.id === meId ? ' <span class="muted">(toi)</span>' : ''}</div>
+        <div class="mname">${esc(m.name)}${m.id === meId ? ' <span class="muted">(toi)</span>' : ''}${admins.has(m.id) ? ' <span class="adminbadge">Admin</span>' : ''}</div>
         <div class="mdev muted">${lastSeenOf(m) && Date.now() - lastSeenOf(m) < 15 * 60 * 1000 ? '<span class="online"></span>' : ''}${ago(lastSeenOf(m)) || 'pas encore connecté'}</div>
       </div>
-      ${state.isAdmin && m.id !== meId ? `<button type="button" class="kick" data-deluser="${esc(m.id)}">Supprimer le compte</button>` : ''}
+      ${me && m.id !== meId ? `<button type="button" class="kick" data-manage="${esc(m.id)}">Gérer</button>` : ''}
     </div>`;
   openSheet(`<h3>Membres</h3>
     ${active.length ? active.map(row).join('') : '<p class="hint">Personne pour l\'instant.</p>'}
-    ${state.isAdmin ? `<p class="hint" style="margin-top:12px"><b>Supprimer le compte</b> : la personne n'a plus accès à la maison. Elle peut recréer un compte et revenir avec le code.<br>Pour l'en empêcher : <button type="button" class="link" data-new-code>générer un nouveau code</button>.</p>` : ''}
+    ${me ? `<p class="hint" style="margin-top:12px">Tu es administrateur : tu peux nommer d'autres admins, retirer quelqu'un de la maison, ou <button type="button" class="link" data-new-code>générer un nouveau code</button> pour que personne ne puisse revenir avec l'ancien.</p>`
+         : `<p class="hint" style="margin-top:12px">Les administrateurs gèrent les membres et le code de la maison.</p>`}
     <div class="actions">
       <button type="button" class="btn ghost" data-close>Fermer</button>
       <button type="button" class="btn primary" data-open-invite>Inviter quelqu'un</button>
     </div>`);
   sheetKind = 'members';
   sheet.scrollTop = keepScroll;
+}
+function openManageMember(uid) {
+  const m = (state.members || []).find(x => x.id === uid) || { id: uid, name: memberName(uid) };
+  const isAdm = houseAdmins().includes(uid);
+  openSheet(`<div class="mrow" style="border:0;padding-top:4px"><span class="avatar lg" style="--h:${pHue(uid)}">${esc(initial(m.name))}</span>
+      <div class="grow"><h3 style="margin:0">${esc(m.name)}</h3><div class="mdev muted">${isAdm ? 'Administrateur' : 'Membre'}</div></div></div>
+    <button type="button" class="btn ghost full" style="margin-top:12px" data-set-admin="${esc(uid)}" data-on="${isAdm ? '0' : '1'}">${isAdm ? 'Retirer les droits d\'administrateur' : '🛡️ Nommer administrateur'}</button>
+    <button type="button" class="btn danger full" style="margin-top:10px" data-remove-member="${esc(uid)}">Retirer de la maison</button>
+    <p class="hint" style="margin-top:10px">Retirée, la personne n'a plus accès à la maison. Elle peut revenir avec le code, sauf si tu génères un nouveau code.</p>
+    <div class="actions"><button type="button" class="btn ghost" data-back-members>Retour</button></div>`);
+  sheetKind = 'manage';
 }
 
 function openInviteSheet() {
@@ -2214,7 +2298,7 @@ function openInviteSheet() {
       ${navigator.share ? `<button type="button" class="btn primary" data-share>Envoyer</button>` : ''}
       <button type="button" class="btn ${navigator.share ? 'ghost' : 'primary'}" data-copy>Copier le code</button>
     </div>
-    ${state.isAdmin ? `<p class="hint" style="text-align:center;margin-top:14px"><button type="button" class="link" data-new-code>Générer un nouveau code</button><br>L'ancien ne marchera plus. Ceux qui sont déjà dans la maison y restent.</p>` : ''}`);
+    ${amAdmin() ? `<p class="hint" style="text-align:center;margin-top:14px"><button type="button" class="link" data-new-code>Générer un nouveau code</button><br>L'ancien ne marchera plus. Ceux qui sont déjà dans la maison y restent.</p>` : ''}`);
   sheetKind = 'invite';
 }
 
@@ -2260,10 +2344,9 @@ function openSettingsSheet() {
       <button type="button" class="btn ghost" data-reset-pw>Changer de mot de passe</button>
       <button type="button" class="btn ghost" data-logout>Se déconnecter</button>
     </div>
-    ${state.isAdmin ? `<button type="button" class="btn primary full" style="margin-top:10px" data-admin>🛡️ Administration des comptes</button>` : ''}
     <div class="sep" style="margin-bottom:16px"></div>
     <button type="button" class="btn danger full" data-leave>Quitter cette maison</button>
-    <p class="hint" style="text-align:center">Les listes restent pour les autres. Tu pourras revenir avec le code de la maison.</p>`);
+    <p class="hint" style="text-align:center">${amAdmin() && houseAdmins().length === 1 ? ((state.house?.members || []).length > 1 ? "Tu es l'administrateur : tu choisiras qui reprend les droits." : 'Tu es seul : la maison sera supprimée.') : 'Les listes restent pour les autres. Tu pourras revenir avec le code de la maison.'}</p>`);
   sheetKind = 'settings';
 }
 
@@ -2521,18 +2604,34 @@ overlay.addEventListener('click', e => {
   }
   if (t.closest('[data-copy]')) return copyInvite();
   const nc = t.closest('[data-new-code]');
-  if (nc && state.isAdmin) {
+  if (nc && amAdmin()) {
     if (!nc.classList.contains('sure')) { nc.classList.add('sure'); nc.textContent = 'Confirmer : nouveau code'; return; }
     changeJoinCode(); toast('Nouveau code créé. L\'ancien ne marche plus.');
     setTimeout(() => openInviteSheet(), 400); return;
   }
-  const du = t.closest('[data-deluser]');
-  if (du && state.isAdmin) {
-    if (!du.classList.contains('sure')) { du.classList.add('sure'); du.textContent = 'Confirmer'; return; }
-    adminDeleteUser(du.dataset.deluser); return;
+  const mg = t.closest('[data-manage]');
+  if (mg && amAdmin()) return openManageMember(mg.dataset.manage);
+  if (t.closest('[data-back-members]')) return openMembersSheet();
+  const sa = t.closest('[data-set-admin]');
+  if (sa && amAdmin()) { setAdmin(sa.dataset.setAdmin, sa.dataset.on === '1'); return openMembersSheet(); }
+  const rm = t.closest('[data-remove-member]');
+  if (rm && amAdmin()) {
+    if (!rm.classList.contains('sure')) { rm.classList.add('sure'); rm.textContent = 'Confirmer : retirer de la maison'; return; }
+    removeMember(rm.dataset.removeMember); return openMembersSheet();
   }
+  const tr = t.closest('[data-transfer]');
+  if (tr) {
+    transferTo = tr.dataset.transfer;
+    sheet.querySelectorAll('[data-transfer]').forEach(b => b.classList.toggle('on', b === tr));
+    const go = sheet.querySelector('[data-transfer-go]'); if (go) go.disabled = false;
+    return;
+  }
+  if (t.closest('[data-transfer-go]') && transferTo) return leaveHouse(transferTo);
+  if (t.closest('[data-delete-house]')) return deleteHouse();
   const leave = t.closest('[data-leave]');
   if (leave) {
+    const lastAdmin = amAdmin() && houseAdmins().filter(x => x !== meId).length === 0;
+    if (lastAdmin) return startLeave();
     if (!leave.classList.contains('sure')) { leave.classList.add('sure'); leave.textContent = 'Confirmer : quitter la maison'; return; }
     return leaveHouse();
   }
@@ -2828,7 +2927,7 @@ app.addEventListener('click', e => {
     case 'admin': openAdmin(); break;
     case 'admin-back': state.view = 'home'; state.anim = 'back'; renderedKey = ''; render(); window.scrollTo(0, 0); break;
     case 'settings': openSettingsSheet(); break;
-    case 'leave': leaveHouse(); break;
+    case 'leave': startLeave(); break;
     case 'houses': openHousesSheet(); break;
   }
 });
