@@ -286,9 +286,8 @@
   .grp-title.static{cursor:default}
   .grp-title .n{margin-left:2px}
   .grp-h .grp-title + .sec-drag{order:3}
-  .grp.mini{margin-top:12px}
-  .grp.mini .grp-h{font-size:11.5px;margin-bottom:6px}
-  .grp.mini .grp-h .e{font-size:14px}
+  .grp.donegrp{margin-top:14px}
+  .grp.donegrp .grp-title{opacity:.75}
   .done-zone{margin-top:32px}
   .done-h{margin-bottom:4px}
 
@@ -552,7 +551,7 @@
   .tiles .irow.hasvid .check,.tiles .irow.hasvid .pickbox{top:11px;left:11px;box-shadow:0 1px 4px rgba(0,0,0,.3)}
   .tiles .irow.hasvid .drag{top:9px;right:8px;opacity:.9;color:#fff;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
   .tiles .irow.hasvid .impbadge{top:10px;right:30px}
-  .grp.mini .vthumb{aspect-ratio:1;margin:4px 4px 0}
+
   .done .vthumb{opacity:.55}
 
   /* Icône libre (2 caractères) */
@@ -631,7 +630,7 @@
   .tiles .irow.checking{transform:scale(.92);opacity:.5;transition:transform .25s,opacity .25s}
   .donemark{position:absolute;top:7px;left:7px;width:22px;height:22px;border-radius:50%;background:var(--lc);color:#fff;display:grid;place-items:center;z-index:2}
   .donemark svg{width:12px;height:12px}
-  .tiles .irow.done .ititle{text-decoration:line-through;opacity:.7}
+  .tiles .irow.done .ititle{text-decoration:line-through;color:var(--muted)}
   .shopsw{margin-top:14px;align-items:flex-start}
   .shopsw small{font-size:12.5px;font-weight:400}
   .imenu-h{display:flex;align-items:center;gap:12px;margin:2px 0 14px}
@@ -662,6 +661,8 @@
 
   .dd-close{display:block;margin:0 0 8px auto;border:0;background:color-mix(in srgb, var(--ink) 8%, transparent);color:var(--ink);border-radius:999px;padding:6px 12px;font:600 13px Inter,system-ui,sans-serif}
   .rxbar .rxclose{font-size:15px;margin-left:4px}
+  .selright{display:flex;align-items:center;gap:14px}
+  .selx{border:0;border-radius:999px;padding:7px 12px;font:600 14px Inter,system-ui,sans-serif;background:color-mix(in srgb, var(--ink) 10%, transparent);color:var(--ink)}
   /* Messages vocaux */
   .iconchip{font-size:18px;padding:6px 12px}
   .vplayer{display:flex;align-items:center;gap:10px;margin-top:10px;padding:8px 12px 8px 8px;border-radius:999px;background:color-mix(in srgb, var(--accent) 10%, var(--card));max-width:300px}
@@ -709,12 +710,9 @@
   .tiles .irow.picked{box-shadow:0 0 0 2.5px var(--lc)}
   .tiles .irow.done{background-color:color-mix(in srgb, var(--card) 60%, transparent);box-shadow:none}
   .tiles .irow.done .itext{min-height:96px;padding-top:12px}
-  .tiles .irow.done .iemo{font-size:26px}
   .tiles .irow.assigned{background-image:var(--pg);background-size:100% 4px;background-position:bottom;background-repeat:no-repeat}
-  .grp.mini .tiles{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
-  .grp.mini .tiles .itext{min-height:84px;padding:12px 5px 8px}
-  .grp.mini .tiles .ititle{font-size:12.5px}
-  .grp.mini .tiles .note,.grp.mini .tiles .qty{display:none}
+  .done-zone .tiles .irow.done{opacity:.8;box-shadow:none}
+  .done-zone .tiles .irow.done .itext{min-height:104px}
   .tiles .drag-ghost{opacity:.35}
 
   .selbar{position:fixed;left:0;right:0;bottom:0;z-index:9;padding:10px 14px calc(10px + env(safe-area-inset-bottom));
@@ -1838,10 +1836,10 @@ function group(sec, items, opts = {}) {
     ? `<button type="button" class="grp-title" data-action="openSec" data-id="${esc(sec.id)}"><span class="e">${esc(sec.emoji)}</span>${esc(sec.name)}<span class="n">${items.length}</span></button>
        ${opts.mini ? '' : `<span class="sec-drag" aria-label="Déplacer la catégorie">${ICON.grip}</span>`}`
     : `<span class="grp-title static">${opts.label || 'Sans catégorie'}<span class="n">${items.length}</span></span>`;
-  return `<section class="grp ${opts.mini ? 'mini' : ''}" ${sec && !opts.mini ? `data-sec-id="${esc(sec.id)}"` : ''}>
+  return `<section class="grp ${opts.mini ? 'donegrp' : ''}" ${sec && !opts.mini ? `data-sec-id="${esc(sec.id)}"` : ''}>
     <div class="grp-h ${sec ? '' : 'soft'}">${head}</div>
     <div class="card tiles" ${opts.mini ? '' : `data-drop="${sec ? esc(sec.id) : ''}"`}>${items.map(itemRow).join('')}${
-      sec && !opts.mini && !items.length && !state.selecting ? `<button type="button" class="addtile" data-action="addIn" data-id="${esc(sec.id)}"><span>＋</span>Ajouter</button>` : ''}</div></section>`;
+      sec && !opts.mini && !state.selecting ? `<button type="button" class="addtile" data-action="addIn" data-id="${esc(sec.id)}"><span>＋</span>Ajouter</button>` : ''}</div></section>`;
 }
 
 function renderListHead(l) {
@@ -1905,7 +1903,7 @@ function renderSelbar(show) {
   const n = ids.length;
   const allDone = n && ids.every(id => state.items.find(i => i.id === id)?.done);
   selbar.innerHTML = `<div class="selcount">${n ? `${n} sélectionné${n > 1 ? 's' : ''}` : 'Touche les éléments à sélectionner'}
-      <button type="button" class="link" data-sel="all">Tout</button></div>
+      <span class="selright"><button type="button" class="link" data-sel="all">Tout</button><button type="button" class="selx" data-sel="cancel" aria-label="Annuler la sélection">✕ Annuler</button></span></div>
     <div class="selacts">
       ${n === 1 && currentList()?.shopping ? `<button type="button" class="selact" data-sel="edit"><span>✏️</span>Modifier</button>` : ''}
       <button type="button" class="selact" data-sel="cat" ${n ? '' : 'disabled'}><span>🏷️</span>Catégorie</button>
@@ -1933,6 +1931,7 @@ selbar.addEventListener('click', e => {
   if (!b || b.disabled) return;
   const its = selectedItems();
   switch (b.dataset.sel) {
+    case 'cancel': setSelecting(false); break;
     case 'edit': { const it = its[0]; setSelecting(false); if (it) openItemSheet(it); break; }
     case 'all': {
       const l = currentList();
@@ -2641,7 +2640,7 @@ function openSettingsSheet() {
     <div class="sep"></div>
     <div class="label">Ton compte</div>
     <p class="hint">Connecté avec <b>${esc(state.user?.email || '')}</b>. Connecte-toi avec ce même compte sur ton iPad ou ton autre téléphone : tu y retrouves tout.</p>
-    <p class="hint" style="font-size:11.5px;opacity:.6">Version de l'app : 19 nov. 22 h 00</p>
+    <p class="hint" style="font-size:11.5px;opacity:.6">Version de l'app : 19 nov. 22 h 15</p>
     <div class="actions" style="margin-top:12px">
       <button type="button" class="btn ghost" data-reset-pw>Changer de mot de passe</button>
       <button type="button" class="btn ghost" data-logout>Se déconnecter</button>
