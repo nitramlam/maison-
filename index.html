@@ -419,6 +419,13 @@
 
   /* Accueil : listes avec aperçu, favoris, réduction */
   .lc-sec{margin:24px 4px 10px}
+  .grid.lcol{display:grid;grid-template-columns:1fr 1fr;gap:12px;flex-direction:initial}
+  .grid.nomt{margin-top:0}
+  .lc-sec + .grid{margin-top:0}
+  .lcard{cursor:pointer;-webkit-user-select:none;user-select:none}
+  .lc-tools{position:absolute;top:8px;right:6px;z-index:2;display:flex;gap:0}
+  .lcard .lc-btn{width:32px;height:32px}
+  .lcard .lc-btn svg{width:18px;height:18px}
   .lcol{display:flex;flex-direction:column;gap:12px}
   .lcol.first{margin-top:22px}
   .lcard2{border-radius:20px;background:hsl(var(--h) 60% 95%);overflow:hidden;animation:rise .4s cubic-bezier(.2,.8,.3,1) both;animation-delay:calc(var(--i,0) * 40ms);
@@ -1383,30 +1390,22 @@ function renderHome() {
   const card = l => {
     const k = cnt[l.id] || { todo: 0, done: 0 };
     const meta = k.todo ? `${k.todo} à faire` : (k.done ? 'Tout est fait ✓' : 'Vide');
-    const isCol = collapsed.has(l.id), isFav = favs.has(l.id);
-    const todo = state.items.filter(i => i.listId === l.id && !i.done);
-    const shown = todo.slice(0, 5);
-    return `<div class="lcard2 ${isCol ? 'collapsed' : ''}" style="--h:${hueOf(l.id)};--i:${idx++}" data-list-id="${esc(l.id)}">
-      <div class="lc-head" data-action="open" data-id="${esc(l.id)}">
-        <span class="lemo">${esc(l.emoji)}</span>
-        <div class="grow"><div class="lname">${esc(l.name)}</div><div class="lmeta">${meta}</div></div>
+    const isFav = favs.has(l.id);
+    return `<div class="lcard" role="button" tabindex="0" style="--h:${hueOf(l.id)};--i:${idx++}" data-action="open" data-id="${esc(l.id)}" data-list-id="${esc(l.id)}">
+      <span class="lc-tools">
         <button type="button" class="lc-btn star ${isFav ? 'on' : ''}" data-action="favList" data-id="${esc(l.id)}" aria-label="Favori">${isFav ? '★' : '☆'}</button>
         <button type="button" class="lc-btn" data-action="listMenuHome" data-id="${esc(l.id)}" aria-label="Options">${ICON.more}</button>
-        <button type="button" class="lc-btn chev" data-action="collapseList" data-id="${esc(l.id)}" aria-label="${isCol ? 'Déplier' : 'Réduire'}">${ICON.down}</button>
-      </div>
-      ${isCol ? '' : `<div class="lc-items">
-        ${shown.length ? shown.map(i => `<div class="lc-item" ${(i.assignees || []).length ? `style="--pg:${peopleGrad(i.assignees, 1)}"` : ''}>
-            <button type="button" class="check sm" data-action="toggle" data-id="${esc(i.id)}" aria-label="Cocher"></button>
-            <span class="lc-t">${i.emoji ? esc(i.emoji) + ' ' : ''}${esc(i.title)}</span>${i.qty ? `<span class="qty">${esc(i.qty)}</span>` : ''}${miniAvatars(i.assignees)}
-          </div>`).join('') : `<div class="lc-empty">${k.done ? 'Tout est fait ✓' : 'Rien pour l\'instant'}</div>`}
-        ${todo.length > shown.length ? `<button type="button" class="lc-more" data-action="open" data-id="${esc(l.id)}">Voir les ${todo.length} éléments</button>` : ''}
-      </div>`}
+      </span>
+      <span class="lemo">${esc(l.emoji)}</span>
+      <span class="lname">${esc(l.name)}</span>
+      <span class="lmeta">${meta}</span>
     </div>`;
   };
-  if (favL.length) h += `<div class="grp-h soft lc-sec">⭐ Favoris</div><div class="lcol" data-zone="fav">${favL.map(card).join('')}</div>`;
-  h += `${favL.length && rest.length ? '<div class="grp-h soft lc-sec">Listes</div>' : ''}<div class="lcol ${favL.length ? '' : 'first'}" data-zone="rest">${rest.map(card).join('')}</div>
-    <button type="button" class="newlist" data-action="newList"><span class="plus">+</span>Nouvelle liste</button>
-    <p class="hint lc-hint">Maintiens une liste puis glisse-la pour changer l'ordre.</p>`;
+  if (favL.length) h += `<div class="grp-h soft lc-sec">⭐ Favoris</div><section class="grid lcol" data-zone="fav">${favL.map(card).join('')}</section>`;
+  h += `${favL.length && rest.length ? '<div class="grp-h soft lc-sec">Listes</div>' : ''}<section class="grid lcol ${favL.length ? 'nomt' : ''}" data-zone="rest">${rest.map(card).join('')}
+      <button class="lcard add" style="--i:${idx}" data-action="newList"><span class="plus">+</span>Nouvelle liste</button>
+    </section>
+    <p class="hint lc-hint">Maintiens une case puis glisse-la pour changer l'ordre.</p>`;
   return h;
 }
 
@@ -1750,7 +1749,7 @@ function initSortables() {
     if (state.tab !== 'lists') return;
     screen.querySelectorAll('.lcol').forEach(el => sortables.push(Sortable.create(el, {
       animation: 200, ghostClass: 'drag-ghost', chosenClass: 'drag-chosen', dragClass: 'drag-fly',
-      forceFallback: true, fallbackTolerance: 6, delay: 280, delayOnTouchOnly: true, draggable: '.lcard2',
+      forceFallback: true, fallbackTolerance: 6, delay: 280, delayOnTouchOnly: true, draggable: '.lcard[data-list-id]',
       filter: '.lc-btn, .check', preventOnFilter: false,
       onStart() { state.dragging = true; document.body.classList.add('dragging'); navigator.vibrate?.(12); },
       onEnd() {
@@ -1778,7 +1777,7 @@ function initSortables() {
   }));
 }
 function saveListOrder() {
-  const ids = [...screen.querySelectorAll('.lcard2[data-list-id]')].map(el => el.dataset.listId);
+  const ids = [...screen.querySelectorAll('.lcard[data-list-id]')].map(el => el.dataset.listId);
   const b = writeBatch(db); let n = 0;
   ids.forEach((id, k) => {
     const l = state.lists.find(x => x.id === id);
