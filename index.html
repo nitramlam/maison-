@@ -129,8 +129,9 @@
   @keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
   .sheet{position:relative}
   .grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:-10px auto 12px}
-  .sheet-x{position:sticky;top:0;float:right;z-index:3;width:36px;height:36px;margin:-6px -6px 0 8px;border:0;border-radius:50%;
-           display:grid;place-items:center;background:color-mix(in srgb, var(--ink) 8%, var(--card));color:var(--ink)}
+  .sheet-x{position:sticky;top:0;float:right;z-index:12;width:40px;height:40px;margin:-8px -8px 0 8px;border:0;border-radius:50%;
+           display:grid;place-items:center;background:color-mix(in srgb, var(--ink) 10%, var(--card));color:var(--ink);
+           box-shadow:0 2px 10px rgba(0,0,0,.14),0 0 0 3px var(--card)}
   .sheet-x svg{width:18px;height:18px}
   .sheet-x:active{transform:scale(.9)}
   .sheet h3{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:24px;margin-bottom:16px}
@@ -652,13 +653,15 @@
   .sheet .stickybar{margin-top:16px}
   .sheet .stickybar .addsubmit{margin-top:0}
   .replyform{bottom:calc(-1 * var(--sheet-pb));padding-bottom:var(--sheet-pb);margin:0 -20px;padding-left:20px;padding-right:20px}
-  .addflash{position:sticky;top:-8px;z-index:5;margin:-4px 0 10px;padding:11px 14px;border-radius:14px;font-size:15px;
+  .addflash{position:sticky;top:-8px;z-index:5;margin:-4px 46px 10px 0;padding:11px 14px;border-radius:14px;font-size:15px;
     background:color-mix(in srgb, var(--lc, var(--accent)) 16%, var(--card));color:var(--ink);border:1px solid color-mix(in srgb, var(--lc, var(--accent)) 40%, transparent);
     box-shadow:0 6px 18px rgba(0,0,0,.12)}
   .addflash b{font-weight:700}
   .addflash.pop{animation:flashpop .35s cubic-bezier(.2,.9,.3,1.3)}
   @keyframes flashpop{from{transform:translateY(-8px) scale(.96);opacity:0}to{transform:none;opacity:1}}
 
+  .dd-close{display:block;margin:0 0 8px auto;border:0;background:color-mix(in srgb, var(--ink) 8%, transparent);color:var(--ink);border-radius:999px;padding:6px 12px;font:600 13px Inter,system-ui,sans-serif}
+  .rxbar .rxclose{font-size:15px;margin-left:4px}
   /* Messages vocaux */
   .iconchip{font-size:18px;padding:6px 12px}
   .vplayer{display:flex;align-items:center;gap:10px;margin-top:10px;padding:8px 12px 8px 8px;border-radius:999px;background:color-mix(in srgb, var(--accent) 10%, var(--card));max-width:300px}
@@ -1904,6 +1907,7 @@ function renderSelbar(show) {
   selbar.innerHTML = `<div class="selcount">${n ? `${n} sélectionné${n > 1 ? 's' : ''}` : 'Touche les éléments à sélectionner'}
       <button type="button" class="link" data-sel="all">Tout</button></div>
     <div class="selacts">
+      ${n === 1 && currentList()?.shopping ? `<button type="button" class="selact" data-sel="edit"><span>✏️</span>Modifier</button>` : ''}
       <button type="button" class="selact" data-sel="cat" ${n ? '' : 'disabled'}><span>🏷️</span>Catégorie</button>
       ${currentList()?.shopping ? `<button type="button" class="selact" data-sel="check" ${n ? '' : 'disabled'}><span>${allDone ? '↩️' : '✅'}</span>${allDone ? 'Décocher' : 'Cocher'}</button>` : ''}
       <button type="button" class="selact danger-t" data-sel="del" ${n ? '' : 'disabled'}><span>🗑️</span>Supprimer</button>
@@ -1929,6 +1933,7 @@ selbar.addEventListener('click', e => {
   if (!b || b.disabled) return;
   const its = selectedItems();
   switch (b.dataset.sel) {
+    case 'edit': { const it = its[0]; setSelecting(false); if (it) openItemSheet(it); break; }
     case 'all': {
       const l = currentList();
       const all = state.items.filter(i => i.listId === l?.id);
@@ -2006,9 +2011,9 @@ overlay.addEventListener('click', e => {
   let timer = null, startX = 0, startY = 0, fired = false;
   body.addEventListener('pointerdown', e => {
     const row = e.target.closest('.irow[data-id]');
-    if (!row || state.selecting || e.target.closest('.drag, a, .ithumb')) return;
+    if (!row || state.selecting || e.target.closest('.drag, .ithumb')) return;
     startX = e.clientX; startY = e.clientY; fired = false;
-    timer = setTimeout(() => { fired = true; navigator.vibrate?.(15); openItemMenu(row.dataset.id); }, 480);
+    timer = setTimeout(() => { fired = true; navigator.vibrate?.(15); setSelecting(true, row.dataset.id); }, 480);
   });
   const cancel = e => { if (timer && (!e || e.type !== 'pointermove' || Math.hypot(e.clientX - startX, e.clientY - startY) > 8)) { clearTimeout(timer); timer = null; } };
   body.addEventListener('pointermove', cancel);
@@ -2216,7 +2221,7 @@ function openAddSheet() {
       <div class="label">Catégorie</div>
       <div class="dd" data-dd>
         <button type="button" class="dd-btn" data-dd-toggle><span class="v" data-dd-label>${ddLabel()}</span>${ICON.down}</button>
-        <div class="dd-panel" hidden>
+        <div class="dd-panel" hidden><button type="button" class="dd-close" data-dd-close aria-label="Fermer la liste">✕ Fermer</button>
           <input class="field dd-search" data-dd-search type="search" placeholder="Rechercher ou créer une catégorie…" autocomplete="off" enterkeyhint="done">
           <div class="dd-list" data-dd-list></div>
         </div>
@@ -2636,7 +2641,7 @@ function openSettingsSheet() {
     <div class="sep"></div>
     <div class="label">Ton compte</div>
     <p class="hint">Connecté avec <b>${esc(state.user?.email || '')}</b>. Connecte-toi avec ce même compte sur ton iPad ou ton autre téléphone : tu y retrouves tout.</p>
-    <p class="hint" style="font-size:11.5px;opacity:.6">Version de l'app : 19 nov. 21 h 50</p>
+    <p class="hint" style="font-size:11.5px;opacity:.6">Version de l'app : 19 nov. 22 h 00</p>
     <div class="actions" style="margin-top:12px">
       <button type="button" class="btn ghost" data-reset-pw>Changer de mot de passe</button>
       <button type="button" class="btn ghost" data-logout>Se déconnecter</button>
@@ -2841,7 +2846,7 @@ function openItemSheet(item) {
       <div class="label">Catégorie</div>
       <div class="dd" data-dd>
         <button type="button" class="dd-btn" data-dd-toggle><span class="v" data-dd-label>${ddLabel()}</span>${ICON.down}</button>
-        <div class="dd-panel" hidden>
+        <div class="dd-panel" hidden><button type="button" class="dd-close" data-dd-close aria-label="Fermer la liste">✕ Fermer</button>
           <input class="field dd-search" data-dd-search type="search" placeholder="Rechercher ou créer une catégorie…" autocomplete="off" enterkeyhint="done">
           <div class="dd-list" data-dd-list></div>
         </div>
@@ -2880,6 +2885,7 @@ overlay.addEventListener('click', e => {
   if (t.closest('[data-emo-toggle]')) { sheet.querySelector('.emo-wrap')?.toggleAttribute('hidden'); return; }
 
   if (t.closest('[data-dd-toggle]')) return setDdOpen(sheet.querySelector('.dd-panel')?.hidden);
+  if (t.closest('[data-dd-close]')) return setDdOpen(false);
   const opt = t.closest('[data-dd-opt]');
   if (opt) return chooseSection(opt.dataset.ddOpt);
   if (t.closest('[data-dd-create]')) {
@@ -3894,7 +3900,7 @@ function openReactBar(target, anchor) {
   const o = (kind === 'posts' ? state.posts : state.replies).find(x => x.id === id);
   const mine = o?.reactions?.[meId];
   reactBar.innerHTML = `<div class="rxbar">${REACTIONS.map(e => `<button type="button" class="${e === mine ? 'me' : ''}" data-rx="${e}">${e}</button>`).join('')}
-      <button type="button" class="rxplus" data-rx-more aria-label="Autre émoji">＋</button></div>
+      <button type="button" class="rxplus" data-rx-more aria-label="Autre émoji">＋</button><button type="button" class="rxplus rxclose" data-rx-close aria-label="Fermer">✕</button></div>
     <div class="rxmore" hidden><input class="field" data-rx-input placeholder="Tape un émoji (touche 😀 du clavier)" autocomplete="off"></div>`;
   reactBar.hidden = false;
   const r = anchor.getBoundingClientRect(), w = Math.min(330, innerWidth - 16);
@@ -3908,6 +3914,7 @@ reactBar.addEventListener('click', e => {
   e.stopPropagation();
   const b = e.target.closest('[data-rx]');
   if (b && reactTarget) { const [k, id] = reactTarget.split(':'); closeReactBar(); setReaction(k, id, b.dataset.rx); return; }
+  if (e.target.closest('[data-rx-close]')) { closeReactBar(); return; }
   if (e.target.closest('[data-rx-more]')) { const m = reactBar.querySelector('.rxmore'); m.hidden = false; m.querySelector('input').focus(); }
 });
 reactBar.addEventListener('input', e => {
