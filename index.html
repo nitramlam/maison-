@@ -907,7 +907,7 @@ const norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLow
 // ----- Icône automatique : « Œufs » → 🥚, « Pâtes carbo » → 🍝… (dictionnaire de mots courants) -----
 const AUTO_EMO = (() => {
   const single = new Map(), multi = [];
-  `🥚 oeuf|🥛 lait,lait d'avoine,lait d'amande,boisson vegetale|🧈 beurre,margarine|🧀 fromage,emmental,gruyere,comte,camembert,brie,mozzarella,parmesan,raclette,roquefort,feta,chevre,cheddar,mascarpone,ricotta,reblochon,fromage rape|🍦 glace,sorbet,creme glacee|🥣 cereale,muesli,granola,flocon d'avoine,porridge|🍶 yaourt,yogourt,skyr,fromage blanc,petit suisse,creme fraiche,creme,faisselle|🍞 pain,baguette,pain de mie,brioche,biscotte,pain complet|🥐 croissant,pain au chocolat,chocolatine,viennoiserie|🥖 ficelle,tradition|🍝 pate,spaghetti,tagliatelle,penne,fusilli,lasagne,macaroni,coquillette,raviolis,gnocchi,nouille,ramen,udon|🍚 riz,risotto,semoule,quinoa,boulgour,couscous|🥔 pomme de terre,patate,frite,puree|🍅 tomate,coulis,sauce tomate,concentre de tomate|🥕 carotte|🥒 concombre,cornichon,courgette|🥬 salade,laitue,epinard,chou,mache,roquette,blette,endive|🥦 brocoli,chou fleur|🧅 oignon,echalote|🧄 ail|🌶️ piment,harissa,tabasco|🫑 poivron|🍆 aubergine|🌽 mais|🍄 champignon,cepe,girolle|🥑 avocat,guacamole|🫛 petit pois,haricot vert,feve,pois|🫘 haricot,lentille,pois chiche,flageolet|🎃 potiron,citrouille,courge,butternut,potimarron|🥜 cacahuete,arachide,beurre de cacahuete|🌰 noix,noisette,amande,chataigne,marron,pistache,noix de cajou|🍎 pomme,compote|🍐 poire|🍊 orange,clementine,mandarine|🍋 citron,citron vert|🍌 banane|🍉 pasteque|🍈 melon|🍇 raisin|🍓 fraise,framboise|🫐 myrtille,cassis,mure|🍒 cerise|🍑 peche,nectarine,abricot|🥭 mangue|🍍 ananas|🥥 noix de coco,coco|🥝 kiwi|🍏 pomme verte|🥩 viande,steak,boeuf,entrecote,bavette,roti,veau,agneau,gigot,cote de boeuf|🍗 poulet,dinde,cuisse,aile de poulet,blanc de poulet,volaille,canard|🥓 lardon,bacon,jambon,chorizo,saucisson,charcuterie,rillette,pate de campagne|🌭 saucisse,merguez,knacki,hot dog,chipolata|🍔 burger,hamburger,steak hache|🐟 poisson,saumon,cabillaud,colin,truite,sardine,maquereau,merlu,lieu|🍤 crevette,gambas,langoustine,fruits de mer|🦪 huitre,moule|🦀 crabe,surimi|🐙 poulpe,calamar,encornet|🥫 thon,conserve,boite,mais en boite,ravioli en boite|🍕 pizza,pate a pizza|🌮 tacos,tortilla,wrap,fajitas|🥪 sandwich,croque monsieur|🥗 taboule,salade composee|🍲 soupe,veloute,bouillon,ragout,pot au feu|🍛 curry,chili|🍣 sushi,maki|🥟 dumpling,ravioli chinois,gyoza,bao,xiao long bao,nem|🥞 crepe,pancake,gaufre|🧇 gaufre|🍰 gateau,tarte,cake,dessert,patisserie,fraisier,tiramisu,cheesecake|🎂 anniversaire,gateau d'anniversaire|🧁 muffin,cupcake,madeleine|🍪 biscuit,cookie,gateau sec,petit beurre,sable|🍫 chocolat,nutella,pate a tartiner,cacao|🍬 bonbon,friandise,haribo|🍭 sucette|🍯 miel,confiture|🧂 sel,poivre,epice,cumin,curcuma,paprika,herbes de provence|🫒 huile,huile d'olive,olive|🍾 champagne,cremant|🍷 vin,rouge,rose,bordeaux|🍺 biere|🥃 whisky,rhum,vodka,alcool,pastis,gin|🧃 jus,jus d'orange,jus de pomme|🥤 soda,coca,limonade,ice tea,sirop|💧 eau,eau gazeuse,eau petillante,bouteille d'eau|☕ cafe,capsule,dosette,expresso|🍵 the,tisane,infusion|🧊 glacon|🥄 sucre,farine,levure,maizena,vanille,sucre glace|🫙 bocal,pot|🥫 sauce,ketchup,mayonnaise,moutarde,vinaigrette,vinaigre,pesto|🍿 popcorn|🥨 bretzel,chips,apero,biscuit apero,crackers|🧻 papier toilette,pq,essuie tout,sopalin,mouchoir|🧼 savon,gel douche,liquide vaisselle,lessive,adoucissant|🧽 eponge|🧴 shampoing,apres shampoing,creme hydratante,lotion,demaquillant,deodorant,dentifrice,creme solaire|🪥 brosse a dents|🧹 balai,serpilliere,menage,aspirateur|🗑️ sac poubelle,poubelle|🧺 linge,panier a linge|🪣 seau|🧤 gant|🧷 epingle|🪒 rasoir|💊 medicament,doliprane,paracetamol,ibuprofene,vitamine,pharmacie|🩹 pansement|🧸 jouet,peluche|🍼 biberon,lait infantile|👶 bebe,couche,lingette|🐶 chien,croquette,patee|🐱 chat,litiere|🐟 aquarium|🪴 plante,terreau,engrais,pot de fleur|🌸 fleur,bouquet|💡 ampoule,lampe,lumiere|🔋 pile,batterie|🔌 prise,rallonge,multiprise,chargeur,cable|🔧 cle,plomberie,fuite,robinet,reparer,reparation|🔨 marteau,clou,bricolage|🪛 tournevis|🪚 scie|🔩 vis,boulon,cheville,ecrou|🪜 echelle,escabeau|🎨 peinture,peindre,pinceau,rouleau,enduit|🧱 brique,ciment,platre,carrelage,joint|🚪 porte,serrure|🪟 fenetre,vitre,rideau,store|🛏️ lit,matelas,drap,couette,oreiller|🛋️ canape,coussin,meuble,table,chaise|🚿 douche,salle de bain|🚽 toilette,wc|🧯 extincteur|🚗 voiture,garage,pneu,vidange,controle technique,essence,carburant|🚲 velo|🛒 courses,supermarche,marche|🎁 cadeau,noel|🎉 fete,soiree|📦 colis,carton,demenagement|✉️ courrier,lettre,timbre|📄 papier,document,dossier,impot,facture|💳 banque,carte bancaire|📞 telephone,appeler|💻 ordinateur,pc|📚 livre|✏️ stylo,crayon,cahier,fourniture|✂️ ciseaux|🧵 couture,fil,bouton|👕 vetement,t-shirt,tee shirt,pull,chemise|👖 pantalon,jean|👟 chaussure,basket|🧦 chaussette|🧥 manteau,veste|🌳 jardin,tondre,pelouse,haie,tondeuse|🔥 bois,cheminee,barbecue,charbon|❄️ congelateur,surgele|🧊 frigo,refrigerateur|🍽️ vaisselle,assiette,couverts|🥘 poele,casserole,cuisine|🕯️ bougie|🧳 valise,vacances|✈️ avion,voyage|🏥 medecin,docteur,rdv,rendez vous,dentiste|💈 coiffeur|🏋️ sport,salle de sport|🎂 anniv`.split('|').forEach(b => {
+  `🥚 oeuf|🥛 lait,lait d'avoine,lait d'amande,boisson vegetale|🧈 beurre,margarine|🧀 fromage,emmental,gruyere,comte,camembert,brie,mozzarella,parmesan,raclette,roquefort,feta,chevre,cheddar,mascarpone,ricotta,reblochon,fromage rape|🍦 glace,sorbet,creme glacee|🥣 cereale,muesli,granola,flocon d'avoine,porridge|🍶 yaourt,yogourt,skyr,fromage blanc,petit suisse,creme fraiche,creme,faisselle|🍞 pain,baguette,pain de mie,brioche,biscotte,pain complet|🥐 croissant,pain au chocolat,chocolatine,viennoiserie|🥖 ficelle,tradition|🍝 pate,spaghetti,tagliatelle,penne,fusilli,lasagne,macaroni,coquillette,raviolis,gnocchi,nouille,ramen,udon|🍚 riz,risotto,semoule,quinoa,boulgour,couscous|🥔 pomme de terre,patate,frite,puree|🍅 tomate,coulis,sauce tomate,concentre de tomate|🥕 carotte|🥒 concombre,cornichon,courgette|🥬 salade,laitue,epinard,chou,mache,roquette,blette,endive|🥦 brocoli,chou fleur|🧅 oignon,echalote|🧄 ail|🌶️ piment,harissa,tabasco|🫑 poivron|🍆 aubergine|🌽 mais|🍄 champignon,cepe,girolle|🥑 avocat,guacamole|🫛 petit pois,haricot vert,feve,pois|🫘 haricot,lentille,pois chiche,flageolet|🎃 potiron,citrouille,courge,butternut,potimarron|🥜 cacahuete,arachide,beurre de cacahuete|🌰 noix,noisette,amande,chataigne,marron,pistache,noix de cajou|🍎 pomme,compote|🍐 poire|🍊 orange,clementine,mandarine|🍋 citron,citron vert|🍌 banane|🍉 pasteque|🍈 melon|🍇 raisin|🍓 fraise,framboise|🫐 myrtille,cassis,mure|🍒 cerise|🍑 peche,nectarine,abricot|🥭 mangue|🍍 ananas|🥥 noix de coco,coco|🥝 kiwi|🍏 pomme verte|🥩 viande,steak,boeuf,entrecote,bavette,roti,veau,agneau,gigot,cote de boeuf|🍗 poulet,dinde,cuisse,aile de poulet,blanc de poulet,volaille,canard|🥓 lardon,bacon,jambon,chorizo,saucisson,charcuterie,rillette,pate de campagne|🌭 saucisse,merguez,knacki,hot dog,chipolata|🍔 burger,hamburger,steak hache|🐟 poisson,saumon,cabillaud,colin,truite,sardine,maquereau,merlu,lieu|🍤 crevette,gambas,langoustine,fruits de mer|🦪 huitre,moule|🦀 crabe,surimi|🐙 poulpe,calamar,encornet|🥫 thon,conserve,boite,mais en boite,ravioli en boite|🍕 pizza,pate a pizza|🌮 tacos,tortilla,wrap,fajitas|🥪 sandwich,croque monsieur|🥗 taboule,salade composee|🍲 soupe,veloute,bouillon,ragout,pot au feu|🍛 curry,chili|🍣 sushi,maki|🥟 dumpling,ravioli chinois,gyoza,bao,xiao long bao,nem|🥞 crepe,pancake,gaufre|🧇 gaufre|🍰 gateau,tarte,cake,dessert,patisserie,fraisier,tiramisu,cheesecake|🎂 anniversaire,gateau d'anniversaire|🧁 muffin,cupcake,madeleine|🍪 biscuit,cookie,gateau sec,petit beurre,sable|🍫 chocolat,nutella,pate a tartiner,cacao|🍬 bonbon,friandise,haribo|🍭 sucette|🍯 miel,confiture|🧂 sel,poivre,epice,cumin,curcuma,paprika,herbes de provence|🫒 huile,huile d'olive,olive|🍾 champagne,cremant|🍷 vin,rouge,rose,bordeaux|🍺 biere|🥃 whisky,rhum,vodka,alcool,pastis,gin|🧃 jus,jus d'orange,jus de pomme|🥤 soda,coca,limonade,ice tea,sirop|💧 eau,eau gazeuse,eau petillante,bouteille d'eau|☕ cafe,capsule,dosette,expresso|🍵 the,tisane,infusion|🧊 glacon|🥄 sucre,farine,levure,maizena,vanille,sucre glace|🫙 bocal,pot|🥫 sauce,ketchup,mayonnaise,moutarde,vinaigrette,vinaigre,pesto|🍿 popcorn|🥨 bretzel,chips,apero,biscuit apero,crackers|🧻 papier toilette,pq,essuie tout,sopalin,mouchoir|🧼 savon,gel douche,liquide vaisselle,lessive,adoucissant|🧽 eponge|🧴 shampoing,apres shampoing,creme hydratante,lotion,demaquillant,deodorant,dentifrice,creme solaire|🪥 brosse a dents|🧹 balai,serpilliere,menage,aspirateur|🗑️ sac poubelle,poubelle|🧺 linge,panier a linge|🪣 seau|🧤 gant|🧷 epingle|🪒 rasoir|💊 medicament,doliprane,paracetamol,ibuprofene,vitamine,pharmacie|🩹 pansement|🧸 jouet,peluche|🍼 biberon,lait infantile|👶 bebe,couche,lingette|🐶 chien,croquette,patee|🐱 chat,litiere|🐟 aquarium|🪴 plante,terreau,engrais,pot de fleur|🌸 fleur,bouquet|💡 ampoule,lampe,lumiere|🔋 pile,batterie|🔌 prise,rallonge,multiprise,chargeur,cable|🔧 cle,plomberie,fuite,robinet,reparer,reparation|🔨 marteau,clou,bricolage|🪛 tournevis|🪚 scie|🔩 vis,boulon,cheville,ecrou|🪜 echelle,escabeau|🎨 peinture,peindre,pinceau,rouleau,enduit|🧱 brique,ciment,platre,carrelage,joint|🚪 porte,serrure|🪟 fenetre,vitre,rideau,store|🛏️ lit,matelas,drap,couette,oreiller|🛋️ canape,coussin,meuble,table,chaise|🚿 douche,salle de bain|🚽 toilette,wc|🧯 extincteur|🚗 voiture,garage,pneu,vidange,controle technique,essence,carburant|🚲 velo|🛒 courses,supermarche,marche|🎁 cadeau,noel|🎉 fete,soiree|📦 colis,carton,demenagement|✉️ courrier,lettre,timbre|📄 papier,document,dossier,impot,facture|💳 banque,carte bancaire|📞 telephone,appeler|💻 ordinateur,pc|📚 livre|✏️ stylo,crayon,cahier,fourniture|✂️ ciseaux|🧵 couture,fil,bouton|👕 vetement,t-shirt,tee shirt,pull,chemise|👖 pantalon,jean|👟 chaussure,basket|🧦 chaussette|🧥 manteau,veste|🌳 jardin,tondre,pelouse,haie,tondeuse|🔥 bois,cheminee,barbecue,charbon|❄️ congelateur,surgele|🧊 frigo,refrigerateur|🍽️ vaisselle,assiette,couverts|🥘 poele,casserole,cuisine|🕯️ bougie|🧳 valise,vacances|✈️ avion,voyage|🏥 medecin,docteur,rdv,rendez vous,dentiste|💈 coiffeur|🏋️ sport,salle de sport|🎂 anniv|🛍️ achat,shopping|🔨 travaux,renovation|🍽️ restaurant,resto,repas,plat,diner,dejeuner|🍝 idees repas,idee repas,recette|🎬 film,cinema|📺 serie,netflix|🎵 musique,concert|🎮 jeu,jeux video|✅ a faire,todo,tache|🎄 noel,sapin|🥗 entree,healthy,leger|🥐 petit dejeuner,brunch|🥕 legume|🍎 fruit|🥤 boisson|🥫 epicerie|🧴 hygiene,beaute|🥖 boulangerie|🥩 boucherie|🐟 poissonnerie|🍔 fast food,fastfood|🛏️ chambre|🛋️ salon|⏱️ minute,min,mins,rapide,express|💰 euro,euros,budget,argent,prix|💡 idee|🏠 maison|🥛 laitier,produit laitier,cremerie`.split('|').forEach(b => {
     const sp = b.indexOf(' '), e = b.slice(0, sp);
     b.slice(sp + 1).split(',').forEach(w => {
       w = norm(w).replace(/œ/g, 'oe');
@@ -2681,7 +2681,7 @@ function openSettingsSheet() {
     <div class="sep"></div>
     <div class="label">Ton compte</div>
     <p class="hint">Connecté avec <b>${esc(state.user?.email || '')}</b>. Connecte-toi avec ce même compte sur ton iPad ou ton autre téléphone : tu y retrouves tout.</p>
-    <p class="hint" style="font-size:11.5px;opacity:.6">Version de l'app : 19 nov. 22 h 35</p>
+    <p class="hint" style="font-size:11.5px;opacity:.6">Version de l'app : 19 nov. 22 h 45</p>
     <div class="actions" style="margin-top:12px">
       <button type="button" class="btn ghost" data-reset-pw>Changer de mot de passe</button>
       <button type="button" class="btn ghost" data-logout>Se déconnecter</button>
@@ -2728,7 +2728,7 @@ function openJoinHouseSheet() {
 
 function openListSheet(list) {
   sheetTarget = list ? list.id : null;
-  sheetEmoji = list ? (list.emoji || null) : null;
+  sheetEmoji = list ? (list.emoji || null) : null; sheetIconManual = !!(list && list.emoji);
   let h = `<h3>${list ? 'Modifier la liste' : 'Nouvelle liste'}</h3>
     <form data-form="${list ? 'editList' : 'newList'}" autocomplete="off">
       ${nameRow(list ? list.name : '', 'ex. Bricolage, Cadeaux…')}${emojiPicker(!list)}
@@ -2755,7 +2755,7 @@ function openSectionsSheet() {
 
 function openSectionSheet(sec) {
   sheetTarget = sec ? sec.id : null;
-  sheetEmoji = sec ? (sec.emoji || null) : null;
+  sheetEmoji = sec ? (sec.emoji || null) : null; sheetIconManual = !!(sec && sec.emoji);
   let h = `<h3>${sec ? 'Modifier la catégorie' : 'Nouvelle catégorie'}</h3>
     <form data-form="${sec ? 'editSec' : 'newSec'}" autocomplete="off">
       ${nameRow(sec ? sec.name : '', 'ex. Fruits, Salle de bain…')}${emojiPicker(!sec)}${actions(sec ? 'Enregistrer' : 'Créer')}
@@ -2773,7 +2773,7 @@ function ddLabel() {
   const s = state.sections.find(x => x.id === sheetSec) || pendingSecs.get(sheetSec);
   return s ? `<span class="e">${esc(s.emoji)}</span>${esc(s.name)}` : '<span class="muted">Sans catégorie</span>';
 }
-let ddNewEmoji = '';
+let ddNewEmoji = '', ddIconManual = false;
 function renderDdList() {
   const box = sheet.querySelector('[data-dd-list]');
   if (!box) return;
@@ -2797,7 +2797,7 @@ function setDdOpen(open) {
   if (!dd) return;
   dd.classList.toggle('open', open);
   dd.querySelector('.dd-panel').hidden = !open;
-  if (open) { const s = dd.querySelector('[data-dd-search]'); s.value = ''; renderDdList(); setTimeout(() => s.focus(), 30); }
+  if (open) { const s = dd.querySelector('[data-dd-search]'); s.value = ''; ddNewEmoji = ''; ddIconManual = false; renderDdList(); setTimeout(() => s.focus(), 30); }
 }
 function openSecView(secId) {
   const sec = state.sections.find(s => s.id === secId);
@@ -2933,7 +2933,7 @@ overlay.addEventListener('click', e => {
     if (!name) return;
     const emo = clipIcon(ddNewEmoji) || '';
     const newId = addSection(sheetListId, name, emo);
-    ddNewEmoji = '';
+    ddNewEmoji = ''; ddIconManual = false;
     if (sheetKind === 'draftCat' || sheetKind === 'bulkCat') return chooseSection(newId);
     sheetSec = newId;
     sheet.querySelector('[data-dd-label]').innerHTML = `<span class="e">${esc(emo)}</span>${esc(name)}`;
@@ -3101,19 +3101,24 @@ overlay.addEventListener('keydown', e => {
 });
 overlay.addEventListener('input', e => {
   if (e.target.name === 'q_reply') { e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight, 160) + 'px'; }
-  if (e.target.matches('[data-dd-search]')) return renderDdList();
+  if (e.target.matches('[data-dd-search]')) { if (!ddIconManual) ddNewEmoji = autoEmoji(e.target.value); return renderDdList(); }
   if (e.target.matches('[data-icon]')) {
     sheetIconManual = true;
     const v = clipIcon(e.target.value);
     if (e.target.value !== v) { e.target.value = v; navigator.vibrate?.(10); }
     sheetEmoji = v || null;
   }
+  if (e.target.name === 'q_name' && !sheetIconManual && e.target.closest('[data-form="newList"],[data-form="editList"],[data-form="newSec"],[data-form="editSec"]')) {
+    const em = autoEmoji(e.target.value);
+    sheetEmoji = em || null;
+    const box = sheet.querySelector('[data-icon]'); if (box) { box.value = em; box.classList.toggle('auto', !!em); }
+  }
   if (e.target.name === 'q_title' && sheetKind === 'add' && !sheetIconManual) {
     const em = autoEmoji(e.target.value);
     sheetEmoji = em || null;
     const box = sheet.querySelector('[data-icon]'); if (box) { box.value = em; box.classList.toggle('auto', !!em); }
   }
-  if (e.target.matches('[data-dd-icon]')) { const v = clipIcon(e.target.value); if (e.target.value !== v) e.target.value = v; ddNewEmoji = v; }
+  if (e.target.matches('[data-dd-icon]')) { ddIconManual = true; const v = clipIcon(e.target.value); if (e.target.value !== v) e.target.value = v; ddNewEmoji = v; }
   e.target.classList?.remove('err');
 });
 
