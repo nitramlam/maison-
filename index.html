@@ -417,6 +417,59 @@
   .tdmore{font-size:13px;color:var(--muted);padding-left:62px}
   .tdnext{margin-top:12px;padding-top:10px;border-top:1px solid var(--line);font-size:13.5px;line-height:1.4}
 
+
+  /* Accueil : jour + météo côte à côte */
+  .homerow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .homerow > .card{margin:0;min-width:0}
+  .todaycard.tdsmall{padding:12px 13px}
+  .todaycard.tdsmall .tdhead{gap:9px}
+  .todaycard.tdsmall .tdcal{width:38px;height:42px;border-radius:10px}
+  .todaycard.tdsmall .tdcal small{font-size:9px}
+  .todaycard.tdsmall .tdcal b{font-size:17px}
+  .todaycard.tdsmall .tdtitle{font-size:15px}
+  .todaycard.tdsmall .tdbody{margin-top:9px;gap:5px}
+  .tdline{font-size:13.5px;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .tdline small{display:block;color:var(--muted);font-size:12px}
+  .todaycard.tdsmall .tdnone{font-size:13.5px}
+  .todaycard.tdsmall .tdmore{padding-left:0;font-size:12px}
+  .wxcard{padding:12px 13px;cursor:pointer;display:flex;flex-direction:column;gap:2px;transition:transform .12s;
+    background:linear-gradient(160deg, color-mix(in srgb, #4A90D9 14%, var(--card)), var(--card) 70%)}
+  .wxcard:active{transform:scale(.985)}
+  .wxcard.empty{align-items:center;justify-content:center;text-align:center;gap:3px}
+  .wxcard.empty small{color:var(--muted)}
+  .wxplace{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .wxnow{display:flex;align-items:center;gap:6px}
+  .wxbig{font-size:30px;line-height:1.1}
+  .wxtemp{font-size:30px;font-weight:700;letter-spacing:-.02em}
+  .wxlabel{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .wxmm{font-size:12px;color:var(--muted)}
+  .wxchips{display:flex;flex-wrap:wrap;gap:7px}
+  .wxchip{display:flex;align-items:center;border:1px solid var(--line);border-radius:999px;background:var(--card);overflow:hidden}
+  .wxchip button{border:0;background:none;color:inherit;font:500 14px Inter,system-ui,sans-serif;padding:7px 4px 7px 12px}
+  .wxchip .x{padding:7px 10px 7px 6px;color:var(--muted);font-size:16px}
+  .wxchip.on{background:var(--accent);border-color:var(--accent)}
+  .wxchip.on button{color:#fff}
+  .wxgeo{margin:10px 2px 0;display:inline-block}
+  .wxres{margin-top:10px;padding:0;overflow:hidden}
+  .wxrow{display:flex;align-items:center;gap:8px;width:100%;border:0;background:none;color:inherit;text-align:left;padding:12px 14px;font:15px Inter,system-ui,sans-serif}
+  .wxrow + .wxrow{border-top:1px solid var(--line)}
+  .wxrow small{color:var(--muted);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .wxrow .plus{color:var(--accent);font-size:18px}
+  .wxhero{text-align:center;margin:20px 0 6px}
+  .wxhero .wxplace{font-size:17px}
+  .wxhero .wxplace small{font-weight:400;color:var(--muted)}
+  .wxhero .wxnow{justify-content:center}
+  .wxhero .wxbig{font-size:48px}.wxhero .wxtemp{font-size:52px}
+  .wxhero .wxlabel{white-space:normal}
+  .wxhours{display:flex;gap:6px;overflow-x:auto;padding:10px 2px;scrollbar-width:none}
+  .wxh{flex:none;width:54px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0;border-radius:14px;background:var(--bg);font-size:13px}
+  .wxh small{color:var(--muted);font-size:11.5px}.wxh span{font-size:20px}.wxh i{font-style:normal;font-size:10.5px;color:#4A90D9;min-height:13px}
+  .wxdays{padding:4px 14px;margin-top:6px}
+  .wxd{display:grid;grid-template-columns:1fr 34px 54px 72px;align-items:center;padding:9px 0;font-size:15px}
+  .wxd + .wxd{border-top:1px solid var(--line)}
+  .wxd .i{font-size:20px;text-align:center}.wxd .p{font-size:12px;color:#4A90D9;text-align:center}.wxd .t{text-align:right}.wxd .t small{color:var(--muted);font-size:14px}
+  .wxcredit{text-align:center;margin-top:14px;font-size:12px}
+  .wxcredit a{color:inherit}
   /* Accueil : listes avec aperçu, favoris, réduction */
   .lc-sec{margin:24px 4px 10px}
   .lsearch{position:relative;margin:18px 0 4px}
@@ -515,6 +568,12 @@
   .pickbox svg{width:15px;height:15px;color:#fff}
   .picked .pickbox{background:var(--lc);border-color:var(--lc);animation:pop .25s ease}
   .irow{-webkit-touch-callout:none}
+
+  .impsw{margin:14px 0 2px}
+  .tiles .irow.imp{box-shadow:0 0 0 2px #E0533D,0 4px 14px rgba(224,83,61,.18)}
+  .impbadge{position:absolute;top:6px;right:24px;z-index:2;width:20px;height:20px;border-radius:50%;background:#E0533D;color:#fff;font:800 13px/20px Inter,system-ui,sans-serif;text-align:center}
+  .limp{display:inline-flex;align-items:center;gap:3px;font-weight:700;color:#D2412B;background:color-mix(in srgb, #E0533D 13%, transparent);padding:3px 9px;border-radius:999px;font-size:12.5px}
+  html[data-theme="dark"] .limp{color:#FF8A75}
   /* ===== Éléments en cases ===== */
   .card.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;background:transparent;box-shadow:none;border:0;padding:0;overflow:visible}
   .tiles .irow{position:relative;display:block;padding:0;min-height:0;border:0!important;border-radius:18px;background-color:var(--card);
@@ -1104,7 +1163,7 @@ function subscribe() {
                order: typeof v.order === 'number' ? v.order : (v.createdAt || 0),
                assignees: Array.isArray(v.assignees) ? v.assignees.filter(x => typeof x === 'string') : [],
                assignedAt: Number(v.assignedAt) || 0, assignedBy: typeof v.assignedBy === 'string' ? v.assignedBy : '',
-               photoId: typeof v.photoId === 'string' ? v.photoId : null };
+               photoId: typeof v.photoId === 'string' ? v.photoId : null, important: v.important === true };
     }).sort(byOrder);
     got('items');
     if (state.tab !== 'lists') renderTabbar(true);
@@ -1342,8 +1401,11 @@ function watchUsers() {
 
 // Supprimer un compte (admin) : son profil est effacé et il est retiré de toutes ses maisons.
 // S'il se reconnecte avec son e-mail, il repart de zéro (pour l'empêcher de revenir, bloque-le plutôt).
-function adminDeleteUser(uid) {
-  const u = state.users.find(x => x.id === uid);
+async function adminDeleteUser(uid) {
+  let u = (state.users || []).find(x => x.id === uid);
+  if (!u) { try { const sn = await getDoc(userRef(uid)); u = sn.exists() ? sn.data() : null; } catch (_) {} }
+  if (!u) u = { pseudo: memberName(uid), houses: state.code ? [{ code: state.code }] : [] };
+  if (state.code && !(u.houses || []).some(h => h && h.code === state.code) && (state.house?.members || []).includes(uid)) u.houses = [...(u.houses || []), { code: state.code }];
   const hs = Array.isArray(u?.houses) ? u.houses.map(h => h && h.code).filter(Boolean) : [];
   hs.forEach(h => {
     updateDoc(doc(db, 'households', h), { members: arrayRemove(uid), banned: arrayRemove(uid) }).catch(e => console.warn(e));
@@ -1382,8 +1444,8 @@ function renderAdminBody() {
       <div class="umeta">Inscrit le ${dateFr(u.createdAt)} · ${ago(u.lastSeen) || 'jamais vu'}</div>
       <div class="umeta">🏠 ${hs.length ? hs.map(esc).join(', ') : '<span class="muted">Aucune maison</span>'}</div>
       ${devs.map(d => `<div class="umeta">${deviceIcon(d.label)} ${esc(d.label)} <span class="muted">· ${ago(d.lastSeen)}</span></div>`).join('')}
-      ${isMe ? '' : `<button type="button" class="btn ${u.blocked ? 'ghost' : 'danger'} full" style="margin-top:12px" data-block="${esc(u.id)}" data-state="${u.blocked ? '1' : '0'}">${u.blocked ? 'Débloquer' : 'Bloquer'}</button>`}
-      ${isMe ? '' : `<button type="button" class="btn ghost full deluser" style="margin-top:8px" data-deluser="${esc(u.id)}">Supprimer le compte</button>`}
+      ${isMe || !u.blocked ? '' : `<button type="button" class="btn ghost full" style="margin-top:12px" data-block="${esc(u.id)}" data-state="1">Débloquer</button>`}
+      ${isMe ? '' : `<button type="button" class="btn danger full deluser" style="margin-top:12px" data-deluser="${esc(u.id)}">Supprimer le compte</button>`}
     </div>`;
   }).join('') : `<div class="card pad muted">Aucun compte trouvé.</div>`}</div>`;
 }
@@ -1456,8 +1518,9 @@ function toggleHomePref(kind, id) {
 function renderHome() {
   const cnt = {};
   for (const i of state.items) {
-    const c = cnt[i.listId] || (cnt[i.listId] = { todo: 0, done: 0 });
+    const c = cnt[i.listId] || (cnt[i.listId] = { todo: 0, done: 0, imp: 0 });
     i.done ? c.done++ : c.todo++;
+    if (i.important && !i.done) c.imp++;
   }
   let h = `<header class="hometop"><div class="grow">
       ${state.myName ? `<div class="hello">Bonjour ${esc(state.myName)} 👋</div>` : ''}
@@ -1507,8 +1570,8 @@ function renderHome() {
   let idx = 0;
   h += `<div class="lsearch"><span class="lsearch-ic">🔍</span><input class="field" id="listSearch" type="search" placeholder="Rechercher une liste…" value="${esc(state.listQuery || '')}" autocomplete="off" enterkeyhint="search"></div>`;
   const card = l => {
-    const k = cnt[l.id] || { todo: 0, done: 0 };
-    const meta = k.todo ? `${k.todo} à faire` : (k.done ? 'Tout est fait ✓' : 'Vide');
+    const k = cnt[l.id] || { todo: 0, done: 0, imp: 0 };
+    const meta = k.imp ? `<span class="limp">❗ ${k.imp} important${k.imp > 1 ? 's' : ''}</span>` : '';
     const isFav = favs.has(l.id);
     return `<div class="lcard" role="button" tabindex="0" style="--h:${hueOf(l.id)};--i:${idx++}" data-action="open" data-id="${esc(l.id)}" data-list-id="${esc(l.id)}" data-name="${esc(norm(l.name))}">
       <span class="lc-tools">
@@ -1517,7 +1580,7 @@ function renderHome() {
       </span>
       <span class="lemo">${esc(l.emoji)}</span>
       <span class="lname">${esc(l.name)}</span>
-      <span class="lmeta">${meta}</span>
+      ${meta ? `<span class="lmeta">${meta}</span>` : ''}
     </div>`;
   };
   if (favL.length) h += `<div class="grp-h soft lc-sec">⭐ Favoris</div><section class="grid lcol" data-zone="fav">${favL.map(card).join('')}</section>`;
@@ -1546,9 +1609,10 @@ function itemRow(i) {
       <div class="itext">${inner}</div>
     </div>`;
   }
-  return `<div class="irow ${i.done ? 'done' : ''} ${state.fresh.has(i.id) ? 'enter' : ''} ${asg.length ? 'assigned' : ''} ${asg.includes(meId) && !i.done ? 'forme' : ''}" data-id="${esc(i.id)}" ${asg.length ? `style="--pg:${peopleGrad(asg, 1)}"` : ''}>
+  return `<div class="irow ${i.important && !i.done ? 'imp' : ''} ${i.done ? 'done' : ''} ${state.fresh.has(i.id) ? 'enter' : ''} ${asg.length ? 'assigned' : ''} ${asg.includes(meId) && !i.done ? 'forme' : ''}" data-id="${esc(i.id)}" ${asg.length ? `style="--pg:${peopleGrad(asg, 1)}"` : ''}>
     <button class="check ${i.done ? 'on' : ''}" data-action="toggle" data-id="${esc(i.id)}" aria-label="${i.done ? 'Décocher' : 'Cocher'}">${i.done ? ICON.check : ''}</button>
     ${i.done ? '' : `<span class="drag" aria-label="Déplacer">${ICON.grip}</span>`}
+    ${i.important && !i.done ? '<span class="impbadge" aria-label="Important">!</span>' : ''}
     <div class="itext" data-action="editItem" data-id="${esc(i.id)}">${inner}</div>
   </div>`;
 }
@@ -1820,6 +1884,7 @@ function openAddSheet() {
       <div class="addrow">
         <div><div class="label">Quantité</div><input class="field" name="qty" maxlength="30" placeholder="ex. 2, 500 g, 5 vis" autocomplete="off" enterkeyhint="done"></div>
       </div>
+      <label class="switch impsw"><input type="checkbox" name="important" ><span class="sw"></span>❗ Important</label>
       <div class="label">Commentaire</div>
       <textarea class="field" name="note" maxlength="500" rows="1" placeholder="Facultatif"></textarea>
       <div class="label">Pour qui ? <span class="muted">(la personne est prévenue)</span></div>
@@ -1838,11 +1903,12 @@ function submitAddItem(f, title) {
   const listId = sheetListId;
   if (!listId) return;
   const qtyEl = f.querySelector('[name="qty"]'), noteEl = f.querySelector('[name="note"]'), titleEl = f.querySelector('[name="title"]');
+  const impEl = f.querySelector('[name="important"]'), important = !!impEl?.checked;
   const photoId = sheetPhoto?.data ? saveMedia(sheetPhoto) : null;
   fire(setDoc(doc(col('items')), {
     photoId,
     listId, sectionId: sheetSec || null, title: title.slice(0, 200), done: false, createdAt: Date.now(), order: Date.now(),
-    qty: qtyEl.value.trim().slice(0, 30), note: noteEl.value.trim().slice(0, 500), emoji: sheetEmoji || null,
+    qty: qtyEl.value.trim().slice(0, 30), note: noteEl.value.trim().slice(0, 500), emoji: sheetEmoji || null, important,
     byName: state.myName, by: meId,
     assignees: [...sheetPeople], assignedAt: sheetPeople.size ? Date.now() : 0, assignedBy: sheetPeople.size ? state.myName : ''
   }));
@@ -1852,10 +1918,10 @@ function submitAddItem(f, title) {
   if (log) {
     const chip = document.createElement('span');
     chip.className = 'addedchip';
-    chip.textContent = `✓ ${sheetEmoji ? sheetEmoji + ' ' : ''}${title}${qtyEl.value.trim() ? ' · ' + qtyEl.value.trim() : ''}`;
+    chip.textContent = `✓ ${important ? '❗ ' : ''}${sheetEmoji ? sheetEmoji + ' ' : ''}${title}${qtyEl.value.trim() ? ' · ' + qtyEl.value.trim() : ''}`;
     log.prepend(chip);
   }
-  titleEl.value = ''; qtyEl.value = ''; noteEl.value = ''; noteEl.style.height = '';
+  titleEl.value = ''; qtyEl.value = ''; noteEl.value = ''; noteEl.style.height = ''; if (impEl) impEl.checked = false;
   sheetPeople = new Set();
   sheet.querySelectorAll('[data-pick-person]').forEach(b => b.classList.remove('on'));
   sheetPhoto = null; refreshPhotoField();
@@ -2121,24 +2187,20 @@ function openMembersSheet() {
   const keepScroll = sheetKind === 'members' ? sheet.scrollTop : 0;
   const all = state.members || [];
   const inHouse = new Set(state.house?.members || []);
-  const banned = new Set(state.house?.banned || []);
+  // Plus de « retirés » : les anciennes interdictions sont levées
+  if ((state.house?.banned || []).length) fire(updateDoc(houseRef(), { banned: [] }));
   const active = all.filter(m => inHouse.has(m.id)).sort((a, b) => (b.id === meId) - (a.id === meId) || a.name.localeCompare(b.name));
-  const removed = all.filter(m => !inHouse.has(m.id) && m.removed);
   const row = m => `<div class="mrow">
       <span class="avatar lg" style="--h:${pHue(m.id)}">${esc(initial(m.name))}</span>
       <div class="grow">
         <div class="mname">${esc(m.name)}${m.id === meId ? ' <span class="muted">(toi)</span>' : ''}</div>
         <div class="mdev muted">${lastSeenOf(m) && Date.now() - lastSeenOf(m) < 15 * 60 * 1000 ? '<span class="online"></span>' : ''}${ago(lastSeenOf(m)) || 'pas encore connecté'}</div>
       </div>
-      ${m.id !== meId ? `<button type="button" class="kick" data-kick="${esc(m.id)}">Retirer</button>` : ''}
+      ${state.isAdmin && m.id !== meId ? `<button type="button" class="kick" data-deluser="${esc(m.id)}">Supprimer le compte</button>` : ''}
     </div>`;
   openSheet(`<h3>Membres</h3>
     ${active.length ? active.map(row).join('') : '<p class="hint">Personne pour l\'instant.</p>'}
-    ${removed.length ? `<div class="label">Retirés · ne peuvent pas revenir</div>${removed.map(m => `<div class="mrow">
-        <span class="avatar lg off">${esc(initial(m.name))}</span>
-        <div class="grow"><div class="mname muted">${esc(m.name)}</div></div>
-        <button type="button" class="kick" data-purge="${esc(m.id)}">Supprimer</button></div>`).join('')}` : ''}
-    <p class="hint" style="margin-top:12px"><b>Retirer</b> : la personne perd l'accès à la maison et ne peut plus revenir, même avec le code.<br><b>Supprimer</b> (dans « Retirés ») : elle disparaît de la liste et pourra revenir normalement avec le code.</p>
+    ${state.isAdmin ? `<p class="hint" style="margin-top:12px"><b>Supprimer le compte</b> : la personne n'a plus accès à la maison. Elle peut recréer un compte et revenir avec le code.<br>Pour l'en empêcher : <button type="button" class="link" data-new-code>générer un nouveau code</button>.</p>` : ''}
     <div class="actions">
       <button type="button" class="btn ghost" data-close>Fermer</button>
       <button type="button" class="btn primary" data-open-invite>Inviter quelqu'un</button>
@@ -2156,7 +2218,7 @@ function openInviteSheet() {
       ${navigator.share ? `<button type="button" class="btn primary" data-share>Envoyer</button>` : ''}
       <button type="button" class="btn ${navigator.share ? 'ghost' : 'primary'}" data-copy>Copier le code</button>
     </div>
-    <p class="hint" style="text-align:center;margin-top:14px">Le code a fuité ? <button type="button" class="link" data-new-code>Changer le code</button><br>L'ancien ne marchera plus.</p>`);
+    ${state.isAdmin ? `<p class="hint" style="text-align:center;margin-top:14px"><button type="button" class="link" data-new-code>Générer un nouveau code</button><br>L'ancien ne marchera plus. Ceux qui sont déjà dans la maison y restent.</p>` : ''}`);
   sheetKind = 'invite';
 }
 
@@ -2390,6 +2452,7 @@ function openItemSheet(item) {
         <input class="field" name="title" maxlength="200" value="${esc(item.title)}">
       </div>
       ${emojiPicker(false, true)}
+      <label class="switch impsw"><input type="checkbox" name="important" ${item.important ? 'checked' : ''}><span class="sw"></span>❗ Important</label>
       <div class="label">Commentaire</div>
       <textarea class="field note-field" name="note" maxlength="500" rows="3" placeholder="Des détails, une précision… (ex. la marque, où ranger, comment faire)">${esc(item.note)}</textarea>
       <div class="label">Quantité</div>
@@ -2461,7 +2524,17 @@ overlay.addEventListener('click', e => {
     return;
   }
   if (t.closest('[data-copy]')) return copyInvite();
-  if (t.closest('[data-new-code]')) { changeJoinCode(); toast('Nouveau code créé. L\'ancien ne marche plus.'); return; }
+  const nc = t.closest('[data-new-code]');
+  if (nc && state.isAdmin) {
+    if (!nc.classList.contains('sure')) { nc.classList.add('sure'); nc.textContent = 'Confirmer : nouveau code'; return; }
+    changeJoinCode(); toast('Nouveau code créé. L\'ancien ne marche plus.');
+    setTimeout(() => openInviteSheet(), 400); return;
+  }
+  const du = t.closest('[data-deluser]');
+  if (du && state.isAdmin) {
+    if (!du.classList.contains('sure')) { du.classList.add('sure'); du.textContent = 'Confirmer'; return; }
+    adminDeleteUser(du.dataset.deluser); return;
+  }
   const leave = t.closest('[data-leave]');
   if (leave) {
     if (!leave.classList.contains('sure')) { leave.classList.add('sure'); leave.textContent = 'Confirmer : quitter la maison'; return; }
@@ -2484,18 +2557,6 @@ overlay.addEventListener('click', e => {
   if (favBtn) { fav = favBtn.dataset.fav; saveHouses(); openHousesSheet(); toast('Maison favorite enregistrée.'); return; }
   if (t.closest('[data-open-create]')) return openCreateHouseSheet();
   if (t.closest('[data-open-invite]')) return openInviteSheet();
-  const kick = t.closest('[data-kick]');
-  if (kick) {
-    if (!kick.classList.contains('sure')) { kick.classList.add('sure'); kick.textContent = 'Confirmer'; return; }
-    kickMember(kick.dataset.kick);
-    toast('Personne retirée de la maison.');
-    return;
-  }
-  const purge = t.closest('[data-purge]');
-  if (purge) {
-    if (!purge.classList.contains('sure')) { purge.classList.add('sure'); purge.textContent = 'Confirmer'; return; }
-    purgeMember(purge.dataset.purge); toast('Personne supprimée. Elle pourra revenir avec le code.'); return;
-  }
   if (t.closest('[data-open-join]')) return openJoinHouseSheet();
 
   if (t.closest('[data-sec-new]')) return openSectionSheet(null);
@@ -2670,14 +2731,15 @@ overlay.addEventListener('submit', e => {
       const emoji = sheetEmoji || null;
       const note = (f.querySelector('[name="note"]')?.value || '').trim().slice(0, 500);
       const asg = [...sheetPeople];
+      const important = !!f.querySelector('[name="important"]')?.checked;
       const added = asg.some(id => !(it?.assignees || []).includes(id));
       const asgChanged = it && (asg.length !== it.assignees.length || added);
       let photoId = it ? it.photoId : null;
       if (sheetPhoto?.data) photoId = saveMedia(sheetPhoto); else if (!sheetPhoto) photoId = null;
       const photoChanged = it && photoId !== it.photoId;
       if (photoChanged && it.photoId) fire(deleteDoc(ref('media', it.photoId)));
-      if (it && (it.title !== title || (it.sectionId || null) !== sheetSec || (it.emoji || null) !== emoji || it.qty !== qty || it.note !== note || asgChanged || photoChanged)) {
-        fire(updateDoc(ref('items', it.id), { title, sectionId: sheetSec, emoji, qty, note, assignees: asg, photoId,
+      if (it && (it.title !== title || (it.sectionId || null) !== sheetSec || (it.emoji || null) !== emoji || it.qty !== qty || it.note !== note || asgChanged || photoChanged || it.important !== important)) {
+        fire(updateDoc(ref('items', it.id), { title, sectionId: sheetSec, emoji, qty, note, assignees: asg, photoId, important,
           ...(added ? { assignedAt: Date.now(), assignedBy: state.myName } : {}) }));
       }
       closeSheet(); break;
@@ -2731,6 +2793,7 @@ app.addEventListener('click', e => {
     case 'goNotes': state.tab = 'notes'; state.anim = 'in'; renderedKey = ''; render(); window.scrollTo(0, 0); break;
     case 'tagPeople': openTagSheet(); break;
     case 'untag': pendingTags.delete(id); showPendingTags(); break;
+    case 'weather': openWeatherSheet(); break;
     case 'goCal': state.tab = 'cal'; state.anim = 'in'; renderedKey = ''; setCalDay(todayYmd()); window.scrollTo(0, 0); break;
     case 'calDay': setCalDay(el.dataset.day); break;
     case 'calPrev': shiftMonth(-1); break;
@@ -2947,24 +3010,188 @@ function todayWidget() {
   const in7 = ymd(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7));
   const evToday = state.events.filter(e => e.date === today).sort(evSort);
   const next = state.events.filter(e => e.date > today && e.date <= in7).sort(evSort);
-  const dateLabel = cap(now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }));
   const hl = (e, inner) => (e.people || []).length ? `<span class="hl" style="background:${peopleGrad(e.people, .32)}">${inner}</span>` : inner;
-  const row = e => `<div class="tdev" style="--h:${hueOf(e.id)}"><span class="tdtime">${e.allDay ? 'Journée' : esc(e.time)}</span><span class="evbar" ${(e.people || []).length ? `style="background:${peopleGrad(e.people, 1).replace('90deg', '180deg')}"` : ''}></span>
-      <span class="tdname">${hl(e, (e.emoji ? esc(e.emoji) + ' ' : '') + esc(e.title))}</span>${miniAvatars(e.people)}</div>`;
-  return `<div class="card todaycard sec" role="button" tabindex="0" data-action="goCal">
-    <div class="tdhead">
-      <span class="tdcal"><small>${now.toLocaleDateString('fr-FR', { month: 'short' }).replace('.', '')}</small><b>${now.getDate()}</b></span>
-      <div class="grow"><div class="tdtitle">Aujourd'hui</div><div class="tddate">${dateLabel}</div></div>
-      <span class="chev">${ICON.chev}</span>
+  const line = (e, when) => `<div class="tdline">${hl(e, `${e.emoji ? esc(e.emoji) + ' ' : ''}${esc(e.title)}`)}<small>${when}</small></div>`;
+  let body;
+  if (evToday.length) {
+    body = evToday.slice(0, 2).map(e => line(e, e.allDay ? 'Journée' : esc(e.time))).join('')
+      + (evToday.length > 2 ? `<div class="tdmore">+ ${evToday.length - 2} autre${evToday.length - 2 > 1 ? 's' : ''}</div>` : '');
+  } else if (next.length) {
+    body = `<div class="tdnone">Rien aujourd'hui</div>` + line(next[0], relDay(next[0].date));
+  } else body = `<div class="tdnone">Rien de prévu 🌿</div>`;
+  return `<div class="homerow sec">
+    <div class="card todaycard tdsmall" role="button" tabindex="0" data-action="goCal">
+      <div class="tdhead">
+        <span class="tdcal"><small>${now.toLocaleDateString('fr-FR', { month: 'short' }).replace('.', '')}</small><b>${now.getDate()}</b></span>
+        <div class="grow"><div class="tdtitle">${cap(now.toLocaleDateString('fr-FR', { weekday: 'long' }))}</div></div>
+      </div>
+      <div class="tdbody">${body}</div>
     </div>
-    <div class="tdbody">${evToday.length
-      ? evToday.slice(0, 3).map(row).join('') + (evToday.length > 3 ? `<div class="tdmore">+ ${evToday.length - 3} autre${evToday.length - 3 > 1 ? 's' : ''}</div>` : '')
-      : `<div class="tdnone">Rien de prévu aujourd'hui 🌿</div>`}</div>
-    <div class="tdnext">${next.length
-      ? `<span class="muted">Bientôt :</span> ${next.slice(0, 3).map(e => hl(e, `${e.emoji ? esc(e.emoji) + ' ' : ''}<b>${esc(e.title)}</b> ${relDay(e.date)}`)).join(' · ')}${next.length > 3 ? ` <span class="muted">et ${next.length - 3} autre${next.length - 3 > 1 ? 's' : ''}</span>` : ''}`
-      : '<span class="muted">Rien de prévu les 7 prochains jours.</span>'}</div>
+    ${weatherCard()}
   </div>`;
 }
+
+// ================== Météo (Open-Meteo : gratuit, sans clé, sans compte) ==================
+const WMO = {0:['☀️','Ensoleillé'],1:['🌤️','Plutôt beau'],2:['⛅','Éclaircies'],3:['☁️','Couvert'],45:['🌫️','Brouillard'],48:['🌫️','Brouillard givrant'],
+  51:['🌦️','Bruine légère'],53:['🌦️','Bruine'],55:['🌧️','Bruine forte'],56:['🌧️','Bruine verglaçante'],57:['🌧️','Bruine verglaçante'],
+  61:['🌦️','Pluie faible'],63:['🌧️','Pluie'],65:['🌧️','Forte pluie'],66:['🌧️','Pluie verglaçante'],67:['🌧️','Pluie verglaçante'],
+  71:['🌨️','Neige faible'],73:['🌨️','Neige'],75:['❄️','Forte neige'],77:['🌨️','Grésil'],80:['🌦️','Averses'],81:['🌧️','Averses'],82:['⛈️','Fortes averses'],
+  85:['🌨️','Averses de neige'],86:['❄️','Averses de neige'],95:['⛈️','Orage'],96:['⛈️','Orage et grêle'],99:['⛈️','Orage et grêle']};
+const wmo = (c, day = 1) => {
+  const w = WMO[c] || ['🌡️', '—'];
+  if (!day && c === 0) return ['🌙', 'Ciel dégagé'];
+  if (!day && c === 1) return ['🌙', 'Plutôt dégagé'];
+  return w;
+};
+const WX_TTL = 30 * 60 * 1000;
+const wxData = new Map();          // "lat,lon" -> { t, d }
+const wxLoading = new Set();
+try { for (const [k, v] of Object.entries(JSON.parse(store.get('maison.wx') || '{}'))) wxData.set(k, v); } catch (_) {}
+const wxKey = p => `${(+p.lat).toFixed(3)},${(+p.lon).toFixed(3)}`;
+function wxPrefs() {
+  const w = state.profile?.weather || {};
+  const places = (Array.isArray(w.places) ? w.places : []).filter(p => p && isFinite(p.lat) && isFinite(p.lon)).slice(0, 12)
+    .map(p => ({ id: String(p.id || wxKey(p)), name: str(p.name, 'Lieu'), sub: str(p.sub, ''), lat: +p.lat, lon: +p.lon }));
+  return { places, cur: w.cur };
+}
+function wxPlace() { const { places, cur } = wxPrefs(); return places.find(p => p.id === cur) || places[0] || null; }
+function wxSave(places, cur) {
+  const weather = { places, cur: cur ?? null };
+  if (state.profile) state.profile.weather = weather;
+  fire(updateDoc(userRef(), { weather }));
+}
+async function wxLoad(p, force) {
+  const k = wxKey(p), have = wxData.get(k);
+  if (!force && have && Date.now() - have.t < WX_TTL) return;
+  if (wxLoading.has(k)) return;
+  wxLoading.add(k);
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${p.lat}&longitude=${p.lon}`
+      + '&current=temperature_2m,apparent_temperature,weather_code,is_day,wind_speed_10m,precipitation'
+      + '&hourly=temperature_2m,weather_code,precipitation_probability,is_day'
+      + '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset'
+      + '&timezone=auto&forecast_days=7';
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    wxData.set(k, { t: Date.now(), d: await r.json() });
+    const obj = {}; for (const [kk, v] of wxData) if (Date.now() - v.t < 6 * 3600e3) obj[kk] = v;
+    store.set('maison.wx', JSON.stringify(obj));
+  } catch (e) { console.warn('météo', e); if (have) have.err = true; else wxData.set(k, { t: 0, err: true }); }
+  wxLoading.delete(k);
+  if (sheetKind === 'weather') renderWeatherSheet();
+  if (state.tab === 'lists' && state.view === 'home') { if (state.dragging) state.renderPending = true; else render(); }
+}
+function weatherCard() {
+  const p = wxPlace();
+  if (!p) return `<div class="card wxcard empty" role="button" tabindex="0" data-action="weather">
+      <span class="wxbig">🌤️</span><b>Météo</b><small>Choisir une ville</small></div>`;
+  const w = wxData.get(wxKey(p));
+  if (!w || Date.now() - w.t > WX_TTL) setTimeout(() => wxLoad(p), 0);
+  const c = w?.d?.current, dd = w?.d?.daily;
+  if (!c) return `<div class="card wxcard" role="button" tabindex="0" data-action="weather">
+      <div class="wxplace">${esc(p.name)}</div><div class="wxnow"><span class="wxbig">⏳</span></div>
+      <small class="muted">${w?.err ? 'Météo indisponible' : 'Chargement…'}</small></div>`;
+  const [ic, label] = wmo(c.weather_code, c.is_day);
+  return `<div class="card wxcard" role="button" tabindex="0" data-action="weather">
+    <div class="wxplace">${esc(p.name)}</div>
+    <div class="wxnow"><span class="wxbig">${ic}</span><span class="wxtemp">${Math.round(c.temperature_2m)}°</span></div>
+    <div class="wxlabel">${esc(label)}</div>
+    ${dd ? `<small class="wxmm">↑ ${Math.round(dd.temperature_2m_max[0])}°  ↓ ${Math.round(dd.temperature_2m_min[0])}°</small>` : ''}
+  </div>`;
+}
+let wxSearchT = null, wxResults = null, wxQuery = '';
+function openWeatherSheet() {
+  wxResults = null; wxQuery = '';
+  openSheet('<div id="wxsheet"></div>');
+  sheetKind = 'weather';
+  renderWeatherSheet();
+  const p = wxPlace(); if (p) wxLoad(p);
+}
+function renderWeatherSheet() {
+  const box = sheet.querySelector('#wxsheet'); if (!box) return;
+  const { places } = wxPrefs(), p = wxPlace();
+  const keepFocus = document.activeElement?.id === 'wxSearch';
+  let h = `<h3>Météo</h3>
+    <div class="wxchips">${places.map(x => `<span class="wxchip ${p && x.id === p.id ? 'on' : ''}">
+        <button type="button" data-wx-pick="${esc(x.id)}">${esc(x.name)}</button>
+        <button type="button" class="x" data-wx-del="${esc(x.id)}" aria-label="Retirer ${esc(x.name)}">×</button></span>`).join('')}
+    </div>
+    <div class="lsearch" style="margin-top:12px"><span class="lsearch-ic">🔍</span>
+      <input class="field" id="wxSearch" type="search" placeholder="Ajouter une ville…" value="${esc(wxQuery)}" autocomplete="off" enterkeyhint="search"></div>
+    <button type="button" class="link act wxgeo" data-wx-geo>📍 Utiliser ma position</button>`;
+  if (wxResults) {
+    h += `<div class="card wxres">${wxResults.length ? wxResults.map((r, i) => `<button type="button" class="wxrow" data-wx-add="${i}">
+        <b>${esc(r.name)}</b><small>${esc(r.sub)}</small><span class="plus">＋</span></button>`).join('')
+      : '<div class="pad muted">Aucune ville trouvée.</div>'}</div>`;
+  }
+  if (p) {
+    const w = wxData.get(wxKey(p)), d = w?.d;
+    if (!d) h += `<div class="pad muted" style="text-align:center">${w?.err ? 'Météo indisponible pour le moment.' : 'Chargement…'}</div>`;
+    else {
+      const c = d.current, [ic, label] = wmo(c.weather_code, c.is_day);
+      const nowH = (c.time || '').slice(0, 13);
+      let start = d.hourly.time.findIndex(t => t.slice(0, 13) >= nowH); if (start < 0) start = 0;
+      const hours = d.hourly.time.slice(start, start + 24).map((t, j) => {
+        const i = start + j, [hi] = wmo(d.hourly.weather_code[i], d.hourly.is_day?.[i] ?? 1), pr = d.hourly.precipitation_probability?.[i];
+        return `<div class="wxh"><small>${j ? t.slice(11, 13) + 'h' : 'Maint.'}</small><span>${hi}</span><b>${Math.round(d.hourly.temperature_2m[i])}°</b>${pr >= 20 ? `<i>💧${pr}%</i>` : '<i></i>'}</div>`;
+      }).join('');
+      const days = d.daily.time.map((t, i) => {
+        const [di] = wmo(d.daily.weather_code[i]), pr = d.daily.precipitation_probability_max?.[i];
+        const name = i === 0 ? "Aujourd'hui" : i === 1 ? 'Demain' : cap(new Date(t + 'T12:00').toLocaleDateString('fr-FR', { weekday: 'long' }));
+        return `<div class="wxd"><span class="n">${name}</span><span class="i">${di}</span><span class="p">${pr >= 20 ? '💧' + pr + '%' : ''}</span>
+          <span class="t"><small>${Math.round(d.daily.temperature_2m_min[i])}°</small> <b>${Math.round(d.daily.temperature_2m_max[i])}°</b></span></div>`;
+      }).join('');
+      h += `<div class="wxhero"><div class="wxplace">${esc(p.name)}${p.sub ? `<small> · ${esc(p.sub)}</small>` : ''}</div>
+          <div class="wxnow"><span class="wxbig">${ic}</span><span class="wxtemp">${Math.round(c.temperature_2m)}°</span></div>
+          <div class="wxlabel">${esc(label)} · ressenti ${Math.round(c.apparent_temperature)}° · vent ${Math.round(c.wind_speed_10m)} km/h</div></div>
+        <div class="wxhours">${hours}</div>
+        <div class="card wxdays">${days}</div>`;
+    }
+  } else if (!wxResults) h += `<p class="hint" style="text-align:center;margin-top:18px">Cherche une ville pour l'ajouter à tes favoris.</p>`;
+  h += `<p class="hint wxcredit">Données météo : <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0)</p>`;
+  const caret = keepFocus ? document.activeElement.selectionStart : 0;
+  box.innerHTML = h;
+  if (keepFocus) { const i = box.querySelector('#wxSearch'); i.focus({ preventScroll: true }); try { i.setSelectionRange(caret, caret); } catch (_) {} }
+}
+async function wxSearch(q) {
+  if (q.length < 2) { wxResults = null; renderWeatherSheet(); return; }
+  try {
+    const r = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=8&language=fr&format=json`);
+    const j = await r.json();
+    if (q !== wxQuery) return;
+    wxResults = (j.results || []).map(x => ({ name: x.name, sub: [x.admin1, x.country].filter(Boolean).join(', '), lat: x.latitude, lon: x.longitude }));
+  } catch (_) { wxResults = []; }
+  renderWeatherSheet();
+}
+function wxAddPlace(r) {
+  const { places } = wxPrefs();
+  const place = { id: wxKey(r), name: String(r.name).slice(0, 60), sub: String(r.sub || '').slice(0, 80), lat: +(+r.lat).toFixed(4), lon: +(+r.lon).toFixed(4) };
+  const list = places.some(x => x.id === place.id) ? places : [...places, place].slice(-12);
+  wxResults = null; wxQuery = '';
+  wxSave(list, place.id); wxLoad(place); renderWeatherSheet(); render();
+}
+overlay.addEventListener('click', e => {
+  if (sheetKind !== 'weather') return;
+  const t = e.target;
+  const pick = t.closest('[data-wx-pick]');
+  if (pick) { const { places } = wxPrefs(); wxSave(places, pick.dataset.wxPick); const p = wxPlace(); if (p) wxLoad(p); renderWeatherSheet(); render(); return; }
+  const del = t.closest('[data-wx-del]');
+  if (del) { const { places, cur } = wxPrefs(); const rest = places.filter(x => x.id !== del.dataset.wxDel); wxSave(rest, rest.some(x => x.id === cur) ? cur : rest[0]?.id); renderWeatherSheet(); render(); return; }
+  const add = t.closest('[data-wx-add]');
+  if (add && wxResults) return wxAddPlace(wxResults[+add.dataset.wxAdd]);
+  if (t.closest('[data-wx-geo]')) {
+    if (!navigator.geolocation) return toast('Position indisponible sur cet appareil.');
+    toast('Recherche de ta position…');
+    navigator.geolocation.getCurrentPosition(
+      pos => wxAddPlace({ name: 'Ma position', sub: '', lat: pos.coords.latitude, lon: pos.coords.longitude }),
+      () => toast("Position refusée : autorise-la dans les réglages de l'iPhone."), { timeout: 10000, maximumAge: 600000 });
+  }
+});
+overlay.addEventListener('input', e => {
+  if (e.target.id !== 'wxSearch') return;
+  wxQuery = e.target.value.trim();
+  clearTimeout(wxSearchT); wxSearchT = setTimeout(() => wxSearch(wxQuery), 300);
+});
 
 // ================== Onglets : Listes / Calendrier / Notes ==================
 const TAB_ICONS = {
