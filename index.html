@@ -415,6 +415,29 @@
   .tdmore{font-size:13px;color:var(--muted);padding-left:62px}
   .tdnext{margin-top:12px;padding-top:10px;border-top:1px solid var(--line);font-size:13.5px;line-height:1.4}
 
+  /* Sélection de plusieurs éléments */
+  .topright{display:flex;align-items:center;gap:2px}
+  .selbtn{border:0;background:none;color:var(--lc);font-weight:600;font-size:15.5px;padding:8px 10px;border-radius:10px}
+  .selbtn.on{background:var(--lc);color:#fff}
+  .irow.selmode{cursor:pointer;-webkit-user-select:none;user-select:none;transition:background-color .15s}
+  .irow.selmode.picked{background:color-mix(in srgb, var(--lc) 12%, var(--card))}
+  .pickbox{width:26px;height:26px;border-radius:8px;border:2px solid color-mix(in srgb, var(--muted) 55%, transparent);display:grid;place-items:center;flex:none;transition:all .15s}
+  .pickbox svg{width:15px;height:15px;color:#fff}
+  .picked .pickbox{background:var(--lc);border-color:var(--lc);animation:pop .25s ease}
+  .irow{-webkit-touch-callout:none}
+  .selbar{position:fixed;left:0;right:0;bottom:0;z-index:9;padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+          background:color-mix(in srgb, var(--card) 94%, transparent);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+          border-top:1px solid var(--line);box-shadow:0 -6px 20px rgba(31,27,22,.08);animation:up .2s ease}
+  .selcount{display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:14.5px;margin:0 4px 8px}
+  .selacts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .selact{display:flex;flex-direction:column;align-items:center;gap:2px;border:0;border-radius:14px;padding:8px 4px;font-size:13px;font-weight:600;
+          background:color-mix(in srgb, var(--ink) 6%, transparent);transition:transform .12s, opacity .2s}
+  .selact span{font-size:20px}
+  .selact:disabled{opacity:.4}
+  .selact:active{transform:scale(.95)}
+  .selact.danger-t{color:#C0392B}
+  .selact.sure{background:#C0392B;color:#fff}
+
   /* Barre d'onglets */
   .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:8;display:flex;justify-content:center;gap:4px;
           padding:6px 10px calc(6px + env(safe-area-inset-bottom));border-top:1px solid var(--line);
@@ -537,6 +560,7 @@
   </button>
 
   <nav class="tabbar" id="tabbar" hidden></nav>
+  <div class="selbar" id="selbar" hidden></div>
   <div class="overlay" id="overlay" hidden><div class="sheet" id="sheet"></div></div>
   <div class="lightbox" id="lightbox" hidden></div>
   <div class="toast" id="toast" hidden></div>
@@ -1301,6 +1325,13 @@ function itemRow(i) {
   const mine = i.by === meId || i.byName === state.myName;
   const by = i.byName && !mine ? `<div class="by">ajouté par ${esc(i.byName)}</div>` : '';
   const asg = i.assignees || [];
+  if (state.selecting) {
+    const on = state.selected.has(i.id);
+    return `<div class="irow selmode ${on ? 'picked' : ''} ${i.done ? 'done' : ''}" data-id="${esc(i.id)}" data-action="pick">
+      <span class="pickbox">${on ? ICON.check : ''}</span>
+      <div class="itext"><div class="iline">${i.emoji ? `<span class="iemo">${esc(i.emoji)}</span>` : ''}<span class="ititle">${esc(i.title)}</span>${i.qty ? `<span class="qty">${esc(i.qty)}</span>` : ''}${miniAvatars(asg)}</div></div>
+    </div>`;
+  }
   return `<div class="irow ${i.done ? 'done' : ''} ${state.fresh.has(i.id) ? 'enter' : ''} ${asg.length ? 'assigned' : ''} ${asg.includes(meId) && !i.done ? 'forme' : ''}" data-id="${esc(i.id)}" ${asg.length ? `style="--pg:${peopleGrad(asg, 1)}"` : ''}>
     <button class="check ${i.done ? 'on' : ''}" data-action="toggle" data-id="${esc(i.id)}" aria-label="${i.done ? 'Décocher' : 'Cocher'}">${i.done ? ICON.check : ''}</button>
     <div class="itext" data-action="editItem" data-id="${esc(i.id)}">
@@ -1327,7 +1358,10 @@ function group(sec, items, opts = {}) {
 function renderListHead(l) {
   return `<div class="topbar">
       <button class="back" data-action="back">${ICON.back}Listes</button>
-      <button class="iconbtn" data-action="listMenu" aria-label="Modifier la liste">${ICON.more}</button>
+      <span class="topright">
+        <button class="selbtn ${state.selecting ? 'on' : ''}" data-action="selectMode">${state.selecting ? 'Terminé' : 'Sélectionner'}</button>
+        <button class="iconbtn" data-action="listMenu" aria-label="Modifier la liste">${ICON.more}</button>
+      </span>
     </div>
     <header class="ltitle"><span class="tile">${esc(l.emoji)}</span><div class="grow"><h1 style="font-size:30px">${esc(l.name)}</h1></div></header>`;
 }
@@ -1370,6 +1404,101 @@ function renderList(l) {
 const draft = { sec: {}, qty: '', note: '', emoji: null, open: null };
 const pendingSecs = new Map();   // catégories tout juste créées, pas encore revenues du serveur
 function renderSecChips() {}
+
+// ----- Sélection de plusieurs éléments -----
+state.selecting = false;
+state.selected = new Set();
+const selbar = $('#selbar');
+function renderSelbar(show) {
+  selbar.hidden = !show;
+  if (!show) return;
+  const ids = [...state.selected].filter(id => state.items.some(i => i.id === id));
+  const n = ids.length;
+  const allDone = n && ids.every(id => state.items.find(i => i.id === id)?.done);
+  selbar.innerHTML = `<div class="selcount">${n ? `${n} sélectionné${n > 1 ? 's' : ''}` : 'Touche les éléments à sélectionner'}
+      <button type="button" class="link" data-sel="all">Tout</button></div>
+    <div class="selacts">
+      <button type="button" class="selact" data-sel="cat" ${n ? '' : 'disabled'}><span>🏷️</span>Catégorie</button>
+      <button type="button" class="selact" data-sel="check" ${n ? '' : 'disabled'}><span>${allDone ? '↩️' : '✅'}</span>${allDone ? 'Décocher' : 'Cocher'}</button>
+      <button type="button" class="selact danger-t" data-sel="del" ${n ? '' : 'disabled'}><span>🗑️</span>Supprimer</button>
+    </div>`;
+}
+function setSelecting(on, firstId) {
+  state.selecting = on;
+  state.selected.clear();
+  if (on && firstId) state.selected.add(firstId);
+  render();
+}
+function selectedItems() { return [...state.selected].map(id => state.items.find(i => i.id === id)).filter(Boolean); }
+function bulkSetSection(secId) {
+  const b = writeBatch(db);
+  selectedItems().forEach(i => b.update(ref('items', i.id), { sectionId: secId || null }));
+  fire(b.commit());
+  const n = state.selected.size;
+  setSelecting(false);
+  toast(`${n} élément${n > 1 ? 's' : ''} rangé${n > 1 ? 's' : ''}.`);
+}
+selbar.addEventListener('click', e => {
+  const b = e.target.closest('[data-sel]');
+  if (!b || b.disabled) return;
+  const its = selectedItems();
+  switch (b.dataset.sel) {
+    case 'all': {
+      const l = currentList();
+      const all = state.items.filter(i => i.listId === l?.id);
+      if (state.selected.size === all.length) state.selected.clear(); else all.forEach(i => state.selected.add(i.id));
+      render(); break;
+    }
+    case 'check': {
+      const allDone = its.every(i => i.done);
+      const wb = writeBatch(db);
+      its.forEach(i => wb.update(ref('items', i.id), { done: !allDone }));
+      fire(wb.commit());
+      setSelecting(false);
+      toast(allDone ? 'Remis dans la liste.' : `${its.length} élément${its.length > 1 ? 's' : ''} coché${its.length > 1 ? 's' : ''}.`);
+      break;
+    }
+    case 'cat': {
+      sheetListId = state.listId; sheetSec = null;
+      openSheet(`<h3>Ranger ${its.length} élément${its.length > 1 ? 's' : ''}</h3>
+        <p class="hint" style="margin-bottom:10px">Choisis la catégorie, ou crée-en une nouvelle.</p>
+        <div class="dd-panel">
+          <input class="field dd-search" data-dd-search type="search" placeholder="Rechercher ou créer une catégorie…" autocomplete="off" enterkeyhint="done">
+          <div class="dd-list" data-dd-list></div>
+        </div>`);
+      sheetKind = 'bulkCat';
+      renderDdList();
+      break;
+    }
+    case 'del': {
+      if (!b.classList.contains('sure')) { b.classList.add('sure'); b.innerHTML = '<span>⚠️</span>Confirmer'; return; }
+      const wb = writeBatch(db);
+      its.forEach(i => { wb.delete(ref('items', i.id)); if (i.photoId) wb.delete(ref('media', i.photoId)); });
+      fire(wb.commit());
+      setSelecting(false);
+      toast(`${its.length} élément${its.length > 1 ? 's' : ''} supprimé${its.length > 1 ? 's' : ''}.`);
+      break;
+    }
+  }
+});
+
+// Appui long sur un élément = commencer la sélection
+(() => {
+  let timer = null, startX = 0, startY = 0, fired = false;
+  body.addEventListener('pointerdown', e => {
+    const row = e.target.closest('.irow[data-id]');
+    if (!row || state.selecting || e.target.closest('.drag, .check, a, .ithumb')) return;
+    startX = e.clientX; startY = e.clientY; fired = false;
+    timer = setTimeout(() => { fired = true; navigator.vibrate?.(15); setSelecting(true, row.dataset.id); }, 480);
+  });
+  const cancel = e => { if (timer && (!e || e.type !== 'pointermove' || Math.hypot(e.clientX - startX, e.clientY - startY) > 8)) { clearTimeout(timer); timer = null; } };
+  body.addEventListener('pointermove', cancel);
+  body.addEventListener('pointerup', () => { cancel(); if (fired) setTimeout(() => { fired = false; }, 350); });
+  body.addEventListener('pointercancel', () => cancel());
+  body.addEventListener('contextmenu', e => { if (e.target.closest('.irow')) e.preventDefault(); });
+  // le clic qui suit un appui long ne doit pas ouvrir l'élément
+  body.addEventListener('click', e => { if (fired) { fired = false; e.stopPropagation(); e.preventDefault(); } }, true);
+})();
 
 function shortLink(url) {
   try {
@@ -1527,7 +1656,7 @@ let sortables = [];
 function initSortables() {
   sortables.forEach(x => { try { x.destroy(); } catch (_) {} });
   sortables = [];
-  if (typeof Sortable === 'undefined' || state.view !== 'list') return;
+  if (typeof Sortable === 'undefined' || state.view !== 'list' || state.selecting) return;
   const base = {
     animation: 180, ghostClass: 'drag-ghost', chosenClass: 'drag-chosen', dragClass: 'drag-fly',
     forceFallback: true, fallbackTolerance: 4, scroll: true, bubbleScroll: true,
@@ -1587,7 +1716,9 @@ function render() {
   else key = 'app';
 
   composer.hidden = true; fab.hidden = true;
-  renderTabbar(key === 'app');
+  const selOn = key === 'app' && state.tab === 'lists' && state.view === 'list' && state.selecting;
+  renderTabbar(key === 'app' && !selOn);
+  renderSelbar(selOn);
 
   if (key === 'admin') {
     if (renderedKey !== 'admin') { screen.innerHTML = `<div class="anim-in">${renderAdminHead()}</div>`; renderedKey = 'admin'; }
@@ -1655,6 +1786,7 @@ function updateStuck() {
 window.addEventListener('scroll', updateStuck, { passive: true });
 
 function go(view, listId) {
+  state.selecting = false; state.selected.clear();
   state.anim = view === 'list' ? 'in' : 'back';
   state.view = view;
   if (listId) state.listId = listId;
@@ -1961,6 +2093,7 @@ function openDraftEmojiSheet() {
   sheetKind = 'draftEmo';
 }
 function chooseSection(id) {
+  if (sheetKind === 'bulkCat') { closeSheet(); bulkSetSection(id); return; }
   if (sheetKind === 'draftCat') {
     draft.sec[state.listId] = id || null;
     closeSheet();
@@ -2047,7 +2180,7 @@ overlay.addEventListener('click', e => {
     const emo = ddNewEmoji;
     const newId = addSection(sheetListId, name, emo);
     ddNewEmoji = '🏷️';
-    if (sheetKind === 'draftCat') return chooseSection(newId);
+    if (sheetKind === 'draftCat' || sheetKind === 'bulkCat') return chooseSection(newId);
     sheetSec = newId;
     sheet.querySelector('[data-dd-label]').innerHTML = `<span class="e">${esc(emo)}</span>${esc(name)}`;
     return setDdOpen(false);
@@ -2321,6 +2454,12 @@ app.addEventListener('click', e => {
     case 'newEvent': openEventSheet(null, state.calDay); break;
     case 'openEvent': { const ev = state.events.find(x => x.id === id); if (ev) openEventSheet(ev); break; }
     case 'thread': openThread(id); break;
+    case 'selectMode': setSelecting(!state.selecting); break;
+    case 'pick': {
+      const rid = el.dataset.id;
+      state.selected.has(rid) ? state.selected.delete(rid) : state.selected.add(rid);
+      render(); break;
+    }
     case 'postMenu': { const p = state.posts.find(x => x.id === id); if (p) openPostMenu(p); break; }
     case 'viewPhoto': { const p = state.posts.find(x => x.id === id); if (p) p.photoId ? viewMedia(p.photoId) : (p.photo && viewMedia(null, p.photo)); break; }
     case 'viewItemPhoto': viewMedia(id); break;
