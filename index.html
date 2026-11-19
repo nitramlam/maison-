@@ -2681,7 +2681,7 @@ function openSettingsSheet() {
     <div class="sep"></div>
     <div class="label">Ton compte</div>
     <p class="hint">Connecté avec <b>${esc(state.user?.email || '')}</b>. Connecte-toi avec ce même compte sur ton iPad ou ton autre téléphone : tu y retrouves tout.</p>
-    <p class="hint" style="font-size:11.5px;opacity:.6">Version de l'app : 19 nov. 22 h 45</p>
+    <p class="hint" style="font-size:11.5px;opacity:.6">Version de l'app : 19 nov. 22 h 50</p>
     <div class="actions" style="margin-top:12px">
       <button type="button" class="btn ghost" data-reset-pw>Changer de mot de passe</button>
       <button type="button" class="btn ghost" data-logout>Se déconnecter</button>
@@ -4041,7 +4041,12 @@ screen.addEventListener('change', async e => {
 // ================== Messages vocaux ==================
 const VOICE_MAX = 60;                      // secondes (un document Firestore fait 1 Mo max)
 const pendingAudio = { wall: null, reply: null };
-const rec = { on: false, where: null, mr: null, chunks: [], t0: 0, timer: null, stream: null };
+const rec = { on: false, where: null, mr: null, chunks: [], t0: 0, timer: null, stream: null, release: null };
+// Le micro reste ouvert 10 min après un vocal : l'iPhone ne redemande pas l'autorisation entre deux enregistrements
+const MIC_KEEP_MS = 10 * 60 * 1000;
+function micAlive() { return rec.stream && rec.stream.getAudioTracks().some(t => t.readyState === 'live'); }
+function releaseMic() { clearTimeout(rec.release); rec.release = null; if (!rec.on) { rec.stream?.getTracks().forEach(t => t.stop()); rec.stream = null; } }
+function keepMic() { clearTimeout(rec.release); rec.release = setTimeout(releaseMic, MIC_KEEP_MS); }
 const fmtDur = sec => { sec = Math.max(0, Math.round(sec)); return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`; };
 function saveAudio(a) {
   const r = doc(col('media'));
@@ -4059,9 +4064,12 @@ async function startRec(where) {
   if (rec.on) return;
   const mime = recMime();
   if (mime === null || !navigator.mediaDevices?.getUserMedia) { toast("L'enregistrement vocal n'est pas possible sur cet appareil."); return; }
-  try {
-    rec.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
-  } catch (e) { toast("Micro refusé : autorise-le dans les réglages de l'iPhone (Safari > Micro)."); return; }
+  clearTimeout(rec.release);
+  if (!micAlive()) {
+    try {
+      rec.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+    } catch (e) { toast("Micro refusé : autorise-le dans les réglages de l'iPhone (Safari > Micro)."); return; }
+  }
   rec.chunks = []; rec.where = where; rec.on = true; rec.t0 = Date.now();
   try { rec.mr = new MediaRecorder(rec.stream, { ...(mime ? { mimeType: mime } : {}), audioBitsPerSecond: 32000 }); }
   catch (_) { rec.mr = new MediaRecorder(rec.stream); }
@@ -4081,7 +4089,7 @@ function stopRec(keep) {
   const where = rec.where, dur = Math.min(VOICE_MAX, (Date.now() - rec.t0) / 1000), mr = rec.mr;
   rec.on = false;
   const finish = () => {
-    rec.stream?.getTracks().forEach(t => t.stop()); rec.stream = null;
+    keepMic();
     if (!keep || dur < 0.8) { pendingAudio[where] = null; showPendingAudio(where); if (keep) toast('Message trop court.'); return; }
     const blob = new Blob(rec.chunks, { type: mr.mimeType || 'audio/mp4' });
     const fr = new FileReader();
