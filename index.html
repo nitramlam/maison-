@@ -419,6 +419,11 @@
 
   /* Accueil : listes avec aperçu, favoris, réduction */
   .lc-sec{margin:24px 4px 10px}
+  .lsearch{position:relative;margin:18px 0 4px}
+  .lsearch .field{padding-left:40px}
+  .lsearch-ic{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:15px;opacity:.6;pointer-events:none}
+  .lcard[hidden],.lc-sec[hidden]{display:none!important}
+  .lc-none{text-align:center;margin-top:18px}
   .grid.lcol{display:grid;grid-template-columns:1fr 1fr;gap:12px;flex-direction:initial}
   .grid.nomt{margin-top:0}
   .lc-sec + .grid{margin-top:0}
@@ -1364,8 +1369,26 @@ body.addEventListener('click', e => {
 });
 screen.addEventListener('input', e => {
   if (e.target.id === 'wallText') { e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight, 260) + 'px'; }
+  if (e.target.id === 'listSearch') { state.listQuery = e.target.value; filterHomeLists(); }
   if (e.target.id === 'adminSearch') { state.adminQuery = e.target.value; renderAdminBody(); }
 });
+
+function filterHomeLists() {
+  const q = norm(state.listQuery);
+  let shown = 0;
+  screen.querySelectorAll('.lcard[data-list-id]').forEach(c => {
+    const ok = !q || c.dataset.name.includes(q);
+    c.hidden = !ok; if (ok) shown++;
+  });
+  screen.querySelectorAll('section.lcol').forEach(sec => {
+    const any = sec.querySelector('.lcard[data-list-id]:not([hidden])');
+    const head = sec.previousElementSibling;
+    if (head?.classList.contains('lc-sec')) head.hidden = !!q && !any;
+    sec.classList.toggle('searching', !!q);
+  });
+  screen.querySelectorAll('.lcard.add, .lc-hint').forEach(el => el.hidden = !!q);
+  const none = screen.querySelector('.lc-none'); if (none) none.hidden = !q || shown > 0;
+}
 
 // ================== Rendu de l'app ==================
 const initial = name => (Array.from(String(name || '?').trim())[0] || '?').toUpperCase();
@@ -1447,11 +1470,12 @@ function renderHome() {
   const favs = new Set(prefs.fav), collapsed = new Set(prefs.collapsed);
   const favL = state.lists.filter(l => favs.has(l.id)), rest = state.lists.filter(l => !favs.has(l.id));
   let idx = 0;
+  h += `<div class="lsearch"><span class="lsearch-ic">🔍</span><input class="field" id="listSearch" type="search" placeholder="Rechercher une liste…" value="${esc(state.listQuery || '')}" autocomplete="off" enterkeyhint="search"></div>`;
   const card = l => {
     const k = cnt[l.id] || { todo: 0, done: 0 };
     const meta = k.todo ? `${k.todo} à faire` : (k.done ? 'Tout est fait ✓' : 'Vide');
     const isFav = favs.has(l.id);
-    return `<div class="lcard" role="button" tabindex="0" style="--h:${hueOf(l.id)};--i:${idx++}" data-action="open" data-id="${esc(l.id)}" data-list-id="${esc(l.id)}">
+    return `<div class="lcard" role="button" tabindex="0" style="--h:${hueOf(l.id)};--i:${idx++}" data-action="open" data-id="${esc(l.id)}" data-list-id="${esc(l.id)}" data-name="${esc(norm(l.name))}">
       <span class="lc-tools">
         <button type="button" class="lc-btn star ${isFav ? 'on' : ''}" data-action="favList" data-id="${esc(l.id)}" aria-label="Favori">${isFav ? '★' : '☆'}</button>
         <button type="button" class="lc-btn" data-action="listMenuHome" data-id="${esc(l.id)}" aria-label="Options">${ICON.more}</button>
@@ -1465,7 +1489,8 @@ function renderHome() {
   h += `${favL.length && rest.length ? '<div class="grp-h soft lc-sec">Listes</div>' : ''}<section class="grid lcol ${favL.length ? 'nomt' : ''}" data-zone="rest">${rest.map(card).join('')}
       <button class="lcard add" style="--i:${idx}" data-action="newList"><span class="plus">+</span>Nouvelle liste</button>
     </section>
-    <p class="hint lc-hint">Maintiens une case puis glisse-la pour changer l'ordre.</p>`;
+    <p class="hint lc-hint">Maintiens une case puis glisse-la pour changer l'ordre.</p>
+    <p class="hint lc-none" hidden>Aucune liste ne correspond.</p>`;
   return h;
 }
 
@@ -1946,8 +1971,12 @@ function render() {
     composer.hidden = false;
     renderSecChips(list);
   } else {
+    const ae = document.activeElement, typing = ae?.id === 'listSearch';
+    const caret = typing ? ae.selectionStart : 0;
     screen.innerHTML = `<div class="${anim}">${renderHome()}</div>`;
     body.innerHTML = '';
+    filterHomeLists();
+    if (typing) { const inp = $('#listSearch'); if (inp) { inp.focus({ preventScroll: true }); try { inp.setSelectionRange(caret, caret); } catch {} } }
     composer.classList.remove('view');
   }
   state.fresh = new Set();
