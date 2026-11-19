@@ -395,7 +395,7 @@
   .rdel{font-size:12.5px;padding:0;color:var(--muted)}
   .rdel.sure{color:#C0392B;font-weight:600}
   .replyform{position:sticky;bottom:calc(-22px - env(safe-area-inset-bottom));display:flex;gap:8px;align-items:flex-end;background:var(--card);padding:10px 0 4px}
-  .replyform textarea{min-height:46px;resize:none}
+  .replyform textarea{min-height:46px;resize:none;flex:1;width:auto;min-width:0}
   .replyform .btn{width:48px;height:46px;padding:0;font-size:18px;flex:none}
 
   /* Résumé du jour (accueil) */
@@ -562,6 +562,38 @@
   .dd-newrow .muted{font-size:13px}
   .lcard .lemo.letter{font-weight:800;font-size:22px;color:hsl(var(--h) 45% 35%)}
   html[data-theme="dark"] .lcard .lemo.letter{color:hsl(var(--h) 55% 78%)}
+
+  /* Réactions et photos dans les réponses */
+  .rxrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px}
+  .rxchip{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:3px 9px 3px 7px;font-size:15px;line-height:1.2;color:var(--ink)}
+  .rxchip b{font-size:12.5px;font-weight:700;color:var(--muted)}
+  .rxchip.me{border-color:var(--accent);background:color-mix(in srgb, var(--accent) 12%, var(--card))}
+  .rxchip.me b{color:var(--accent)}
+  .rxnames{font-size:12.5px;color:var(--muted)}
+  .reply .rxrow{margin-top:5px}
+  .prow{display:flex;align-items:center;gap:6px;width:100%}
+  .preact{border:1px solid var(--line);background:none;color:var(--muted);border-radius:999px;padding:4px 10px;font-size:14px}
+  .rreact{font-size:12.5px;padding:0;color:var(--muted)}
+  #reactbar{position:fixed;z-index:200;animation:rxpop .16s ease-out}
+  @keyframes rxpop{from{transform:scale(.85);opacity:0}to{transform:none;opacity:1}}
+  .rxbar{display:flex;justify-content:space-between;align-items:center;background:var(--card);border-radius:999px;padding:6px 8px;box-shadow:0 8px 30px rgba(0,0,0,.22),0 0 0 1px var(--line)}
+  .rxbar button{border:0;background:none;font-size:27px;width:40px;height:44px;border-radius:50%;transition:transform .12s;padding:0}
+  .rxbar button:active{transform:scale(1.3)}
+  .rxbar button.me{background:color-mix(in srgb, var(--accent) 16%, transparent)}
+  .rxbar .rxplus{font-size:20px;color:var(--muted);background:color-mix(in srgb, var(--ink) 7%, transparent);width:36px;height:36px}
+  .rxmore{margin-top:8px;background:var(--card);border-radius:14px;padding:6px;box-shadow:0 8px 30px rgba(0,0,0,.18)}
+  .rxmore .field{font-size:15px}
+  .rphoto{display:block;border:0;padding:0;margin-top:6px;border-radius:12px;overflow:hidden;background:var(--line);max-width:220px}
+  .rphoto img{display:block;width:100%;height:auto;max-height:260px;object-fit:cover}
+  .replyform{flex-wrap:wrap}
+  .rpending{flex-basis:100%}
+  .rpending:empty{display:none}
+  .rpthumb{position:relative;display:inline-block;margin-bottom:4px}
+  .rpthumb img{width:64px;height:64px;object-fit:cover;border-radius:12px;display:block}
+  .rpthumb button{position:absolute;top:-6px;right:-6px;width:24px;height:24px;border-radius:50%;border:0;background:#333;color:#fff;display:grid;place-items:center;padding:0}
+  .rpthumb button svg{width:12px;height:12px}
+  .rcam{flex:none;width:46px;height:46px;border-radius:13px;display:grid;place-items:center;font-size:20px;background:color-mix(in srgb, var(--ink) 6%, var(--card));cursor:pointer}
+  .ptext[data-react-tap],.rbubble[data-react-tap]{cursor:pointer;-webkit-tap-highlight-color:transparent}
   /* ===== Éléments en cases ===== */
   .card.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;background:transparent;box-shadow:none;border:0;padding:0;overflow:visible}
   .tiles .irow{position:relative;display:block;padding:0;min-height:0;border:0!important;border-radius:18px;background-color:var(--card);
@@ -753,7 +785,7 @@ import {
 import {
   initializeFirestore, getFirestore, persistentLocalCache, persistentMultipleTabManager,
   collection, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, writeBatch,
-  arrayUnion, arrayRemove, limit, getDocFromCache, getDocs, where
+  arrayUnion, arrayRemove, limit, getDocFromCache, getDocs, where, deleteField
 } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
 
 // ================== Outils ==================
@@ -1130,7 +1162,7 @@ function subscribe() {
                w: Number(v.w) || 0, h: Number(v.h) || 0, by: typeof v.by === 'string' ? v.by : null, byName: typeof v.byName === 'string' ? v.byName : '',
                createdAt: Number(v.createdAt) || 0, pinned: v.pinned === true,
                mentions: Array.isArray(v.mentions) ? v.mentions.filter(x => typeof x === 'string') : [],
-               photoId: typeof v.photoId === 'string' ? v.photoId : null, editedAt: Number(v.editedAt) || 0 };
+               photoId: typeof v.photoId === 'string' ? v.photoId : null, editedAt: Number(v.editedAt) || 0, reactions: cleanReactions(v.reactions) };
     });
     if (state.tab === 'notes' || (state.tab === 'lists' && state.view !== 'list')) render();
     else renderTabbar(true);
@@ -1139,7 +1171,8 @@ function subscribe() {
 
   unsubs.push(onSnapshot(query(col('replies'), orderBy('createdAt', 'desc'), limit(300)), snap => {
     state.replies = snap.docs.map(d => { const v = d.data(); return { id: d.id, postId: v.postId, text: String(v.text || ''),
-      by: typeof v.by === 'string' ? v.by : null, byName: typeof v.byName === 'string' ? v.byName : '', createdAt: Number(v.createdAt) || 0 }; }).sort((x, y) => x.createdAt - y.createdAt);
+      by: typeof v.by === 'string' ? v.by : null, byName: typeof v.byName === 'string' ? v.byName : '', createdAt: Number(v.createdAt) || 0,
+      photoId: typeof v.photoId === 'string' ? v.photoId : null, w: Number(v.w) || 0, h: Number(v.h) || 0, reactions: cleanReactions(v.reactions) }; }).sort((x, y) => x.createdAt - y.createdAt);
     if (state.tab === 'notes' || (state.tab === 'lists' && state.view !== 'list')) render(); else renderTabbar(true);
     if (sheetKind === 'thread') openThread(sheetTarget);
   }, soft('Réponses')));
@@ -2448,7 +2481,7 @@ function openSettingsSheet() {
     <div class="sep"></div>
     <div class="label">Ton compte</div>
     <p class="hint">Connecté avec <b>${esc(state.user?.email || '')}</b>. Connecte-toi avec ce même compte sur ton iPad ou ton autre téléphone : tu y retrouves tout.</p>
-    <p class="hint" style="font-size:11.5px;opacity:.6">Version de l'app : 19 nov. 18 h 25</p>
+    <p class="hint" style="font-size:11.5px;opacity:.6">Version de l'app : 19 nov. 18 h 45</p>
     <div class="actions" style="margin-top:12px">
       <button type="button" class="btn ghost" data-reset-pw>Changer de mot de passe</button>
       <button type="button" class="btn ghost" data-logout>Se déconnecter</button>
@@ -2791,9 +2824,14 @@ overlay.addEventListener('click', e => {
   if (ep) { const p = state.posts.find(x => x.id === ep.dataset.editPost); if (p) openEditPost(p); return; }
   const rp = t.closest('[data-reply-post]');
   if (rp) { openThread(rp.dataset.replyPost); return; }
+  if (t.closest('[data-reply-photo-drop]')) { replyPhoto = null; showReplyPhoto(); return; }
+  const vm = t.closest('[data-view-media]');
+  if (vm) { viewMedia(vm.dataset.viewMedia); return; }
   const dr = t.closest('[data-del-reply]');
   if (dr) {
     if (!dr.classList.contains('sure')) { dr.classList.add('sure'); dr.textContent = 'Confirmer'; return; }
+    const rr = state.replies.find(x => x.id === dr.dataset.delReply);
+    if (rr?.photoId) fire(deleteDoc(ref('media', rr.photoId)));
     fire(deleteDoc(ref('replies', dr.dataset.delReply))); return;
   }
   const svT = t.closest('[data-sv-toggle]');
@@ -2833,6 +2871,14 @@ overlay.addEventListener('click', e => {
 });
 
 overlay.addEventListener('change', async e => {
+  if (e.target.matches('[data-reply-photo]')) {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    try { replyPhoto = await compressImage(file); showReplyPhoto(); sheet.querySelector('[name="reply"]')?.focus(); }
+    catch (err) { console.error(err); toast('Impossible de lire cette photo.'); }
+    return;
+  }
   if (e.target.matches('[data-photo-input]')) {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
@@ -3538,8 +3584,9 @@ function postCard(p) {
       ${p.pinned ? '<span class="pin" title="Épinglé">📌</span>' : ''}
       <button type="button" class="iconbtn pmore" data-action="postMenu" data-id="${esc(p.id)}" aria-label="Options">${ICON.more}</button>
     </div>
-    ${p.text ? `<div class="ptext">${linkify(esc(p.text))}</div>` : ''}
+    ${p.text ? `<div class="ptext" data-react-tap="posts:${esc(p.id)}">${linkify(esc(p.text))}</div>` : ''}
     ${p.photoId || p.photo ? `<button type="button" class="pphoto" data-action="viewPhoto" data-id="${esc(p.id)}"><img ${p.photoId ? `data-media="${esc(p.photoId)}"` : `src="${p.photo}"`} alt="" ${p.w && p.h ? `width="${p.w}" height="${p.h}"` : ''}></button>` : ''}
+    ${reactRow('posts', p)}
     ${(p.mentions || []).length ? `<div class="ptags">avec ${p.mentions.map(id => `<span class="ptag ${id === meId ? 'me' : ''}">${esc(id === meId ? 'toi' : memberName(id))}</span>`).join(' ')}</div>` : ''}
     ${replyStrip(p)}
   </article>`;
@@ -3551,8 +3598,9 @@ const repliesOf = postId => state.replies.filter(r => r.postId === postId);
 function replyStrip(p) {
   const rs = repliesOf(p.id), last = rs[rs.length - 1];
   return `<div class="pactions">
-    ${last ? `<button type="button" class="plast" data-action="thread" data-id="${esc(p.id)}"><b>${esc(last.byName || "Quelqu'un")}</b> ${esc(last.text.slice(0, 90))}${last.text.length > 90 ? '…' : ''}</button>` : ''}
-    <button type="button" class="preply" data-action="thread" data-id="${esc(p.id)}">💬 ${rs.length ? `${rs.length} réponse${rs.length > 1 ? 's' : ''} · Répondre` : 'Répondre'}</button>
+    ${last ? `<button type="button" class="plast" data-action="thread" data-id="${esc(p.id)}"><b>${esc(last.byName || "Quelqu'un")}</b> ${last.photoId && !last.text ? '📷 Photo' : esc(last.text.slice(0, 90)) + (last.text.length > 90 ? '…' : '')}</button>` : ''}
+    <span class="prow"><button type="button" class="preact" data-react-open="posts:${esc(p.id)}" aria-label="Réagir">☺＋</button>
+    <button type="button" class="preply" data-action="thread" data-id="${esc(p.id)}">💬 ${rs.length ? `${rs.length} réponse${rs.length > 1 ? 's' : ''} · Répondre` : 'Répondre'}</button></span>
   </div>`;
 }
 function openThread(postId) {
@@ -3571,24 +3619,38 @@ function openThread(postId) {
     </div>
     <div class="replies">${rs.length ? rs.map(r => `<div class="reply">
         <span class="avatar" style="--h:${pHue(r.by || r.byName)}">${esc(initial(r.byName))}</span>
-        <div class="grow"><div class="rbubble"><b>${esc(r.byName || "Quelqu'un")}</b><div class="rtext">${linkify(esc(r.text))}</div></div>
-          <div class="ptime">${whenFr(r.createdAt)} · <button type="button" class="link rdel" data-del-reply="${esc(r.id)}">Supprimer</button></div></div>
+        <div class="grow"><div class="rbubble" data-react-tap="replies:${esc(r.id)}"><b>${esc(r.byName || "Quelqu'un")}</b>${r.text ? `<div class="rtext">${linkify(esc(r.text))}</div>` : ''}
+            ${r.photoId ? `<button type="button" class="rphoto" data-view-media="${esc(r.photoId)}"><img data-media="${esc(r.photoId)}" alt="" ${r.w && r.h ? `width="${r.w}" height="${r.h}"` : ''}></button>` : ''}</div>
+          ${reactRow('replies', r)}
+          <div class="ptime">${whenFr(r.createdAt)} · <button type="button" class="link rreact" data-react-open="replies:${esc(r.id)}">Réagir</button> · <button type="button" class="link rdel" data-del-reply="${esc(r.id)}">Supprimer</button></div></div>
       </div>`).join('') : '<p class="hint" style="text-align:center;margin:10px 0">Pas encore de réponse.</p>'}</div>
     <form data-form="reply" class="replyform" autocomplete="off">
+      <div class="rpending" id="replyPending"></div>
+      <label class="rcam" aria-label="Ajouter une photo">📷<input type="file" accept="image/*" data-reply-photo hidden></label>
       <textarea class="field" name="reply" maxlength="1000" rows="1" placeholder="Écrire une réponse…">${esc(keepVal)}</textarea>
       <button type="submit" class="btn primary" aria-label="Envoyer">➤</button>
     </form>`);
   sheetKind = 'thread'; sheetTarget = postId;
+  if (!again) replyPhoto = null;
+  showReplyPhoto();
   hydrateMedia(sheet);
   const replies = sheet.querySelector('.replies');
   if (replies && again) sheet.scrollTop = sheet.scrollHeight;
   if (hadFocus || !again) sheet.querySelector('[name="reply"]')?.focus();
 }
+let replyPhoto = null;
+function showReplyPhoto() {
+  const box = sheet.querySelector('#replyPending'); if (!box) return;
+  box.innerHTML = replyPhoto ? `<span class="rpthumb"><img src="${replyPhoto.data}" alt=""><button type="button" data-reply-photo-drop aria-label="Retirer la photo">${ICON.x}</button></span>` : '';
+}
 function sendReply(f) {
   const ta = f.querySelector('[name="reply"]');
   const text = ta.value.trim().slice(0, 1000);
-  if (!text) { ta.focus(); return; }
-  fire(setDoc(doc(col('replies')), { postId: sheetTarget, text, by: meId, byName: state.myName, createdAt: Date.now() }));
+  if (!text && !replyPhoto) { ta.focus(); return; }
+  const data = { postId: sheetTarget, text, by: meId, byName: state.myName, createdAt: Date.now() };
+  if (replyPhoto) { data.photoId = saveMedia(replyPhoto); data.w = replyPhoto.w; data.h = replyPhoto.h; }
+  fire(setDoc(doc(col('replies')), data));
+  replyPhoto = null; showReplyPhoto();
   ta.value = ''; ta.style.height = '';
   ta.focus();
 }
@@ -3604,6 +3666,78 @@ function openEditPost(p) {
   sheetKind = 'editPost'; sheetTarget = p.id;
 }
 // Réponses à mes notes, pas encore vues
+// ----- Réactions (une par personne, comme sur Messenger) -----
+const REACTIONS = ['👍', '❤️', '😂', '😮', '😢', '😡'];
+function cleanReactions(v) {
+  const out = {};
+  if (v && typeof v === 'object') for (const [k, e] of Object.entries(v)) if (typeof e === 'string' && e) out[k] = graphemes(e).slice(0, 1).join('');
+  return out;
+}
+function reactRow(kind, obj) {
+  const rx = obj.reactions || {}, groups = new Map();
+  for (const [uid, e] of Object.entries(rx)) { if (!groups.has(e)) groups.set(e, []); groups.get(e).push(uid); }
+  if (!groups.size) return '';
+  const mine = rx[meId];
+  return `<div class="rxrow">${[...groups].sort((a, b) => b[1].length - a[1].length).map(([e, ids]) =>
+    `<button type="button" class="rxchip ${e === mine ? 'me' : ''}" data-react-set="${kind}:${esc(obj.id)}:${esc(e)}" title="${esc(ids.map(id => id === meId ? 'toi' : memberName(id)).join(', '))}">${esc(e)}<b>${ids.length}</b></button>`).join('')}
+    <span class="rxnames">${esc([...groups.values()].flat().map(id => id === meId ? 'toi' : memberName(id)).slice(0, 3).join(', '))}${Object.keys(rx).length > 3 ? '…' : ''}</span></div>`;
+}
+function setReaction(kind, id, emoji) {
+  const list = kind === 'posts' ? state.posts : state.replies;
+  const o = list.find(x => x.id === id); if (!o) return;
+  const cur = (o.reactions || {})[meId];
+  const next = cur === emoji ? null : emoji;                  // retoucher la même = l'enlever
+  o.reactions = { ...(o.reactions || {}) };
+  if (next) o.reactions[meId] = next; else delete o.reactions[meId];
+  fire(updateDoc(ref(kind, id), { [`reactions.${meId}`]: next || deleteField() }));
+  if (next) navigator.vibrate?.(10);
+  if (kind === 'posts' && state.tab === 'notes') render();
+  if (sheetKind === 'thread') openThread(sheetTarget);
+}
+const reactBar = document.createElement('div');
+reactBar.id = 'reactbar'; reactBar.hidden = true;
+document.body.appendChild(reactBar);
+let reactTarget = null;
+function openReactBar(target, anchor) {
+  reactTarget = target;
+  const [kind, id] = target.split(':');
+  const o = (kind === 'posts' ? state.posts : state.replies).find(x => x.id === id);
+  const mine = o?.reactions?.[meId];
+  reactBar.innerHTML = `<div class="rxbar">${REACTIONS.map(e => `<button type="button" class="${e === mine ? 'me' : ''}" data-rx="${e}">${e}</button>`).join('')}
+      <button type="button" class="rxplus" data-rx-more aria-label="Autre émoji">＋</button></div>
+    <div class="rxmore" hidden><input class="field" data-rx-input placeholder="Tape un émoji (touche 😀 du clavier)" autocomplete="off"></div>`;
+  reactBar.hidden = false;
+  const r = anchor.getBoundingClientRect(), w = Math.min(330, innerWidth - 16);
+  reactBar.style.width = w + 'px';
+  reactBar.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2)) + 'px';
+  const top = r.top - 62;
+  reactBar.style.top = (top < 10 ? r.bottom + 8 : top) + 'px';
+}
+function closeReactBar() { reactBar.hidden = true; reactTarget = null; }
+reactBar.addEventListener('click', e => {
+  e.stopPropagation();
+  const b = e.target.closest('[data-rx]');
+  if (b && reactTarget) { const [k, id] = reactTarget.split(':'); closeReactBar(); setReaction(k, id, b.dataset.rx); return; }
+  if (e.target.closest('[data-rx-more]')) { const m = reactBar.querySelector('.rxmore'); m.hidden = false; m.querySelector('input').focus(); }
+});
+reactBar.addEventListener('input', e => {
+  if (!e.target.matches('[data-rx-input]') || !reactTarget) return;
+  const g = graphemes(e.target.value.trim())[0];
+  if (g && !/^[\p{L}\p{N}\p{P}\s]$/u.test(g)) { const [k, id] = reactTarget.split(':'); closeReactBar(); setReaction(k, id, g); }
+  else if (g) e.target.value = '';
+});
+document.addEventListener('click', e => {
+  const t = e.target;
+  if (!reactBar.hidden && !t.closest('#reactbar')) { const was = reactTarget; closeReactBar(); const o = t.closest('[data-react-open], [data-react-tap]'); if (o && (o.dataset.reactOpen || o.dataset.reactTap) === was) return; }
+  const set = t.closest('[data-react-set]');
+  if (set) { const [k, id, ...em] = set.dataset.reactSet.split(':'); setReaction(k, id, em.join(':')); return; }
+  const open = t.closest('[data-react-open]');
+  if (open) { openReactBar(open.dataset.reactOpen, open); return; }
+  const tap = t.closest('[data-react-tap]');
+  if (tap && !t.closest('a, button') && !String(getSelection?.() || '')) openReactBar(tap.dataset.reactTap, tap);
+}, true);
+addEventListener('scroll', () => { if (!reactBar.hidden && document.activeElement?.matches?.('[data-rx-input]') !== true) closeReactBar(); }, true);
+
 function unreadReplies() {
   const seen = Number(state.profile?.mentionSeen?.[state.code]) || 0;
   const mine = new Set(state.posts.filter(p => p.by === meId).map(p => p.id));
