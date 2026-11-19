@@ -286,8 +286,9 @@
   .grp-title.static{cursor:default}
   .grp-title .n{margin-left:2px}
   .grp-h .grp-title + .sec-drag{order:3}
-  .grp.donegrp{margin-top:14px}
-  .grp.donegrp .grp-title{opacity:.75}
+  .grp.mini{margin-top:12px}
+  .grp.mini .grp-h{font-size:11.5px;margin-bottom:6px}
+  .grp.mini .grp-h .e{font-size:14px}
   .done-zone{margin-top:32px}
   .done-h{margin-bottom:4px}
 
@@ -551,7 +552,7 @@
   .tiles .irow.hasvid .check,.tiles .irow.hasvid .pickbox{top:11px;left:11px;box-shadow:0 1px 4px rgba(0,0,0,.3)}
   .tiles .irow.hasvid .drag{top:9px;right:8px;opacity:.9;color:#fff;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
   .tiles .irow.hasvid .impbadge{top:10px;right:30px}
-
+  .grp.mini .vthumb{aspect-ratio:1;margin:4px 4px 0}
   .done .vthumb{opacity:.55}
 
   /* Icône libre (2 caractères) */
@@ -630,7 +631,7 @@
   .tiles .irow.checking{transform:scale(.92);opacity:.5;transition:transform .25s,opacity .25s}
   .donemark{position:absolute;top:7px;left:7px;width:22px;height:22px;border-radius:50%;background:var(--lc);color:#fff;display:grid;place-items:center;z-index:2}
   .donemark svg{width:12px;height:12px}
-  .tiles .irow.done .ititle{text-decoration:line-through;color:var(--muted)}
+  .tiles .irow.done .ititle{text-decoration:line-through;opacity:.7}
   .shopsw{margin-top:14px;align-items:flex-start}
   .shopsw small{font-size:12.5px;font-weight:400}
   .imenu-h{display:flex;align-items:center;gap:12px;margin:2px 0 14px}
@@ -661,90 +662,6 @@
 
   .dd-close{display:block;margin:0 0 8px auto;border:0;background:color-mix(in srgb, var(--ink) 8%, transparent);color:var(--ink);border-radius:999px;padding:6px 12px;font:600 13px Inter,system-ui,sans-serif}
   .rxbar .rxclose{font-size:15px;margin-left:4px}
-  .selright{display:flex;align-items:center;gap:14px}
-  .selx{border:0;border-radius:999px;padding:7px 12px;font:600 14px Inter,system-ui,sans-serif;background:color-mix(in srgb, var(--ink) 10%, transparent);color:var(--ink)}
-  .iconbox.auto{background:color-mix(in srgb, var(--accent) 10%, var(--field, var(--card)))}
-
-  /* Page d'accueil */
-  .dh{margin:4px 4px 10px}
-  .dpeople{display:flex;gap:14px;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none;cursor:pointer}
-  .dp{display:flex;flex-direction:column;align-items:center;gap:5px;flex:none;width:56px}
-  .dp small{font-size:12px;color:var(--muted);max-width:56px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .dp .avatar{position:relative}
-  .dp .avatar.more{background:color-mix(in srgb, var(--ink) 10%, var(--card));color:var(--ink)}
-  .ondot{position:absolute;right:-1px;bottom:-1px;width:13px;height:13px;border-radius:50%;background:#2fbf71;border:2.5px solid var(--bg)}
-  .dtiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .dtile{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;border:0;border-radius:22px;padding:16px 16px 15px;min-height:128px;
-    background:linear-gradient(155deg, hsl(var(--h) 55% 92%), var(--card) 75%);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.05),0 6px 18px rgba(0,0,0,.06);transition:transform .12s;font-family:inherit}
-  html[data-theme="dark"] .dtile{background:linear-gradient(155deg, hsl(var(--h) 30% 22%), var(--card) 75%)}
-  .dtile:active{transform:scale(.97)}
-  .dt-ic{font-size:30px;line-height:1;margin-bottom:auto}
-  .dtile b{font-size:18px;margin-top:12px}
-  .dtile small{font-size:13px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-  .dt-badge{position:absolute;top:12px;right:12px;min-width:22px;height:22px;border-radius:11px;background:#E0533D;color:#fff;font:700 12px/22px Inter,system-ui,sans-serif;text-align:center;font-style:normal;padding:0 6px}
-  .dfavs{display:flex;flex-direction:column;gap:8px}
-  .dfav{display:flex;align-items:center;gap:12px;border:0;border-radius:16px;background:var(--card);padding:10px 12px;color:var(--ink);font:600 15.5px Inter,system-ui,sans-serif;text-align:left;box-shadow:0 1px 2px rgba(0,0,0,.05)}
-  .dfav .lemo{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:22px;background:hsl(var(--h) 55% 92%);flex:none}
-  html[data-theme="dark"] .dfav .lemo{background:hsl(var(--h) 25% 24%)}
-  .dfav .n{font-size:12.5px;color:var(--muted);font-weight:600}
-  .dfav .chev{color:var(--muted);display:flex}
-  .dfav .chev svg{width:16px;height:16px}
-
-  /* Dépenses */
-  .bseg{margin-bottom:4px}
-  .bhero{display:flex;align-items:center;gap:16px;padding:16px}
-  .bring{position:relative;width:132px;height:132px;flex:none}
-  .ring{width:100%;height:100%;transform:rotate(-90deg)}
-  .ring-bg{fill:none;stroke:color-mix(in srgb, var(--ink) 9%, transparent);stroke-width:13}
-  .ring-fg,.ring-seg{fill:none;stroke-width:13;stroke-linecap:round;transition:stroke-dasharray .6s cubic-bezier(.2,.8,.3,1)}
-  .ring-seg{stroke-linecap:butt}
-  .bring-in{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
-  .bring-in small{font-size:11.5px;color:var(--muted)}
-  .bring-in b{font-size:22px;letter-spacing:-.02em;line-height:1.15}
-  .bstats{flex:1;display:flex;flex-direction:column;gap:8px;min-width:0}
-  .bstats > div{display:flex;flex-direction:column}
-  .bstats small{font-size:12px;color:var(--muted)}
-  .bstats b{font-size:16px}
-  .bstats p{margin:0 0 6px;font-size:14px}
-  .bstats .link{align-self:flex-start;font-size:13px}
-  .bnote{margin:-4px 4px 0;font-size:12px}
-  .blegend{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0;font-size:13.5px}
-  .blegend > div{display:flex;align-items:center;gap:8px}
-  .blegend i{width:10px;height:10px;border-radius:3px;flex:none}
-  .blegend .grow{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .exlist{padding:0;overflow:hidden}
-  .exrow{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;color:var(--ink);text-align:left;padding:12px 14px;font-family:inherit}
-  .exrow + .exrow{border-top:1px solid var(--line)}
-  .exrow.past{opacity:.55}
-  .exic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:21px;background:color-mix(in srgb, var(--ink) 6%, var(--card));flex:none}
-  .exrow .grow{min-width:0;display:flex;flex-direction:column}
-  .exrow .grow b{font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .exrow small{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-  .examt{display:flex;flex-direction:column;align-items:flex-end;flex:none}
-  .examt b{font-size:15px;font-variant-numeric:tabular-nums}
-  .examt small{font-size:11.5px;color:var(--muted)}
-  .bpeople{display:flex;flex-direction:column;gap:10px}
-  .bperson{display:flex;align-items:center;gap:12px;padding:12px 14px}
-  .bperson .grow{min-width:0;display:flex;flex-direction:column;gap:5px}
-  .bperson small{font-size:12.5px;color:var(--muted)}
-  .bbar{height:7px;border-radius:4px;background:color-mix(in srgb, var(--ink) 9%, transparent);overflow:hidden}
-  .bbar i{display:block;height:100%;border-radius:4px;transition:width .6s cubic-bezier(.2,.8,.3,1)}
-  .bleft{display:flex;flex-direction:column;align-items:flex-end;flex:none}
-  .bleft b{font-size:17px}
-  .bleft b.neg{color:#E0533D}
-  .fabadd{position:fixed;right:18px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:9;border:0;border-radius:999px;padding:13px 18px;background:var(--accent);color:#fff;
-    font:700 15px Inter,system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.22)}
-  .fabadd:active{transform:scale(.96)}
-  .addrow2{display:grid;grid-template-columns:1.4fr 1fr;gap:10px}
-  .eurfield{position:relative}
-  .eurfield .field{padding-right:30px;font-size:18px;font-weight:600}
-  .eurfield span{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-weight:600}
-  .expfreq{margin-top:14px}
-  .exsplit{margin-top:8px;color:var(--accent);font-weight:600}
-  .dtile.wide{grid-column:1 / -1;min-height:0;flex-direction:row;align-items:center;gap:12px;padding:14px 16px}
-  .dtile.wide .dt-ic{margin:0}
-  .dtile.wide b{margin:0}
-  .dtile.wide small{margin-left:auto}
   /* Messages vocaux */
   .iconchip{font-size:18px;padding:6px 12px}
   .vplayer{display:flex;align-items:center;gap:10px;margin-top:10px;padding:8px 12px 8px 8px;border-radius:999px;background:color-mix(in srgb, var(--accent) 10%, var(--card));max-width:300px}
@@ -792,9 +709,12 @@
   .tiles .irow.picked{box-shadow:0 0 0 2.5px var(--lc)}
   .tiles .irow.done{background-color:color-mix(in srgb, var(--card) 60%, transparent);box-shadow:none}
   .tiles .irow.done .itext{min-height:96px;padding-top:12px}
+  .tiles .irow.done .iemo{font-size:26px}
   .tiles .irow.assigned{background-image:var(--pg);background-size:100% 4px;background-position:bottom;background-repeat:no-repeat}
-  .done-zone .tiles .irow.done{opacity:.8;box-shadow:none}
-  .done-zone .tiles .irow.done .itext{min-height:104px}
+  .grp.mini .tiles{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+  .grp.mini .tiles .itext{min-height:84px;padding:12px 5px 8px}
+  .grp.mini .tiles .ititle{font-size:12.5px}
+  .grp.mini .tiles .note,.grp.mini .tiles .qty{display:none}
   .tiles .drag-ghost{opacity:.35}
 
   .selbar{position:fixed;left:0;right:0;bottom:0;z-index:9;padding:10px 14px calc(10px + env(safe-area-inset-bottom));
@@ -985,43 +905,6 @@ const screen = $('#screen'), composer = $('#composer'), input = $('#newItem'), s
       fab = $('#fab'), overlay = $('#overlay'), sheet = $('#sheet');
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
-// ----- Icône automatique : « Œufs » → 🥚, « Pâtes carbo » → 🍝… (dictionnaire de mots courants) -----
-const AUTO_EMO = (() => {
-  const single = new Map(), multi = [];
-  `🥚 oeuf|🥛 lait,lait d'avoine,lait d'amande,boisson vegetale|🧈 beurre,margarine|🧀 fromage,emmental,gruyere,comte,camembert,brie,mozzarella,parmesan,raclette,roquefort,feta,chevre,cheddar,mascarpone,ricotta,reblochon,fromage rape|🍦 glace,sorbet,creme glacee|🥣 cereale,muesli,granola,flocon d'avoine,porridge|🍶 yaourt,yogourt,skyr,fromage blanc,petit suisse,creme fraiche,creme,faisselle|🍞 pain,baguette,pain de mie,brioche,biscotte,pain complet|🥐 croissant,pain au chocolat,chocolatine,viennoiserie|🥖 ficelle,tradition|🍝 pate,spaghetti,tagliatelle,penne,fusilli,lasagne,macaroni,coquillette,raviolis,gnocchi,nouille,ramen,udon|🍚 riz,risotto,semoule,quinoa,boulgour,couscous|🥔 pomme de terre,patate,frite,puree|🍅 tomate,coulis,sauce tomate,concentre de tomate|🥕 carotte|🥒 concombre,cornichon,courgette|🥬 salade,laitue,epinard,chou,mache,roquette,blette,endive|🥦 brocoli,chou fleur|🧅 oignon,echalote|🧄 ail|🌶️ piment,harissa,tabasco|🫑 poivron|🍆 aubergine|🌽 mais|🍄 champignon,cepe,girolle|🥑 avocat,guacamole|🫛 petit pois,haricot vert,feve,pois|🫘 haricot,lentille,pois chiche,flageolet|🎃 potiron,citrouille,courge,butternut,potimarron|🥜 cacahuete,arachide,beurre de cacahuete|🌰 noix,noisette,amande,chataigne,marron,pistache,noix de cajou|🍎 pomme,compote|🍐 poire|🍊 orange,clementine,mandarine|🍋 citron,citron vert|🍌 banane|🍉 pasteque|🍈 melon|🍇 raisin|🍓 fraise,framboise|🫐 myrtille,cassis,mure|🍒 cerise|🍑 peche,nectarine,abricot|🥭 mangue|🍍 ananas|🥥 noix de coco,coco|🥝 kiwi|🍏 pomme verte|🥩 viande,steak,boeuf,entrecote,bavette,roti,veau,agneau,gigot,cote de boeuf|🍗 poulet,dinde,cuisse,aile de poulet,blanc de poulet,volaille,canard|🥓 lardon,bacon,jambon,chorizo,saucisson,charcuterie,rillette,pate de campagne|🌭 saucisse,merguez,knacki,hot dog,chipolata|🍔 burger,hamburger,steak hache|🐟 poisson,saumon,cabillaud,colin,truite,sardine,maquereau,merlu,lieu|🍤 crevette,gambas,langoustine,fruits de mer|🦪 huitre,moule|🦀 crabe,surimi|🐙 poulpe,calamar,encornet|🥫 thon,conserve,boite,mais en boite,ravioli en boite|🍕 pizza,pate a pizza|🌮 tacos,tortilla,wrap,fajitas|🥪 sandwich,croque monsieur|🥗 taboule,salade composee|🍲 soupe,veloute,bouillon,ragout,pot au feu|🍛 curry,chili|🍣 sushi,maki|🥟 dumpling,ravioli chinois,gyoza,bao,xiao long bao,nem|🥞 crepe,pancake,gaufre|🧇 gaufre|🍰 gateau,tarte,cake,dessert,patisserie,fraisier,tiramisu,cheesecake|🎂 anniversaire,gateau d'anniversaire|🧁 muffin,cupcake,madeleine|🍪 biscuit,cookie,gateau sec,petit beurre,sable|🍫 chocolat,nutella,pate a tartiner,cacao|🍬 bonbon,friandise,haribo|🍭 sucette|🍯 miel,confiture|🧂 sel,poivre,epice,cumin,curcuma,paprika,herbes de provence|🫒 huile,huile d'olive,olive|🍾 champagne,cremant|🍷 vin,rouge,rose,bordeaux|🍺 biere|🥃 whisky,rhum,vodka,alcool,pastis,gin|🧃 jus,jus d'orange,jus de pomme|🥤 soda,coca,limonade,ice tea,sirop|💧 eau,eau gazeuse,eau petillante,bouteille d'eau|☕ cafe,capsule,dosette,expresso|🍵 the,tisane,infusion|🧊 glacon|🥄 sucre,farine,levure,maizena,vanille,sucre glace|🫙 bocal,pot|🥫 sauce,ketchup,mayonnaise,moutarde,vinaigrette,vinaigre,pesto|🍿 popcorn|🥨 bretzel,chips,apero,biscuit apero,crackers|🧻 papier toilette,pq,essuie tout,sopalin,mouchoir|🧼 savon,gel douche,liquide vaisselle,lessive,adoucissant|🧽 eponge|🧴 shampoing,apres shampoing,creme hydratante,lotion,demaquillant,deodorant,dentifrice,creme solaire|🪥 brosse a dents|🧹 balai,serpilliere,menage,aspirateur|🗑️ sac poubelle,poubelle|🧺 linge,panier a linge|🪣 seau|🧤 gant|🧷 epingle|🪒 rasoir|💊 medicament,doliprane,paracetamol,ibuprofene,vitamine,pharmacie|🩹 pansement|🧸 jouet,peluche|🍼 biberon,lait infantile|👶 bebe,couche,lingette|🐶 chien,croquette,patee|🐱 chat,litiere|🐟 aquarium|🪴 plante,terreau,engrais,pot de fleur|🌸 fleur,bouquet|💡 ampoule,lampe,lumiere|🔋 pile,batterie|🔌 prise,rallonge,multiprise,chargeur,cable|🔧 cle,plomberie,fuite,robinet,reparer,reparation|🔨 marteau,clou,bricolage|🪛 tournevis|🪚 scie|🔩 vis,boulon,cheville,ecrou|🪜 echelle,escabeau|🎨 peinture,peindre,pinceau,rouleau,enduit|🧱 brique,ciment,platre,carrelage,joint|🚪 porte,serrure|🪟 fenetre,vitre,rideau,store|🛏️ lit,matelas,drap,couette,oreiller|🛋️ canape,coussin,meuble,table,chaise|🚿 douche,salle de bain|🚽 toilette,wc|🧯 extincteur|🚗 voiture,garage,pneu,vidange,controle technique,essence,carburant|🚲 velo|🛒 courses,supermarche,marche|🎁 cadeau,noel|🎉 fete,soiree|📦 colis,carton,demenagement|✉️ courrier,lettre,timbre|📄 papier,document,dossier,impot,facture|💳 banque,carte bancaire|📞 telephone,appeler|💻 ordinateur,pc|📚 livre|✏️ stylo,crayon,cahier,fourniture|✂️ ciseaux|🧵 couture,fil,bouton|👕 vetement,t-shirt,tee shirt,pull,chemise|👖 pantalon,jean|👟 chaussure,basket|🧦 chaussette|🧥 manteau,veste|🌳 jardin,tondre,pelouse,haie,tondeuse|🔥 bois,cheminee,barbecue,charbon|❄️ congelateur,surgele|🧊 frigo,refrigerateur|🍽️ vaisselle,assiette,couverts|🥘 poele,casserole,cuisine|🕯️ bougie|🧳 valise,vacances|✈️ avion,voyage|🏥 medecin,docteur,rdv,rendez vous,dentiste|💈 coiffeur|🏋️ sport,salle de sport|🎂 anniv|🛍️ achat,shopping|🔨 travaux,renovation|🍽️ restaurant,resto,repas,plat,diner,dejeuner|🍝 idees repas,idee repas,recette|🎬 film,cinema|📺 serie,netflix|🎵 musique,concert|🎮 jeu,jeux video|✅ a faire,todo,tache|🎄 noel,sapin|🥗 entree,healthy,leger|🥐 petit dejeuner,brunch|🥕 legume|🍎 fruit|🥤 boisson|🥫 epicerie|🧴 hygiene,beaute|🥖 boulangerie|🥩 boucherie|🐟 poissonnerie|🍔 fast food,fastfood|🛏️ chambre|🛋️ salon|⏱️ minute,min,mins,rapide,express|💰 euro,euros,budget,argent,prix|💡 idee|🏠 maison,loyer,credit immobilier,pret immobilier,syndic,charges|🥛 laitier,produit laitier,cremerie|📺 netflix,disney,canal,prime video,abonnement tv,deezer,spotify|📱 forfait,mobile,box,internet,fibre|⚡ electricite,edf,engie,gaz,energie|💧 eau|🛡️ assurance,mutuelle,prevoyance|🚗 credit auto,voiture,parking,peage,navigo,transport|🏋️ salle de sport,basic fit,fitness|🎓 ecole,cantine,creche,nounou|💳 credit,pret|🧾 impot,taxe fonciere,taxe|🐶 veterinaire`.split('|').forEach(b => {
-    const sp = b.indexOf(' '), e = b.slice(0, sp);
-    b.slice(sp + 1).split(',').forEach(w => {
-      w = norm(w).replace(/œ/g, 'oe');
-      if (!w) return;
-      if (/[\s'-]/.test(w)) multi.push([w, e]); else if (!single.has(w)) single.set(w, e);
-    });
-  });
-  multi.sort((a, b) => b[0].length - a[0].length);
-  return { single, multi };
-})();
-const autoEmoCache = new Map();
-function autoEmoji(title) {
-  const t = norm(title).replace(/œ/g, 'oe').replace(/[’]/g, "'");
-  if (!t) return '';
-  if (autoEmoCache.has(t)) return autoEmoCache.get(t);
-  let found = '';
-  const padded = ' ' + t.replace(/[^a-z0-9' -]/g, ' ') + ' ';
-  const sing = ' ' + t.replace(/[^a-z0-9' -]/g, ' ').split(/\s+/).map(w => w.length > 3 ? w.replace(/(s|x)$/, '') : w).join(' ') + ' ';
-  for (const [w, e] of AUTO_EMO.multi) {
-    const re = new RegExp(`[\\s']${w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}s?[\\s']`);
-    if (re.test(padded) || re.test(sing)) { found = e; break; }
-  }
-  if (!found) {
-    for (const raw of t.split(/[^a-z0-9]+/)) {
-      if (raw.length < 2) continue;
-      const cands = [raw, raw.replace(/(s|x)$/, ''), raw.replace(/aux$/, 'al'), raw.replace(/eaux$/, 'eau')];
-      const hit = cands.find(c => AUTO_EMO.single.has(c));
-      if (hit) { found = AUTO_EMO.single.get(hit); break; }
-    }
-  }
-  autoEmoCache.set(t, found);
-  return found;
-}
 const str = (v, fallback) => (typeof v === 'string' && v.trim()) ? v : fallback;
 
 // Icône libre : 2 caractères maximum (lettres, chiffres ou un émoji du clavier)
@@ -1083,7 +966,7 @@ const state = {
   view: 'home', listId: null, loading: true, error: null,
   // admin
   users: [], adminQuery: '',
-  tab: 'home'
+  tab: 'lists'
 };
 let db = null, auth = null, fbApp = null, unsubs = [], renderedKey = '';
 const seenItems = new Set(); let itemsPrimed = false;
@@ -1174,8 +1057,7 @@ function touchMember(force) {
   if (!force && now - lastTouch < 10 * 60 * 1000) return;
   lastTouch = now;
   const extra = typeof state.profile?.color === 'number' ? { hue: state.profile.color } : {};
-  // plus aucune trace d'activité (« vu il y a… ») : on efface l'ancienne si elle existe
-  fire(setDoc(ref('members', meId), { name: state.myName, removed: false, ...extra, devices: deleteField() }, { merge: true }));
+  fire(setDoc(ref('members', meId), { name: state.myName, removed: false, ...extra, devices: { [deviceId]: { label: deviceLabel(), lastSeen: now } } }, { merge: true }));
 }
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') { touchUser(false); touchMember(false); }
@@ -1243,7 +1125,7 @@ function onSignedOut() {
   if (unsubProfile) { unsubProfile(); unsubProfile = null; }
   if (unsubUsers) { unsubUsers(); unsubUsers = null; }
   meId = null; houses = []; fav = null; migrated = false;
-  Object.assign(state, { user: null, profile: null, blocked: false, isAdmin: false, myName: '', users: [], view: 'home', authMode: 'login', tab: 'home' });
+  Object.assign(state, { user: null, profile: null, blocked: false, isAdmin: false, myName: '', users: [], view: 'home', authMode: 'login', tab: 'lists' });
   closeSheet();
   render();
 }
@@ -1286,13 +1168,6 @@ function closeHouse() {
 
 function subscribe() {
   unsubs.forEach(u => u()); unsubs = [];
-  state.expenses = []; state.expDenied = false;
-  unsubs.push(onSnapshot(query(col('expenses'), orderBy('createdAt')), snap => {
-    state.expenses = snap.docs.map(d => { const v = d.data(); return { id: d.id, name: str(v.name, 'Dépense'), emoji: typeof v.emoji === 'string' ? clipIcon(v.emoji) : '',
-      amount: Math.max(0, Math.round(Number(v.amount) || 0)), freq: v.freq === 'year' ? 'year' : 'month', day: Math.min(31, Math.max(1, Number(v.day) || 1)),
-      people: Array.isArray(v.people) ? v.people.filter(x => typeof x === 'string') : [], by: v.by || null, createdAt: Number(v.createdAt) || 0 }; });
-    if (state.tab === 'budget' || state.tab === 'home') render();
-  }, e => { if (e && e.code === 'permission-denied') { state.expDenied = true; if (state.tab === 'budget') render(); return; } console.warn('dépenses', e); }));
   state.loading = true; state.error = null;
   const have = {};
   const kinds = ['lists', 'sections', 'items'];
@@ -1338,7 +1213,6 @@ function subscribe() {
       const devs = v.devices && typeof v.devices === 'object' ? Object.entries(v.devices) : [];
       return {
         id: d.id, name: str(v.name, "Quelqu'un"), removed: v.removed === true, hue: typeof v.hue === 'number' ? v.hue : null,
-        budget: v.budget && typeof v.budget === 'object' && Number(v.budget.salary) > 0 ? { salary: Math.round(Number(v.budget.salary)), payday: Math.min(31, Math.max(1, Number(v.budget.payday) || 1)) } : null,
         devices: devs.map(([k, x]) => ({ id: k, label: str(x && x.label, 'Appareil'), lastSeen: Number(x && x.lastSeen) || 0 }))
                      .sort((a, b) => b.lastSeen - a.lastSeen)
       };
@@ -1367,7 +1241,7 @@ function subscribe() {
   setTimeout(purgeOldEvents, 4000);
   unsubs.push(onSnapshot(query(col('events'), where('date', '>=', evCutoff())), snap => {
     state.events = snap.docs.map(evFromDoc).filter(e => e.date);
-    if (state.tab === 'cal' || state.tab === 'home') render();
+    if (state.tab === 'cal' || (state.tab === 'lists' && state.view !== 'list')) render();
   }, soft('Calendrier')));
   const seenPosts = new Set(); let postsPrimed = false;
   unsubs.push(onSnapshot(query(col('posts'), orderBy('createdAt', 'desc'), limit(80)), snap => {
@@ -1383,7 +1257,7 @@ function subscribe() {
                photoId: typeof v.photoId === 'string' ? v.photoId : null, editedAt: Number(v.editedAt) || 0, reactions: cleanReactions(v.reactions),
                audioId: typeof v.audioId === 'string' ? v.audioId : null, dur: Number(v.dur) || 0 };
     });
-    if (state.tab === 'notes' || state.tab === 'home') render();
+    if (state.tab === 'notes' || (state.tab === 'lists' && state.view !== 'list')) render();
     else renderTabbar(true);
     if (sheetKind === 'post' && !state.posts.some(p => p.id === sheetTarget)) closeSheet();
   }, soft('Notes')));
@@ -1393,7 +1267,7 @@ function subscribe() {
       by: typeof v.by === 'string' ? v.by : null, byName: typeof v.byName === 'string' ? v.byName : '', createdAt: Number(v.createdAt) || 0,
       photoId: typeof v.photoId === 'string' ? v.photoId : null, w: Number(v.w) || 0, h: Number(v.h) || 0, reactions: cleanReactions(v.reactions),
       audioId: typeof v.audioId === 'string' ? v.audioId : null, dur: Number(v.dur) || 0 }; }).sort((x, y) => x.createdAt - y.createdAt);
-    if (state.tab === 'notes' || state.tab === 'home') render(); else renderTabbar(true);
+    if (state.tab === 'notes' || (state.tab === 'lists' && state.view !== 'list')) render(); else renderTabbar(true);
     if (sheetKind === 'thread') openThread(sheetTarget);
   }, soft('Réponses')));
 
@@ -1668,7 +1542,7 @@ function renderOnboarding() {
     <p class="sub">Pour commencer, crée ta maison ou rejoins celle de quelqu'un.</p>
     <form class="card pad sec stack" data-form="create" autocomplete="off">
       <h2>🏡 Créer une maison</h2>
-      <input class="field" name="q_house" maxlength="40" placeholder="ex. Chez nous">
+      <input class="field" name="house" maxlength="40" placeholder="Nom de la maison (ex. Chez nous)">
       <button class="btn primary full" type="submit">Créer</button>
     </form>
     <form class="card pad sec stack" data-form="join" autocomplete="off">
@@ -1693,9 +1567,8 @@ function renderLoading() {
 screen.addEventListener('submit', async e => {
   e.preventDefault();
   if (e.target.id === 'wallForm') return publishPost();
-  const f = e.target, fld = n => f.querySelector(`[name="${n}"]`) || f.querySelector(`[name="q_${n}"]`);
-  const v = n => (fld(n)?.value || '').trim();
-  const need = n => { const el = fld(n); if (!el.value.trim()) { el.classList.add('err'); el.focus(); return true; } return false; };
+  const f = e.target, v = n => (f.querySelector(`[name="${n}"]`)?.value || '').trim();
+  const need = n => { const el = f.querySelector(`[name="${n}"]`); if (!el.value.trim()) { el.classList.add('err'); el.focus(); return true; } return false; };
   const btn = f.querySelector('button[type="submit"]');
   const busy = on => { if (btn) { btn.disabled = on; btn.style.opacity = on ? .6 : ''; } };
 
@@ -1863,10 +1736,41 @@ function renderHome() {
     dn ? c.done++ : c.todo++;
     if (i.important && !dn) c.imp++;
   }
-  let h = pageHead('Listes', state.loading ? 'Chargement…' : '');
+  let h = `<header class="hometop"><div class="grow">
+      ${state.myName ? `<div class="hello">Bonjour ${esc(state.myName)} 👋</div>` : ''}
+      <button class="housebtn" data-action="houses" aria-label="Mes maisons"><h1>${esc(state.house?.name || 'Maison')}</h1><span class="caret">${ICON.down}</span></button>
+      ${state.loading ? '<p class="sub">Chargement…</p>' : ''}</div>
+      <div class="btns">
+        <button class="iconbtn members-btn" data-action="members" aria-label="Membres">${avatarStack()}</button>
+        <button class="iconbtn" data-action="settings" aria-label="Réglages">${ICON.gear}</button>
+      </div></header>`;
   if (state.error) h += `<div class="banner">${esc(state.error)}</div>`;
   if (state.loading) return h;
-  h += notifCards(true);
+  const ua = unreadAssigned();
+  if (ua.length) {
+    const names = [...new Set(ua.map(i => i.assignedBy || "Quelqu'un"))];
+    h += `<div class="card mentioncard assigncard sec" role="button" tabindex="0" data-action="goAssigned">
+      <span class="bell">📌</span>
+      <span class="grow"><b>${esc(names.slice(0, 2).join(' et '))}</b> ${ua.length > 1 ? `t'a confié ${ua.length} éléments` : `t'a confié « ${esc(ua[0].title)} »`}</span>
+      <span class="chev">${ICON.chev}</span></div>`;
+  }
+  const ur = unreadReplies();
+  if (ur.length) {
+    const names = [...new Set(ur.map(r => r.byName || "Quelqu'un"))];
+    h += `<div class="card mentioncard sec" role="button" tabindex="0" data-action="goNotes">
+      <span class="bell">💬</span>
+      <span class="grow"><b>${esc(names.slice(0, 2).join(' et '))}</b> ${ur.length > 1 ? `ont répondu à tes notes (${ur.length})` : 'a répondu à ta note'}</span>
+      <span class="chev">${ICON.chev}</span></div>`;
+  }
+  const um = unreadMentions();
+  if (um.length) {
+    const names = [...new Set(um.map(p => p.byName || "Quelqu'un"))];
+    h += `<div class="card mentioncard sec" role="button" tabindex="0" data-action="goNotes">
+      <span class="bell">🔔</span>
+      <span class="grow"><b>${esc(names.slice(0, 2).join(' et '))}${names.length > 2 ? ' et d\'autres' : ''}</b> ${um.length > 1 ? `t'ont identifié dans ${um.length} notes` : "t'a identifié dans une note"}</span>
+      <span class="chev">${ICON.chev}</span></div>`;
+  }
+  h += todayWidget();
 
   if (!state.lists.length) {
     return h + `<div class="card empty" style="margin-top:22px"><div style="font-size:40px">📝</div>
@@ -1907,7 +1811,7 @@ function itemRow(i) {
   const asg = i.assignees || [];
   const pic = i.link && videoInfo(i.link) ? '' : i.photoId
     ? `<button type="button" class="ithumb" data-action="viewItemPhoto" data-id="${esc(i.photoId)}"><img data-media="${esc(i.photoId)}" alt=""></button>`
-    : (i.emoji || autoEmoji(i.title)) ? `<span class="iemo">${esc(i.emoji || autoEmoji(i.title))}</span>` : `<span class="iemo letter" style="--h:${hueOf(i.title)}">${esc(initial(i.title))}</span>`;
+    : i.emoji ? `<span class="iemo">${esc(i.emoji)}</span>` : `<span class="iemo letter" style="--h:${hueOf(i.title)}">${esc(initial(i.title))}</span>`;
   const inner = `${pic}<span class="ititle">${esc(i.title)}</span>
       ${i.qty ? `<span class="qty">${esc(i.qty)}</span>` : ''}
       ${i.note ? `<span class="note">${linkify(esc(i.note))}</span>` : ''}
@@ -1934,10 +1838,10 @@ function group(sec, items, opts = {}) {
     ? `<button type="button" class="grp-title" data-action="openSec" data-id="${esc(sec.id)}"><span class="e">${esc(sec.emoji)}</span>${esc(sec.name)}<span class="n">${items.length}</span></button>
        ${opts.mini ? '' : `<span class="sec-drag" aria-label="Déplacer la catégorie">${ICON.grip}</span>`}`
     : `<span class="grp-title static">${opts.label || 'Sans catégorie'}<span class="n">${items.length}</span></span>`;
-  return `<section class="grp ${opts.mini ? 'donegrp' : ''}" ${sec && !opts.mini ? `data-sec-id="${esc(sec.id)}"` : ''}>
+  return `<section class="grp ${opts.mini ? 'mini' : ''}" ${sec && !opts.mini ? `data-sec-id="${esc(sec.id)}"` : ''}>
     <div class="grp-h ${sec ? '' : 'soft'}">${head}</div>
     <div class="card tiles" ${opts.mini ? '' : `data-drop="${sec ? esc(sec.id) : ''}"`}>${items.map(itemRow).join('')}${
-      sec && !opts.mini && !state.selecting ? `<button type="button" class="addtile" data-action="addIn" data-id="${esc(sec.id)}"><span>＋</span>Ajouter</button>` : ''}</div></section>`;
+      sec && !opts.mini && !items.length && !state.selecting ? `<button type="button" class="addtile" data-action="addIn" data-id="${esc(sec.id)}"><span>＋</span>Ajouter</button>` : ''}</div></section>`;
 }
 
 function renderListHead(l) {
@@ -2001,7 +1905,7 @@ function renderSelbar(show) {
   const n = ids.length;
   const allDone = n && ids.every(id => state.items.find(i => i.id === id)?.done);
   selbar.innerHTML = `<div class="selcount">${n ? `${n} sélectionné${n > 1 ? 's' : ''}` : 'Touche les éléments à sélectionner'}
-      <span class="selright"><button type="button" class="link" data-sel="all">Tout</button><button type="button" class="selx" data-sel="cancel" aria-label="Annuler la sélection">✕ Annuler</button></span></div>
+      <button type="button" class="link" data-sel="all">Tout</button></div>
     <div class="selacts">
       ${n === 1 && currentList()?.shopping ? `<button type="button" class="selact" data-sel="edit"><span>✏️</span>Modifier</button>` : ''}
       <button type="button" class="selact" data-sel="cat" ${n ? '' : 'disabled'}><span>🏷️</span>Catégorie</button>
@@ -2029,7 +1933,6 @@ selbar.addEventListener('click', e => {
   if (!b || b.disabled) return;
   const its = selectedItems();
   switch (b.dataset.sel) {
-    case 'cancel': setSelecting(false); break;
     case 'edit': { const it = its[0]; setSelecting(false); if (it) openItemSheet(it); break; }
     case 'all': {
       const l = currentList();
@@ -2303,7 +2206,7 @@ function openAddSheet() {
   sheetListId = l.id;
   sheetSec = draft.sec[l.id] || null;
   if (sheetSec && !state.sections.some(s => s.id === sheetSec) && !pendingSecs.has(sheetSec)) sheetSec = null;
-  sheetEmoji = null; sheetIconManual = false;
+  sheetEmoji = null;
   sheetPeople = new Set();
   sheetPhoto = null;
   openSheet(`<div class="view" style="--h:${hueOf(l.id)}">
@@ -2312,7 +2215,7 @@ function openAddSheet() {
     <form data-form="addItem" autocomplete="off">
       <div class="emo-row">
         ${iconInput()}
-        <input class="field" name="q_title" maxlength="200" placeholder="ex. Lait, changer l'ampoule…" enterkeyhint="done" autocomplete="off">
+        <input class="field" name="title" maxlength="200" placeholder="Nom (ex. Lait, Changer l'ampoule…)" enterkeyhint="done" autocomplete="off">
       </div>
       ${emojiPicker(false, true)}
       <div class="label">Catégorie</div>
@@ -2324,13 +2227,13 @@ function openAddSheet() {
         </div>
       </div>
       <div class="addrow">
-        <div><div class="label">Quantité</div><input class="field" name="q_qty" maxlength="30" placeholder="ex. 2, 500 g, 5 vis" autocomplete="off" enterkeyhint="done"></div>
+        <div><div class="label">Quantité</div><input class="field" name="qty" maxlength="30" placeholder="ex. 2, 500 g, 5 vis" autocomplete="off" enterkeyhint="done"></div>
       </div>
       <div class="label">Lien <span class="muted">(vidéo TikTok, YouTube, Instagram, site…)</span></div>
-      <input class="field" name="q_link" type="text" inputmode="url" maxlength="500" placeholder="Colle un lien ici" autocomplete="off" autocapitalize="off" enterkeyhint="done">
+      <input class="field" name="link" type="text" inputmode="url" maxlength="500" placeholder="Colle un lien ici" autocomplete="off" autocapitalize="off" enterkeyhint="done">
       <label class="switch impsw"><input type="checkbox" name="important" ><span class="sw"></span>❗ Important</label>
       <div class="label">Commentaire</div>
-      <textarea class="field" name="q_note" maxlength="500" rows="1" placeholder="Facultatif"></textarea>
+      <textarea class="field" name="note" maxlength="500" rows="1" placeholder="Facultatif"></textarea>
       <div class="label">Pour qui ? <span class="muted">(la personne est prévenue)</span></div>
       <div data-people>${peoplePicker(true)}</div>
       <div class="label">Photo <span class="muted">(facultatif · pour une vidéo, une capture d'écran sert de miniature)</span></div>
@@ -2340,15 +2243,15 @@ function openAddSheet() {
     </form>
   </div>`);
   sheetKind = 'add';
-  sheet.querySelector('[name="q_title"]').focus();   // ouvre le clavier tout de suite
+  sheet.querySelector('[name="title"]').focus();   // ouvre le clavier tout de suite
 }
 
 function submitAddItem(f, title) {
   const listId = sheetListId;
   if (!listId) return;
-  const qtyEl = f.querySelector('[name="q_qty"]'), noteEl = f.querySelector('[name="q_note"]'), titleEl = f.querySelector('[name="q_title"]');
+  const qtyEl = f.querySelector('[name="qty"]'), noteEl = f.querySelector('[name="note"]'), titleEl = f.querySelector('[name="title"]');
   const impEl = f.querySelector('[name="important"]'), important = !!impEl?.checked;
-  const linkEl = f.querySelector('[name="q_link"]'), link = normLink(linkEl?.value);
+  const linkEl = f.querySelector('[name="link"]'), link = normLink(linkEl?.value);
   const photoId = sheetPhoto?.data ? saveMedia(sheetPhoto) : null;
   fire(setDoc(doc(col('items')), {
     photoId,
@@ -2381,8 +2284,7 @@ function submitAddItem(f, title) {
   sheetPeople = new Set();
   sheet.querySelectorAll('[data-pick-person]').forEach(b => b.classList.remove('on'));
   sheetPhoto = null; refreshPhotoField();
-  setEmoji(null); sheetIconManual = false;
-  sheet.querySelector('[data-icon]')?.classList.remove('auto');
+  setEmoji(null);
   sheet.querySelector('.emo-wrap')?.setAttribute('hidden', '');
   titleEl.focus();
 }
@@ -2495,22 +2397,6 @@ function render() {
     }
     return;
   }
-  if (state.tab === 'home') {
-    const anim = state.anim ? 'anim-' + state.anim : ''; state.anim = null;
-    screen.innerHTML = `<div class="${anim}">${renderDashboard()}</div>`;
-    body.innerHTML = '';
-    composer.hidden = true;
-    renderedKey = 'home';
-    return;
-  }
-  if (state.tab === 'budget') {
-    const anim = state.anim ? 'anim-' + state.anim : ''; state.anim = null;
-    screen.innerHTML = `<div class="${anim}">${pageHead('Dépenses', 'Salaire moins charges fixes : ce qu\'il reste à chacun.')}</div>`;
-    body.innerHTML = `<div class="${anim}">${renderBudget()}</div>`;
-    composer.hidden = true;
-    renderedKey = 'budget';
-    return;
-  }
   if (state.tab === 'cal') {
     const anim = state.anim ? 'anim-' + state.anim : ''; state.anim = null;
     screen.innerHTML = `<div class="${anim}">${renderCalendar()}</div>`;
@@ -2607,13 +2493,12 @@ function addSection(listId, name, emoji) {
 }
 
 // ================== Feuilles ==================
-let sheetIconManual = false;
 let sheetEmoji = null, sheetSec = null, sheetTarget = null, sheetListId = null;
 
 function emojiPicker() { return ''; }   // plus de grille d'émojis : l'icône se tape directement (2 caractères max)
 const nameRow = (value, placeholder) => `<div class="emo-row">
     ${iconInput()}
-    <input class="field" name="q_name" maxlength="60" placeholder="${placeholder}" value="${esc(value)}"></div>`;
+    <input class="field" name="name" maxlength="60" placeholder="${placeholder}" value="${esc(value)}"></div>`;
 const actions = label => `<div class="actions"><button type="button" class="btn ghost" data-close>Annuler</button><button type="submit" class="btn primary">${label}</button></div>`;
 const secRows = secs => secs.length ? secs.map(s => `<div class="srow" data-row="${esc(s.id)}">
     <button type="button" class="srow-btn" data-sec-edit="${esc(s.id)}"><span class="e">${esc(s.emoji)}</span><span class="t">${esc(s.name)}</span></button>
@@ -2678,6 +2563,7 @@ function openMembersSheet() {
       <span class="avatar lg" style="--h:${pHue(m.id)}">${esc(initial(m.name))}</span>
       <div class="grow">
         <div class="mname">${esc(m.name)}${m.id === meId ? ' <span class="muted">(toi)</span>' : ''}${admins.has(m.id) ? ' <span class="adminbadge">Admin</span>' : ''}</div>
+        <div class="mdev muted">${lastSeenOf(m) && Date.now() - lastSeenOf(m) < 15 * 60 * 1000 ? '<span class="online"></span>' : ''}${ago(lastSeenOf(m)) || 'pas encore connecté'}</div>
       </div>
       ${me && m.id !== meId ? `<button type="button" class="kick" data-manage="${esc(m.id)}">Gérer</button>` : ''}
     </div>`;
@@ -2740,7 +2626,7 @@ function openSettingsSheet() {
   openSheet(`<h3>Réglages</h3>
     <form data-form="settings" autocomplete="off">
       <div class="label" style="margin-top:0">Nom de la maison</div>
-      <input class="field" name="q_house" maxlength="40" value="${esc(state.house?.name || '')}">
+      <input class="field" name="house" maxlength="40" value="${esc(state.house?.name || '')}">
       <div class="label">Ton pseudo</div>
       <input class="field" name="me" maxlength="30" value="${esc(state.myName)}">
       ${actions('Enregistrer')}
@@ -2755,7 +2641,7 @@ function openSettingsSheet() {
     <div class="sep"></div>
     <div class="label">Ton compte</div>
     <p class="hint">Connecté avec <b>${esc(state.user?.email || '')}</b>. Connecte-toi avec ce même compte sur ton iPad ou ton autre téléphone : tu y retrouves tout.</p>
-    <p class="hint" style="font-size:11.5px;opacity:.6">Version de l'app : 20 nov. 00 h 30</p>
+    <p class="hint" style="font-size:11.5px;opacity:.6">Version de l'app : 19 nov. 22 h 00</p>
     <div class="actions" style="margin-top:12px">
       <button type="button" class="btn ghost" data-reset-pw>Changer de mot de passe</button>
       <button type="button" class="btn ghost" data-logout>Se déconnecter</button>
@@ -2786,7 +2672,7 @@ function openHousesSheet() {
 function openCreateHouseSheet() {
   openSheet(`<h3>Créer une maison</h3>
     <form data-form="createHouse" autocomplete="off">
-      <input class="field" name="q_house" maxlength="40" placeholder="ex. Chez mes parents">
+      <input class="field" name="house" maxlength="40" placeholder="Nom de la maison (ex. Chez mes parents)">
       ${actions('Créer')}
     </form>`);
 }
@@ -2795,17 +2681,17 @@ function openJoinHouseSheet() {
   openSheet(`<h3>Rejoindre une maison</h3>
     <form data-form="joinHouse" autocomplete="off">
       <p class="hint" style="margin-bottom:10px">Tape le code de la maison (6 caractères) qu'on t'a donné.</p>
-      <input class="field codefield" name="q_link" maxlength="7" placeholder="CODE" autocapitalize="characters" autocomplete="off" spellcheck="false">
+      <input class="field codefield" name="link" maxlength="7" placeholder="CODE" autocapitalize="characters" autocomplete="off" spellcheck="false">
       ${actions('Rejoindre')}
     </form>`);
 }
 
 function openListSheet(list) {
   sheetTarget = list ? list.id : null;
-  sheetEmoji = list ? (list.emoji || null) : null; sheetIconManual = !!(list && list.emoji);
+  sheetEmoji = list ? (list.emoji || null) : null;
   let h = `<h3>${list ? 'Modifier la liste' : 'Nouvelle liste'}</h3>
     <form data-form="${list ? 'editList' : 'newList'}" autocomplete="off">
-      ${nameRow(list ? list.name : '', 'ex. Bricolage, Cadeaux…')}${emojiPicker(!list)}
+      ${nameRow(list ? list.name : '', 'Nom de la liste')}${emojiPicker(!list)}
       <label class="switch shopsw"><input type="checkbox" name="shopping" ${list?.shopping ? 'checked' : ''}><span class="sw"></span><span>🛒 Liste de courses<br><small class="muted">Toucher un élément le coche, le retoucher le remet dans la liste.</small></span></label>
       ${actions(list ? 'Enregistrer' : 'Créer')}
     </form>`;
@@ -2829,10 +2715,10 @@ function openSectionsSheet() {
 
 function openSectionSheet(sec) {
   sheetTarget = sec ? sec.id : null;
-  sheetEmoji = sec ? (sec.emoji || null) : null; sheetIconManual = !!(sec && sec.emoji);
+  sheetEmoji = sec ? (sec.emoji || null) : null;
   let h = `<h3>${sec ? 'Modifier la catégorie' : 'Nouvelle catégorie'}</h3>
     <form data-form="${sec ? 'editSec' : 'newSec'}" autocomplete="off">
-      ${nameRow(sec ? sec.name : '', 'ex. Fruits, Salle de bain…')}${emojiPicker(!sec)}${actions(sec ? 'Enregistrer' : 'Créer')}
+      ${nameRow(sec ? sec.name : '', 'Nom de la catégorie')}${emojiPicker(!sec)}${actions(sec ? 'Enregistrer' : 'Créer')}
     </form>`;
   if (sec) {
     h += `<div class="sep" style="margin-bottom:16px"></div>
@@ -2847,7 +2733,7 @@ function ddLabel() {
   const s = state.sections.find(x => x.id === sheetSec) || pendingSecs.get(sheetSec);
   return s ? `<span class="e">${esc(s.emoji)}</span>${esc(s.name)}` : '<span class="muted">Sans catégorie</span>';
 }
-let ddNewEmoji = '', ddIconManual = false;
+let ddNewEmoji = '';
 function renderDdList() {
   const box = sheet.querySelector('[data-dd-list]');
   if (!box) return;
@@ -2871,25 +2757,25 @@ function setDdOpen(open) {
   if (!dd) return;
   dd.classList.toggle('open', open);
   dd.querySelector('.dd-panel').hidden = !open;
-  if (open) { const s = dd.querySelector('[data-dd-search]'); s.value = ''; ddNewEmoji = ''; ddIconManual = false; renderDdList(); setTimeout(() => s.focus(), 30); }
+  if (open) { const s = dd.querySelector('[data-dd-search]'); s.value = ''; renderDdList(); setTimeout(() => s.focus(), 30); }
 }
 function openSecView(secId) {
   const sec = state.sections.find(s => s.id === secId);
   if (!sec) { if (sheetKind === 'sec') closeSheet(); return; }
   const keepScroll = sheetKind === 'sec' ? sheet.scrollTop : 0;
-  const keepVal = sheetKind === 'sec' ? (sheet.querySelector('[name="q_title"]')?.value || '') : '';
-  const hadFocus = sheetKind === 'sec' && document.activeElement?.name === 'q_title';
+  const keepVal = sheetKind === 'sec' ? (sheet.querySelector('[name="title"]')?.value || '') : '';
+  const hadFocus = sheetKind === 'sec' && document.activeElement?.name === 'title';
   const its = state.items.filter(i => i.sectionId === secId && i.listId === sec.listId);
   const todo = its.filter(i => !i.done), done = its.filter(i => i.done);
   const row = i => `<div class="svrow ${i.done ? 'done' : ''}">
       <button type="button" class="check ${i.done ? 'on' : ''}" data-sv-toggle="${esc(i.id)}" aria-label="${i.done ? 'Décocher' : 'Cocher'}">${i.done ? ICON.check : ''}</button>
-      <button type="button" class="svtext" data-sv-edit="${esc(i.id)}">${(i.emoji || autoEmoji(i.title)) ? `<span class="iemo">${esc(i.emoji || autoEmoji(i.title))}</span>` : ''}<span class="ititle">${esc(i.title)}</span>${i.qty ? `<span class="qty">${esc(i.qty)}</span>` : ''}</button>
+      <button type="button" class="svtext" data-sv-edit="${esc(i.id)}">${i.emoji ? `<span class="iemo">${esc(i.emoji)}</span>` : ''}<span class="ititle">${esc(i.title)}</span>${i.qty ? `<span class="qty">${esc(i.qty)}</span>` : ''}</button>
       <button type="button" class="del" data-sv-del="${esc(i.id)}" aria-label="Supprimer">${ICON.x}</button>
     </div>`;
   openSheet(`<div class="view" style="--h:${hueOf(sec.listId)}">
     <h3 class="svhead"><span>${esc(sec.emoji)}</span> ${esc(sec.name)} <button type="button" class="link" data-sec-edit="${esc(sec.id)}">Modifier</button></h3>
     <form data-form="secAdd" class="svadd" autocomplete="off">
-      <input class="field" name="q_title" maxlength="200" placeholder="Ajouter dans ${esc(sec.name)}…" enterkeyhint="send" value="${esc(keepVal)}">
+      <input class="field" name="title" maxlength="200" placeholder="Ajouter dans ${esc(sec.name)}…" enterkeyhint="send" value="${esc(keepVal)}">
       <button type="submit" class="btn primary" aria-label="Ajouter">＋</button>
     </form>
     <div class="card" style="margin-top:12px">${todo.length ? todo.map(row).join('') : '<div class="pad muted">Rien à faire dans cette catégorie.</div>'}</div>
@@ -2897,7 +2783,7 @@ function openSecView(secId) {
   </div>`);
   sheetKind = 'sec'; sheetTarget = secId;
   sheet.scrollTop = keepScroll;
-  if (hadFocus) sheet.querySelector('[name="q_title"]')?.focus();
+  if (hadFocus) sheet.querySelector('[name="title"]')?.focus();
 }
 
 function openDraftCatSheet() {
@@ -2943,16 +2829,16 @@ function openItemSheet(item) {
     <form data-form="editItem" autocomplete="off">
       <div class="emo-row">
         ${iconInput()}
-        <input class="field" name="q_title" maxlength="200" value="${esc(item.title)}">
+        <input class="field" name="title" maxlength="200" value="${esc(item.title)}">
       </div>
       ${emojiPicker(false, true)}
       <label class="switch impsw"><input type="checkbox" name="important" ${item.important ? 'checked' : ''}><span class="sw"></span>❗ Important</label>
       <div class="label">Commentaire</div>
-      <textarea class="field note-field" name="q_note" maxlength="500" rows="3" placeholder="Des détails, une précision… (ex. la marque, où ranger, comment faire)">${esc(item.note)}</textarea>
+      <textarea class="field note-field" name="note" maxlength="500" rows="3" placeholder="Des détails, une précision… (ex. la marque, où ranger, comment faire)">${esc(item.note)}</textarea>
       <div class="label">Lien <span class="muted">(vidéo TikTok, YouTube, Instagram, site…)</span></div>
-      <input class="field" name="q_link" type="text" inputmode="url" maxlength="500" placeholder="Colle un lien ici" value="${esc(item.link || '')}" autocomplete="off" autocapitalize="off">
+      <input class="field" name="link" type="text" inputmode="url" maxlength="500" placeholder="Colle un lien ici" value="${esc(item.link || '')}" autocomplete="off" autocapitalize="off">
       <div class="label">Quantité</div>
-      <input class="field" name="q_qty" maxlength="30" placeholder="ex. 2, 500 g, 5 vis, 1 kilo…" value="${esc(item.qty)}" autocomplete="off">
+      <input class="field" name="qty" maxlength="30" placeholder="ex. 2, 500 g, 5 vis, 1 kilo…" value="${esc(item.qty)}" autocomplete="off">
       <div class="label">Pour qui ?</div>
       <div data-people>${peoplePicker(true)}</div>
       <div class="label">Photo <span class="muted">(pour une vidéo, une capture d'écran sert de miniature)</span></div>
@@ -3007,7 +2893,7 @@ overlay.addEventListener('click', e => {
     if (!name) return;
     const emo = clipIcon(ddNewEmoji) || '';
     const newId = addSection(sheetListId, name, emo);
-    ddNewEmoji = ''; ddIconManual = false;
+    ddNewEmoji = '';
     if (sheetKind === 'draftCat' || sheetKind === 'bulkCat') return chooseSection(newId);
     sheetSec = newId;
     sheet.querySelector('[data-dd-label]').innerHTML = `<span class="e">${esc(emo)}</span>${esc(name)}`;
@@ -3153,7 +3039,7 @@ overlay.addEventListener('change', async e => {
     const file = e.target.files && e.target.files[0];
     e.target.value = '';
     if (!file) return;
-    try { replyPhoto = await compressImage(file); showReplyPhoto(); sheet.querySelector('[name="q_reply"]')?.focus(); }
+    try { replyPhoto = await compressImage(file); showReplyPhoto(); sheet.querySelector('[name="reply"]')?.focus(); }
     catch (err) { console.error(err); toast('Impossible de lire cette photo.'); }
     return;
   }
@@ -3167,32 +3053,21 @@ overlay.addEventListener('change', async e => {
   if (e.target.name === 'allDay') sheet.querySelector('.times').hidden = e.target.checked;
 });
 overlay.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey && e.target.name === 'q_reply') { e.preventDefault(); sendReply(e.target.closest('form')); return; }
+  if (e.key === 'Enter' && !e.shiftKey && e.target.name === 'reply') { e.preventDefault(); sendReply(e.target.closest('form')); return; }
   if (e.key === 'Enter' && e.target.matches('[data-dd-search]')) {
     e.preventDefault();
     sheet.querySelector('[data-dd-list] .dd-opt')?.click();
   }
 });
 overlay.addEventListener('input', e => {
-  if (e.target.name === 'q_reply') { e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight, 160) + 'px'; }
-  if (e.target.matches('[data-dd-search]')) { if (!ddIconManual) ddNewEmoji = autoEmoji(e.target.value); return renderDdList(); }
+  if (e.target.name === 'reply') { e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight, 160) + 'px'; }
+  if (e.target.matches('[data-dd-search]')) return renderDdList();
   if (e.target.matches('[data-icon]')) {
-    sheetIconManual = true;
     const v = clipIcon(e.target.value);
     if (e.target.value !== v) { e.target.value = v; navigator.vibrate?.(10); }
     sheetEmoji = v || null;
   }
-  if (e.target.name === 'q_name' && !sheetIconManual && e.target.closest('[data-form="newList"],[data-form="editList"],[data-form="newSec"],[data-form="editSec"],[data-form="expense"]')) {
-    const em = autoEmoji(e.target.value);
-    sheetEmoji = em || null;
-    const box = sheet.querySelector('[data-icon]'); if (box) { box.value = em; box.classList.toggle('auto', !!em); }
-  }
-  if (e.target.name === 'q_title' && sheetKind === 'add' && !sheetIconManual) {
-    const em = autoEmoji(e.target.value);
-    sheetEmoji = em || null;
-    const box = sheet.querySelector('[data-icon]'); if (box) { box.value = em; box.classList.toggle('auto', !!em); }
-  }
-  if (e.target.matches('[data-dd-icon]')) { ddIconManual = true; const v = clipIcon(e.target.value); if (e.target.value !== v) e.target.value = v; ddNewEmoji = v; }
+  if (e.target.matches('[data-dd-icon]')) { const v = clipIcon(e.target.value); if (e.target.value !== v) e.target.value = v; ddNewEmoji = v; }
   e.target.classList?.remove('err');
 });
 
@@ -3207,7 +3082,7 @@ overlay.addEventListener('submit', e => {
     closeSheet(); return;
   }
   if (f.dataset.form === 'secAdd') {
-    const el = f.querySelector('[name="q_title"]');
+    const el = f.querySelector('[name="title"]');
     const title = el.value.trim().slice(0, 200);
     const sec = state.sections.find(x => x.id === sheetTarget);
     if (!title || !sec) { el.focus(); return; }
@@ -3218,13 +3093,13 @@ overlay.addEventListener('submit', e => {
     return;
   }
   if (f.dataset.form === 'joinHouse') {
-    const el = f.querySelector('[name="q_link"]');
+    const el = f.querySelector('[name="link"]');
     if (!el.value.trim()) { el.classList.add('err'); el.focus(); return; }
     joinWithCode(el.value);
     return;
   }
 
-  const field = f.querySelector('[name="q_name"], [name="q_title"], [name="q_house"]');
+  const field = f.querySelector('[name="name"], [name="title"], [name="house"]');
   const value = (field?.value || '').trim();
   if (!value) { field?.classList.add('err'); field?.focus(); return; }
 
@@ -3258,12 +3133,12 @@ overlay.addEventListener('submit', e => {
     }
     case 'editItem': {
       const it = state.items.find(x => x.id === sheetTarget), title = value.slice(0, 200);
-      const qty = (f.querySelector('[name="q_qty"]')?.value || '').trim().slice(0, 30);
+      const qty = (f.querySelector('[name="qty"]')?.value || '').trim().slice(0, 30);
       const emoji = sheetEmoji || null;
-      const note = (f.querySelector('[name="q_note"]')?.value || '').trim().slice(0, 500);
+      const note = (f.querySelector('[name="note"]')?.value || '').trim().slice(0, 500);
       const asg = [...sheetPeople];
       const important = !!f.querySelector('[name="important"]')?.checked;
-      const link = normLink(f.querySelector('[name="q_link"]')?.value);
+      const link = normLink(f.querySelector('[name="link"]')?.value);
       const added = asg.some(id => !(it?.assignees || []).includes(id));
       const asgChanged = it && (asg.length !== it.assignees.length || added);
       let photoId = it ? it.photoId : null;
@@ -3320,7 +3195,7 @@ app.addEventListener('click', e => {
     case 'addIn': { const l = currentList(); if (l) { draft.sec[l.id] = id; openAddSheet(); } break; }
     case 'goAssigned': {
       const first = unreadAssigned()[0];
-      if (first) { markAssignedSeen(); state.tab = 'lists'; renderedKey = ''; go('list', first.listId); }
+      if (first) { markAssignedSeen(); go('list', first.listId); }
       break;
     }
     case 'goNotes': state.tab = 'notes'; state.anim = 'in'; renderedKey = ''; render(); window.scrollTo(0, 0); break;
@@ -3459,7 +3334,7 @@ async function wxLoad(p, force) {
   } catch (e) { console.warn('météo', e); if (have) have.err = true; else wxData.set(k, { t: 0, err: true }); }
   wxLoading.delete(k);
   if (sheetKind === 'weather') renderWeatherSheet();
-  if (state.tab === 'home') render();
+  if (state.tab === 'lists' && state.view === 'home') { if (state.dragging) state.renderPending = true; else render(); }
 }
 // Petite scène animée selon le temps (soleil qui tourne, nuage qui pleut…)
 function wxAnim(code, day = 1) {
@@ -3596,8 +3471,6 @@ overlay.addEventListener('input', e => {
 
 // ================== Onglets : Listes / Calendrier / Notes ==================
 const TAB_ICONS = {
-  budget: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="3"/><path d="M2.5 10h19"/><path d="M7 15h3"/></svg>',
-  home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg>',
   lists: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>',
   cal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>',
   notes: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'
@@ -3610,7 +3483,7 @@ function renderTabbar(show) {
   const n = t === 'notes' ? 0 : unreadMentions().length + unreadReplies().length;
   const a = unreadAssigned().length;
   const badge = k => k === 'notes' && n ? `<i class="tabbadge">${n}</i>` : k === 'lists' && a ? `<i class="tabbadge">${a}</i>` : '';
-  tabbar.innerHTML = [['home', 'Accueil'], ['lists', 'Listes'], ['cal', 'Agenda'], ['notes', 'Notes'], ['budget', 'Dépenses']].map(([k, label]) =>
+  tabbar.innerHTML = [['lists', 'Listes'], ['cal', 'Calendrier'], ['notes', 'Notes']].map(([k, label]) =>
     `<button type="button" class="tab ${t === k ? 'on' : ''}" data-tab="${k}">${TAB_ICONS[k]}<span>${label}</span>${badge(k)}</button>`).join('');
 }
 tabbar.addEventListener('click', e => {
@@ -3620,292 +3493,14 @@ tabbar.addEventListener('click', e => {
   if (k === state.tab) {
     // retoucher l'onglet Listes ramène à l'accueil des listes
     if (k === 'lists' && state.view === 'list') go('home');
-    if (k === 'home') { renderedKey = ''; render(); }
     window.scrollTo({ top: 0, behavior: 'smooth' });
     return;
   }
   state.tab = k;
-  if (k === 'lists' && state.view === 'list' && !currentList()) state.view = 'home';
   state.anim = 'first';
   renderedKey = '';
   render();
   window.scrollTo(0, 0);
-});
-
-// ================== Dépenses : récurrentes, partagées, et ce qu'il reste à chacun ==================
-state.expenses = []; state.budgetView = 'me';
-const eur = c => (Number(c) / 100).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR', minimumFractionDigits: Number(c) % 100 ? 2 : 0, maximumFractionDigits: 2 });
-const eurInt = c => (Math.round(Number(c) / 100)).toLocaleString('fr-FR') + ' €';
-function parseEuros(v) {
-  const t = String(v || '').replace(/\s/g, '').replace('€', '').replace(',', '.');
-  if (!/^\d+(\.\d{0,2})?$/.test(t)) return null;
-  return Math.round(parseFloat(t) * 100);
-}
-const monthlyOf = e => e.freq === 'year' ? Math.round(e.amount / 12) : e.amount;
-function shareOf(e, uid) {
-  const ppl = e.people.length ? e.people : [e.by];
-  return ppl.includes(uid) ? Math.round(monthlyOf(e) / ppl.length) : 0;
-}
-function myBudget() {
-  const b = state.profile?.budget?.[state.code];
-  return b && Number(b.salary) > 0 ? { salary: Math.round(Number(b.salary)), payday: Math.min(31, Math.max(1, Number(b.payday) || 1)), shared: b.shared === true } : null;
-}
-function budgetOf(uid) {
-  if (uid === meId) return myBudget();
-  return (state.members || []).find(m => m.id === uid)?.budget || null;
-}
-function budgetTileText() {
-  const tot = state.expenses.reduce((t, e) => t + shareOf(e, meId), 0), b = myBudget();
-  if (!tot && !b) return 'Ce qu\'il te reste par mois';
-  return b ? `Il te reste ${eurInt(b.salary - tot)} / mois` : `${eurInt(tot)} de charges / mois`;
-}
-function ring(pct, color) {
-  const r = 52, C = 2 * Math.PI * r, v = Math.max(0, Math.min(1, pct));
-  return `<svg viewBox="0 0 120 120" class="ring"><circle cx="60" cy="60" r="${r}" class="ring-bg"/>
-    <circle cx="60" cy="60" r="${r}" class="ring-fg" style="stroke:${color};stroke-dasharray:${(C * v).toFixed(1)} ${C.toFixed(1)}"/></svg>`;
-}
-function renderBudget() {
-  if (state.expDenied) return `<div class="banner">Les dépenses ne sont pas encore autorisées : publie les nouvelles règles Firestore.</div>`;
-  const mine = state.expenses.filter(e => shareOf(e, meId) > 0);
-  const myTotal = mine.reduce((t, e) => t + shareOf(e, meId), 0);
-  const b = myBudget();
-  const left = b ? b.salary - myTotal : null;
-  const col = left == null ? 'var(--muted)' : left < 0 ? '#E0533D' : left < b.salary * 0.15 ? '#E89B2E' : '#2fbf71';
-  let h = `<div class="card bhero sec">
-    <div class="bring">${ring(b ? Math.max(0, left) / (b.salary || 1) : 0, col)}<div class="bring-in">
-      <small>${b ? 'Il te reste' : 'Tes charges'}</small><b style="color:${col}">${eurInt(b ? left : myTotal)}</b><small>par mois</small></div></div>
-    <div class="bstats">
-      ${b ? `<div><small>Salaire</small><b>${eur(b.salary)}</b></div>` : `<p>Ajoute ton salaire pour voir ce qu'il te reste chaque mois.</p>`}
-      <div><small>Charges fixes</small><b>− ${eur(myTotal)}</b></div>
-      <button type="button" class="${b ? 'link' : 'btn primary'}" data-salary>${b ? 'Modifier mon salaire' : '💶 Ajouter mon salaire'}</button>
-    </div></div>`;
-  if (b) h += `<p class="hint bnote">${b.shared ? 'Ton salaire est visible par la maison.' : 'Ton salaire est privé : toi seul le vois.'}</p>`;
-
-  // mes charges
-  h += `<div class="sec"><div class="grp-h soft dh">Mes charges fixes<span class="n">${mine.length}</span><button class="link act" data-exp-new>＋ Ajouter</button></div>
-    <div class="card exlist">${mine.length ? mine.sort((x, y) => shareOf(y, meId) - shareOf(x, meId)).map(e => expLine(e, meId)).join('')
-      : '<div class="pad muted">Aucune charge. Ajoute le loyer, les abonnements, l\'assurance…</div>'}</div></div>`;
-
-  // chacun
-  const people = houseMembers().filter(m => m.id !== meId).sort((x, y) => x.name.localeCompare(y.name));
-  if (people.length) {
-    h += `<div class="sec"><div class="grp-h soft dh">Chacun</div><div class="bpeople">${people.map(m => {
-      const tot = state.expenses.reduce((t, e) => t + shareOf(e, m.id), 0), bb = budgetOf(m.id);
-      return `<div class="card bperson"><span class="avatar lg" style="--h:${pHue(m.id)}">${esc(initial(m.name))}</span>
-        <div class="grow"><b>${esc(m.name)}</b><small>Charges : ${eur(tot)} / mois${bb ? ` · salaire ${eurInt(bb.salary)}` : ''}</small></div>
-        <div class="bleft">${bb ? `<small>reste</small><b class="${bb.salary - tot < 0 ? 'neg' : ''}">${eurInt(bb.salary - tot)}</b>` : '<small>salaire privé</small>'}</div></div>`;
-    }).join('')}</div></div>`;
-  }
-  // charges des autres (où je ne suis pas)
-  const others = state.expenses.filter(e => shareOf(e, meId) === 0);
-  if (others.length) h += `<div class="sec"><div class="grp-h soft dh">Charges des autres<span class="n">${others.length}</span></div>
-    <div class="card exlist">${others.map(e => expLine(e, null)).join('')}</div></div>`;
-  h += `<div style="height:76px"></div><button type="button" class="fabadd" data-exp-new aria-label="Ajouter une charge">＋ Charge</button>`;
-  return h;
-}
-function expLine(e, uid) {
-  const ppl = e.people.length ? e.people : [e.by];
-  const part = uid ? shareOf(e, uid) : monthlyOf(e);
-  return `<button type="button" class="exrow" data-exp="${esc(e.id)}"><span class="exic">${esc(e.emoji || autoEmoji(e.name) || '💶')}</span>
-    <span class="grow"><b>${esc(e.name)}</b><small>${miniAvatars(ppl)}${ppl.length > 1 ? ` partagé · ${eur(monthlyOf(e))} au total` : ''}</small></span>
-    <span class="examt"><b>${eur(part)}</b><small>par mois</small></span></button>`;
-}
-let expFreq = 'month';
-function openExpenseSheet(e) {
-  sheetTarget = e ? e.id : null;
-  sheetEmoji = e ? (e.emoji || null) : null; sheetIconManual = !!(e && e.emoji);
-  sheetPeople = new Set(e ? (e.people.length ? e.people : [e.by]) : [meId]);
-  expFreq = 'month';
-  openSheet(`<h3>${e ? 'Modifier la charge' : 'Nouvelle charge fixe'}</h3>
-    <form data-form="expense" autocomplete="off">
-      ${nameRow(e ? e.name : '', 'ex. Loyer, Netflix, Assurance auto…')}
-      <div class="label">Montant par mois</div>
-      <div class="eurfield"><input class="field" name="q_amount" inputmode="decimal" placeholder="0,00" value="${e ? (monthlyOf(e) / 100).toFixed(2).replace('.', ',').replace(',00', '') : ''}" autocomplete="off"><span>€</span></div>
-      <div class="label">Pour qui ? <span class="muted">(partagé à parts égales)</span></div>
-      <div data-people>${peoplePicker(true)}</div>
-      <button type="button" class="link" data-exp-all style="margin-top:8px">Tout le monde</button>
-      <p class="hint exsplit" id="expSplit"></p>
-      ${actions(e ? 'Enregistrer' : 'Ajouter')}
-    </form>
-    ${e ? `<div class="sep"></div><button type="button" class="btn danger full" data-exp-del>Supprimer la charge</button>` : ''}`);
-  sheetKind = 'expense';
-  updateExpSplit();
-  if (!e) sheet.querySelector('[name="q_name"]')?.focus();
-}
-function updateExpSplit() {
-  const box = sheet.querySelector('#expSplit'); if (!box) return;
-  const c = parseEuros(sheet.querySelector('[name="q_amount"]')?.value);
-  const n = sheetPeople.size || 1;
-  if (!c) { box.textContent = ''; return; }
-  const m = expFreq === 'year' ? c / 12 : c;
-  box.textContent = n > 1 ? `Soit ${eur(Math.round(m / n))} par personne.` : '';
-}
-function openSalarySheet() {
-  const b = myBudget();
-  openSheet(`<h3>Mon salaire</h3>
-    <form data-form="salary" autocomplete="off">
-      <div class="label">Salaire net par mois</div>
-      <div class="eurfield"><input class="field" name="q_salary" inputmode="decimal" placeholder="0" value="${b ? (b.salary / 100).toFixed(2).replace('.', ',').replace(',00', '') : ''}" autocomplete="off"><span>€</span></div>
-      <label class="switch" style="margin-top:14px"><input type="checkbox" name="shared" ${b?.shared ? 'checked' : ''}><span class="sw"></span><span>Visible par la maison<br><small class="muted">Sinon, toi seul vois ton salaire et ton reste.</small></span></label>
-      ${actions('Enregistrer')}
-    </form>
-    ${b ? `<button type="button" class="link" data-salary-del style="margin-top:12px">Retirer mon salaire</button>` : ''}`);
-  sheetKind = 'salary';
-  sheet.querySelector('[name="q_salary"]')?.focus();
-}
-document.addEventListener('click', e => {
-  const t = e.target;
-  if (t.closest('[data-exp-new]')) { openExpenseSheet(null); return; }
-  const ex = t.closest('[data-exp]'); if (ex) { const it = state.expenses.find(x => x.id === ex.dataset.exp); if (it) openExpenseSheet(it); return; }
-  if (t.closest('[data-salary]')) { openSalarySheet(); return; }
-  if (sheetKind === 'expense') {
-    if (t.closest('[data-exp-all]')) { houseMembers().forEach(m => sheetPeople.add(m.id)); sheet.querySelectorAll('[data-pick-person]').forEach(b => b.classList.add('on')); updateExpSplit(); return; }
-    if (t.closest('[data-pick-person]')) setTimeout(updateExpSplit, 0);
-    const del = t.closest('[data-exp-del]');
-    if (del) {
-      if (!del.classList.contains('sure')) { del.classList.add('sure'); del.textContent = 'Confirmer la suppression'; return; }
-      fire(deleteDoc(ref('expenses', sheetTarget))); closeSheet(); return;
-    }
-  }
-  if (sheetKind === 'salary' && t.closest('[data-salary-del]')) { saveSalary(null); closeSheet(); }
-});
-document.addEventListener('input', e => { if (sheetKind === 'expense' && e.target.name === 'q_amount') updateExpSplit(); });
-function saveSalary(b) {
-  const key = `budget.${state.code}`;
-  if (state.profile) { state.profile.budget = { ...(state.profile.budget || {}) }; if (b) state.profile.budget[state.code] = b; else delete state.profile.budget[state.code]; }
-  fire(updateDoc(userRef(), { [key]: b || deleteField() }));
-  // partagé : copie dans la fiche de membre de la maison (lisible par les autres) ; sinon on l'enlève
-  fire(updateDoc(ref('members', meId), { budget: b && b.shared ? { salary: b.salary, payday: b.payday } : deleteField() }));
-  renderedKey = ''; render();
-}
-document.addEventListener('submit', e => {
-  const f = e.target;
-  if (f.dataset.form === 'expense') {
-    e.preventDefault(); e.stopImmediatePropagation();
-    const name = (f.querySelector('[name="q_name"]').value || '').trim().slice(0, 60);
-    const amount = parseEuros(f.querySelector('[name="q_amount"]').value);
-    if (!name) { f.querySelector('[name="q_name"]').classList.add('err'); f.querySelector('[name="q_name"]').focus(); return; }
-    if (amount == null || amount <= 0) { const a = f.querySelector('[name="q_amount"]'); a.classList.add('err'); a.focus(); return; }
-    const data = { name, emoji: sheetEmoji || autoEmoji(name) || '', amount, freq: 'month',
-      people: [...sheetPeople].length ? [...sheetPeople] : [meId] };
-    if (sheetTarget) fire(updateDoc(ref('expenses', sheetTarget), data));
-    else fire(setDoc(doc(col('expenses')), { ...data, by: meId, byName: state.myName, createdAt: Date.now() }));
-    closeSheet(); toast(sheetTarget ? 'Charge modifiée.' : 'Charge ajoutée.');
-  } else if (f.dataset.form === 'salary') {
-    e.preventDefault(); e.stopImmediatePropagation();
-    const salary = parseEuros(f.querySelector('[name="q_salary"]').value);
-    if (salary == null || salary <= 0) { const a = f.querySelector('[name="q_salary"]'); a.classList.add('err'); a.focus(); return; }
-    saveSalary({ salary, payday: 1, shared: !!f.querySelector('[name="shared"]').checked });
-    closeSheet(); toast('Salaire enregistré.');
-  }
-}, true);
-
-// ================== Page d'accueil ==================
-function notifCards(onlyAssigned) {
-  let h = '';
-  const ua = unreadAssigned();
-  if (ua.length) {
-    const names = [...new Set(ua.map(i => i.assignedBy || "Quelqu'un"))];
-    h += `<div class="card mentioncard assigncard sec" role="button" tabindex="0" data-action="goAssigned">
-      <span class="bell">📌</span>
-      <span class="grow"><b>${esc(names.slice(0, 2).join(' et '))}</b> ${ua.length > 1 ? `t'a confié ${ua.length} éléments` : `t'a confié « ${esc(ua[0].title)} »`}</span>
-      <span class="chev">${ICON.chev}</span></div>`;
-  }
-  if (onlyAssigned) return h;
-  const ur = unreadReplies();
-  if (ur.length) {
-    const names = [...new Set(ur.map(r => r.byName || "Quelqu'un"))];
-    h += `<div class="card mentioncard sec" role="button" tabindex="0" data-action="goNotes">
-      <span class="bell">💬</span>
-      <span class="grow"><b>${esc(names.slice(0, 2).join(' et '))}</b> ${ur.length > 1 ? `ont répondu à tes notes (${ur.length})` : 'a répondu à ta note'}</span>
-      <span class="chev">${ICON.chev}</span></div>`;
-  }
-  const um = unreadMentions();
-  if (um.length) {
-    const names = [...new Set(um.map(p => p.byName || "Quelqu'un"))];
-    h += `<div class="card mentioncard sec" role="button" tabindex="0" data-action="goNotes">
-      <span class="bell">🔔</span>
-      <span class="grow"><b>${esc(names.slice(0, 2).join(' et '))}${names.length > 2 ? ' et d\'autres' : ''}</b> ${um.length > 1 ? `t'ont identifié dans ${um.length} notes` : "t'a identifié dans une note"}</span>
-      <span class="chev">${ICON.chev}</span></div>`;
-  }
-  return h;
-}
-function greeting() {
-  const hr = new Date().getHours();
-  return hr < 5 ? 'Bonne nuit' : hr < 18 ? 'Bonjour' : 'Bonsoir';
-}
-function renderDashboard() {
-  let h = `<header class="hometop"><div class="grow">
-      ${state.myName ? `<div class="hello">${greeting()} ${esc(state.myName)} 👋</div>` : ''}
-      <button class="housebtn" data-action="houses" aria-label="Mes maisons"><h1>${esc(state.house?.name || 'Maison')}</h1><span class="caret">${ICON.down}</span></button>
-      ${state.loading ? '<p class="sub">Chargement…</p>' : ''}</div>
-      <div class="btns">
-        <button class="iconbtn members-btn" data-action="members" aria-label="Membres">${avatarStack()}</button>
-        <button class="iconbtn" data-action="settings" aria-label="Réglages">${ICON.gear}</button>
-      </div></header>`;
-  if (state.error) h += `<div class="banner">${esc(state.error)}</div>`;
-  if (state.loading) return h;
-  h += notifCards(false);
-  h += todayWidget();
-
-  // Qui est là
-  const inHouse = new Set(state.house?.members || []);
-  const people = (state.members || []).filter(m => inHouse.has(m.id))
-    .sort((a, b) => (b.id === meId) - (a.id === meId) || a.name.localeCompare(b.name));
-  if (people.length) {
-    h += `<div class="sec"><div class="grp-h soft dh">La maison<span class="n">${people.length}</span></div>
-      <div class="dpeople" role="button" tabindex="0" data-action="members">${people.slice(0, 8).map(m => {
-        return `<span class="dp"><span class="avatar lg" style="--h:${pHue(m.id)}">${esc(initial(m.name))}</span><small>${esc(m.id === meId ? 'Toi' : m.name)}</small></span>`;
-      }).join('')}${people.length > 8 ? `<span class="dp"><span class="avatar lg more">+${people.length - 8}</span><small>&nbsp;</small></span>` : ''}</div></div>`;
-  }
-
-  // Les grandes cases
-  const todo = state.items.filter(i => !isDoneItem(i));
-  const imp = todo.filter(i => i.important).length;
-  const today = todayYmd();
-  const evToday = state.events.filter(e => e.date === today).length;
-  const evNext = state.events.filter(e => e.date >= today).sort(evSort)[0];
-  const lastPost = state.posts.filter(p => !p.pinned).sort((a, b) => b.createdAt - a.createdAt)[0] || state.posts[0];
-  const unreadN = unreadMentions().length + unreadReplies().length;
-  const tile = (go, icon, title, sub, badge, hue) => `<button type="button" class="dtile" data-go-tab="${go}" style="--h:${hue}">
-      <span class="dt-ic">${icon}</span>${badge ? `<i class="dt-badge">${badge}</i>` : ''}
-      <b>${title}</b><small>${sub}</small></button>`;
-  h += `<div class="dtiles sec">
-    ${tile('lists', '📝', 'Listes', `${state.lists.length} liste${state.lists.length > 1 ? 's' : ''}${imp ? ` · ❗ ${imp}` : ''}`, unreadAssigned().length, 150)}
-    ${tile('cal', '📅', 'Calendrier', evToday ? `${evToday} aujourd'hui` : evNext ? esc(`${relDay(evNext.date)} · ${evNext.title}`) : 'Rien de prévu', 0, 25)}
-    ${tile('notes', '💬', 'Notes', lastPost ? esc(`${lastPost.byName || ''} : ${lastPost.text || (lastPost.audioId ? '🎤 vocal' : '📷 photo')}`) : 'Écris le premier mot', unreadN, 265)}
-    ${tile('budget', '💶', 'Dépenses', budgetTileText(), 0, 45)}
-    ${(() => { const shop = state.lists.find(l => l.shopping);
-      if (!shop) return '';
-      const n = state.items.filter(i => i.listId === shop.id && !i.done).length;
-      return `<button type="button" class="dtile wide" data-open-list="${esc(shop.id)}" style="--h:205"><span class="dt-ic">${esc(iconOf(shop.emoji, shop.name))}</span>
-        <b>${esc(shop.name)}</b><small>${n ? `${n} à acheter` : 'Rien à acheter'}</small></button>`; })()}
-  </div>`;
-
-  // Raccourcis vers les listes favorites
-  const favs = new Set(homePrefs().fav);
-  const favL = state.lists.filter(l => favs.has(l.id));
-  if (favL.length) {
-    h += `<div class="sec"><div class="grp-h soft dh">⭐ Mes favoris</div><div class="dfavs">${favL.map(l => {
-      const n = state.items.filter(i => i.listId === l.id && !isDoneItem(i)).length;
-      return `<button type="button" class="dfav" data-open-list="${esc(l.id)}" style="--h:${hueOf(l.id)}"><span class="lemo ${l.emoji ? '' : 'letter'}">${esc(iconOf(l.emoji, l.name))}</span><span class="grow">${esc(l.name)}</span>${n ? `<span class="n">${n}</span>` : ''}<span class="chev">${ICON.chev}</span></button>`;
-    }).join('')}</div></div>`;
-  }
-  return h;
-}
-screen.addEventListener('click', e => {
-  const t = e.target.closest('[data-go-tab]');
-  if (t) {
-    const k = t.dataset.goTab;
-    if (k === 'weather') return openWeatherSheet();
-    if (k === 'newlist') return openListSheet(null);
-    if (k === 'cal') { state.tab = 'cal'; state.anim = 'in'; renderedKey = ''; setCalDay(todayYmd()); window.scrollTo(0, 0); return; }
-    state.tab = k; if (k === 'lists') state.view = 'home';
-    state.anim = 'in'; renderedKey = ''; render(); window.scrollTo(0, 0);
-    return;
-  }
-  const ol = e.target.closest('[data-open-list]');
-  if (ol) { state.tab = 'lists'; renderedKey = ''; markAssignedSeen?.(ol.dataset.openList); go('list', ol.dataset.openList); window.scrollTo(0, 0); }
 });
 
 // En-tête commun (nom de la maison, membres, réglages)
@@ -4050,7 +3645,7 @@ function openEventSheet(ev, day) {
     <form data-form="event" autocomplete="off">
       <div class="emo-row">
         ${iconInput()}
-        <input class="field" name="q_name" maxlength="80" placeholder="ex. Anniversaire de Léa" value="${esc(ev?.title || '')}">
+        <input class="field" name="name" maxlength="80" placeholder="Titre (ex. Anniversaire de Léa)" value="${esc(ev?.title || '')}">
       </div>
       ${emojiPicker(false, true)}
       <div class="label">Date</div>
@@ -4063,7 +3658,7 @@ function openEventSheet(ev, day) {
       <div class="label">Qui est concerné ?</div>
       ${peoplePicker(true)}
       <div class="label">Commentaire</div>
-      <textarea class="field" name="q_note" maxlength="500" rows="2" placeholder="Lieu, détails…">${esc(ev?.note || '')}</textarea>
+      <textarea class="field" name="note" maxlength="500" rows="2" placeholder="Lieu, détails…">${esc(ev?.note || '')}</textarea>
       ${actions(ev ? 'Enregistrer' : 'Ajouter')}
     </form>
     ${ev ? `<div class="sep" style="margin-bottom:16px"></div>
@@ -4080,7 +3675,7 @@ function saveEvent(f, title) {
   const data = {
     title: title.slice(0, 80), emoji: sheetEmoji || null, date, allDay,
     time: allDay ? '' : time, end: allDay ? '' : (f.querySelector('[name="end"]').value || ''),
-    note: (f.querySelector('[name="q_note"]').value || '').trim().slice(0, 500),
+    note: (f.querySelector('[name="note"]').value || '').trim().slice(0, 500),
     people: [...sheetPeople]
   };
   if (sheetTarget) fire(updateDoc(ref('events', sheetTarget), data));
@@ -4203,8 +3798,8 @@ function openThread(postId) {
   const p = state.posts.find(x => x.id === postId);
   if (!p) { if (sheetKind === 'thread') closeSheet(); return; }
   const again = sheetKind === 'thread' && sheetTarget === postId;
-  const keepVal = again ? (sheet.querySelector('[name="q_reply"]')?.value || '') : '';
-  const hadFocus = again && document.activeElement?.name === 'q_reply';
+  const keepVal = again ? (sheet.querySelector('[name="reply"]')?.value || '') : '';
+  const hadFocus = again && document.activeElement?.name === 'reply';
   const rs = repliesOf(postId);
   openSheet(`<h3>Réponses</h3>
     <div class="tpost">
@@ -4226,7 +3821,7 @@ function openThread(postId) {
       <div class="rpending" id="replyAudio"></div>
       <label class="rcam" aria-label="Ajouter une photo">📷<input type="file" accept="image/*" data-reply-photo hidden></label>
       <button type="button" class="rcam" data-rec="reply" aria-label="Message vocal">🎤</button>
-      <textarea class="field" name="q_reply" maxlength="1000" rows="1" placeholder="Écrire une réponse…">${esc(keepVal)}</textarea>
+      <textarea class="field" name="reply" maxlength="1000" rows="1" placeholder="Écrire une réponse…">${esc(keepVal)}</textarea>
       <button type="submit" class="btn primary" aria-label="Envoyer">➤</button>
     </form>`);
   sheetKind = 'thread'; sheetTarget = postId;
@@ -4235,7 +3830,7 @@ function openThread(postId) {
   hydrateMedia(sheet);
   const replies = sheet.querySelector('.replies');
   if (replies && again) sheet.scrollTop = sheet.scrollHeight;
-  if (hadFocus || !again) sheet.querySelector('[name="q_reply"]')?.focus();
+  if (hadFocus || !again) sheet.querySelector('[name="reply"]')?.focus();
 }
 let replyPhoto = null;
 function showReplyPhoto() {
@@ -4243,7 +3838,7 @@ function showReplyPhoto() {
   box.innerHTML = replyPhoto ? `<span class="rpthumb"><img src="${replyPhoto.data}" alt=""><button type="button" data-reply-photo-drop aria-label="Retirer la photo">${ICON.x}</button></span>` : '';
 }
 function sendReply(f) {
-  const ta = f.querySelector('[name="q_reply"]');
+  const ta = f.querySelector('[name="reply"]');
   const text = ta.value.trim().slice(0, 1000);
   if (rec.on) { toast("Arrête d'abord l'enregistrement."); return; }
   if (!text && !replyPhoto && !pendingAudio.reply) { ta.focus(); return; }
@@ -4395,12 +3990,7 @@ screen.addEventListener('change', async e => {
 // ================== Messages vocaux ==================
 const VOICE_MAX = 60;                      // secondes (un document Firestore fait 1 Mo max)
 const pendingAudio = { wall: null, reply: null };
-const rec = { on: false, where: null, mr: null, chunks: [], t0: 0, timer: null, stream: null, release: null };
-// Le micro reste ouvert 10 min après un vocal : l'iPhone ne redemande pas l'autorisation entre deux enregistrements
-const MIC_KEEP_MS = 10 * 60 * 1000;
-function micAlive() { return rec.stream && rec.stream.getAudioTracks().some(t => t.readyState === 'live'); }
-function releaseMic() { clearTimeout(rec.release); rec.release = null; if (!rec.on) { rec.stream?.getTracks().forEach(t => t.stop()); rec.stream = null; } }
-function keepMic() { clearTimeout(rec.release); rec.release = setTimeout(releaseMic, MIC_KEEP_MS); }
+const rec = { on: false, where: null, mr: null, chunks: [], t0: 0, timer: null, stream: null };
 const fmtDur = sec => { sec = Math.max(0, Math.round(sec)); return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`; };
 function saveAudio(a) {
   const r = doc(col('media'));
@@ -4418,12 +4008,9 @@ async function startRec(where) {
   if (rec.on) return;
   const mime = recMime();
   if (mime === null || !navigator.mediaDevices?.getUserMedia) { toast("L'enregistrement vocal n'est pas possible sur cet appareil."); return; }
-  clearTimeout(rec.release);
-  if (!micAlive()) {
-    try {
-      rec.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
-    } catch (e) { toast("Micro refusé : autorise-le dans les réglages de l'iPhone (Safari > Micro)."); return; }
-  }
+  try {
+    rec.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+  } catch (e) { toast("Micro refusé : autorise-le dans les réglages de l'iPhone (Safari > Micro)."); return; }
   rec.chunks = []; rec.where = where; rec.on = true; rec.t0 = Date.now();
   try { rec.mr = new MediaRecorder(rec.stream, { ...(mime ? { mimeType: mime } : {}), audioBitsPerSecond: 32000 }); }
   catch (_) { rec.mr = new MediaRecorder(rec.stream); }
@@ -4443,7 +4030,7 @@ function stopRec(keep) {
   const where = rec.where, dur = Math.min(VOICE_MAX, (Date.now() - rec.t0) / 1000), mr = rec.mr;
   rec.on = false;
   const finish = () => {
-    keepMic();
+    rec.stream?.getTracks().forEach(t => t.stop()); rec.stream = null;
     if (!keep || dur < 0.8) { pendingAudio[where] = null; showPendingAudio(where); if (keep) toast('Message trop court.'); return; }
     const blob = new Blob(rec.chunks, { type: mr.mimeType || 'audio/mp4' });
     const fr = new FileReader();
