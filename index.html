@@ -663,6 +663,7 @@
   .rxbar .rxclose{font-size:15px;margin-left:4px}
   .selright{display:flex;align-items:center;gap:14px}
   .selx{border:0;border-radius:999px;padding:7px 12px;font:600 14px Inter,system-ui,sans-serif;background:color-mix(in srgb, var(--ink) 10%, transparent);color:var(--ink)}
+  .iconbox.auto{background:color-mix(in srgb, var(--accent) 10%, var(--field, var(--card)))}
   /* Messages vocaux */
   .iconchip{font-size:18px;padding:6px 12px}
   .vplayer{display:flex;align-items:center;gap:10px;margin-top:10px;padding:8px 12px 8px 8px;border-radius:999px;background:color-mix(in srgb, var(--accent) 10%, var(--card));max-width:300px}
@@ -903,6 +904,43 @@ const screen = $('#screen'), composer = $('#composer'), input = $('#newItem'), s
       fab = $('#fab'), overlay = $('#overlay'), sheet = $('#sheet');
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+// ----- Icône automatique : « Œufs » → 🥚, « Pâtes carbo » → 🍝… (dictionnaire de mots courants) -----
+const AUTO_EMO = (() => {
+  const single = new Map(), multi = [];
+  `🥚 oeuf|🥛 lait,lait d'avoine,lait d'amande,boisson vegetale|🧈 beurre,margarine|🧀 fromage,emmental,gruyere,comte,camembert,brie,mozzarella,parmesan,raclette,roquefort,feta,chevre,cheddar,mascarpone,ricotta,reblochon,fromage rape|🍦 glace,sorbet,creme glacee|🥣 cereale,muesli,granola,flocon d'avoine,porridge|🍶 yaourt,yogourt,skyr,fromage blanc,petit suisse,creme fraiche,creme,faisselle|🍞 pain,baguette,pain de mie,brioche,biscotte,pain complet|🥐 croissant,pain au chocolat,chocolatine,viennoiserie|🥖 ficelle,tradition|🍝 pate,spaghetti,tagliatelle,penne,fusilli,lasagne,macaroni,coquillette,raviolis,gnocchi,nouille,ramen,udon|🍚 riz,risotto,semoule,quinoa,boulgour,couscous|🥔 pomme de terre,patate,frite,puree|🍅 tomate,coulis,sauce tomate,concentre de tomate|🥕 carotte|🥒 concombre,cornichon,courgette|🥬 salade,laitue,epinard,chou,mache,roquette,blette,endive|🥦 brocoli,chou fleur|🧅 oignon,echalote|🧄 ail|🌶️ piment,harissa,tabasco|🫑 poivron|🍆 aubergine|🌽 mais|🍄 champignon,cepe,girolle|🥑 avocat,guacamole|🫛 petit pois,haricot vert,feve,pois|🫘 haricot,lentille,pois chiche,flageolet|🎃 potiron,citrouille,courge,butternut,potimarron|🥜 cacahuete,arachide,beurre de cacahuete|🌰 noix,noisette,amande,chataigne,marron,pistache,noix de cajou|🍎 pomme,compote|🍐 poire|🍊 orange,clementine,mandarine|🍋 citron,citron vert|🍌 banane|🍉 pasteque|🍈 melon|🍇 raisin|🍓 fraise,framboise|🫐 myrtille,cassis,mure|🍒 cerise|🍑 peche,nectarine,abricot|🥭 mangue|🍍 ananas|🥥 noix de coco,coco|🥝 kiwi|🍏 pomme verte|🥩 viande,steak,boeuf,entrecote,bavette,roti,veau,agneau,gigot,cote de boeuf|🍗 poulet,dinde,cuisse,aile de poulet,blanc de poulet,volaille,canard|🥓 lardon,bacon,jambon,chorizo,saucisson,charcuterie,rillette,pate de campagne|🌭 saucisse,merguez,knacki,hot dog,chipolata|🍔 burger,hamburger,steak hache|🐟 poisson,saumon,cabillaud,colin,truite,sardine,maquereau,merlu,lieu|🍤 crevette,gambas,langoustine,fruits de mer|🦪 huitre,moule|🦀 crabe,surimi|🐙 poulpe,calamar,encornet|🥫 thon,conserve,boite,mais en boite,ravioli en boite|🍕 pizza,pate a pizza|🌮 tacos,tortilla,wrap,fajitas|🥪 sandwich,croque monsieur|🥗 taboule,salade composee|🍲 soupe,veloute,bouillon,ragout,pot au feu|🍛 curry,chili|🍣 sushi,maki|🥟 dumpling,ravioli chinois,gyoza,bao,xiao long bao,nem|🥞 crepe,pancake,gaufre|🧇 gaufre|🍰 gateau,tarte,cake,dessert,patisserie,fraisier,tiramisu,cheesecake|🎂 anniversaire,gateau d'anniversaire|🧁 muffin,cupcake,madeleine|🍪 biscuit,cookie,gateau sec,petit beurre,sable|🍫 chocolat,nutella,pate a tartiner,cacao|🍬 bonbon,friandise,haribo|🍭 sucette|🍯 miel,confiture|🧂 sel,poivre,epice,cumin,curcuma,paprika,herbes de provence|🫒 huile,huile d'olive,olive|🍾 champagne,cremant|🍷 vin,rouge,rose,bordeaux|🍺 biere|🥃 whisky,rhum,vodka,alcool,pastis,gin|🧃 jus,jus d'orange,jus de pomme|🥤 soda,coca,limonade,ice tea,sirop|💧 eau,eau gazeuse,eau petillante,bouteille d'eau|☕ cafe,capsule,dosette,expresso|🍵 the,tisane,infusion|🧊 glacon|🥄 sucre,farine,levure,maizena,vanille,sucre glace|🫙 bocal,pot|🥫 sauce,ketchup,mayonnaise,moutarde,vinaigrette,vinaigre,pesto|🍿 popcorn|🥨 bretzel,chips,apero,biscuit apero,crackers|🧻 papier toilette,pq,essuie tout,sopalin,mouchoir|🧼 savon,gel douche,liquide vaisselle,lessive,adoucissant|🧽 eponge|🧴 shampoing,apres shampoing,creme hydratante,lotion,demaquillant,deodorant,dentifrice,creme solaire|🪥 brosse a dents|🧹 balai,serpilliere,menage,aspirateur|🗑️ sac poubelle,poubelle|🧺 linge,panier a linge|🪣 seau|🧤 gant|🧷 epingle|🪒 rasoir|💊 medicament,doliprane,paracetamol,ibuprofene,vitamine,pharmacie|🩹 pansement|🧸 jouet,peluche|🍼 biberon,lait infantile|👶 bebe,couche,lingette|🐶 chien,croquette,patee|🐱 chat,litiere|🐟 aquarium|🪴 plante,terreau,engrais,pot de fleur|🌸 fleur,bouquet|💡 ampoule,lampe,lumiere|🔋 pile,batterie|🔌 prise,rallonge,multiprise,chargeur,cable|🔧 cle,plomberie,fuite,robinet,reparer,reparation|🔨 marteau,clou,bricolage|🪛 tournevis|🪚 scie|🔩 vis,boulon,cheville,ecrou|🪜 echelle,escabeau|🎨 peinture,peindre,pinceau,rouleau,enduit|🧱 brique,ciment,platre,carrelage,joint|🚪 porte,serrure|🪟 fenetre,vitre,rideau,store|🛏️ lit,matelas,drap,couette,oreiller|🛋️ canape,coussin,meuble,table,chaise|🚿 douche,salle de bain|🚽 toilette,wc|🧯 extincteur|🚗 voiture,garage,pneu,vidange,controle technique,essence,carburant|🚲 velo|🛒 courses,supermarche,marche|🎁 cadeau,noel|🎉 fete,soiree|📦 colis,carton,demenagement|✉️ courrier,lettre,timbre|📄 papier,document,dossier,impot,facture|💳 banque,carte bancaire|📞 telephone,appeler|💻 ordinateur,pc|📚 livre|✏️ stylo,crayon,cahier,fourniture|✂️ ciseaux|🧵 couture,fil,bouton|👕 vetement,t-shirt,tee shirt,pull,chemise|👖 pantalon,jean|👟 chaussure,basket|🧦 chaussette|🧥 manteau,veste|🌳 jardin,tondre,pelouse,haie,tondeuse|🔥 bois,cheminee,barbecue,charbon|❄️ congelateur,surgele|🧊 frigo,refrigerateur|🍽️ vaisselle,assiette,couverts|🥘 poele,casserole,cuisine|🕯️ bougie|🧳 valise,vacances|✈️ avion,voyage|🏥 medecin,docteur,rdv,rendez vous,dentiste|💈 coiffeur|🏋️ sport,salle de sport|🎂 anniv`.split('|').forEach(b => {
+    const sp = b.indexOf(' '), e = b.slice(0, sp);
+    b.slice(sp + 1).split(',').forEach(w => {
+      w = norm(w).replace(/œ/g, 'oe');
+      if (!w) return;
+      if (/[\s'-]/.test(w)) multi.push([w, e]); else if (!single.has(w)) single.set(w, e);
+    });
+  });
+  multi.sort((a, b) => b[0].length - a[0].length);
+  return { single, multi };
+})();
+const autoEmoCache = new Map();
+function autoEmoji(title) {
+  const t = norm(title).replace(/œ/g, 'oe').replace(/[’]/g, "'");
+  if (!t) return '';
+  if (autoEmoCache.has(t)) return autoEmoCache.get(t);
+  let found = '';
+  const padded = ' ' + t.replace(/[^a-z0-9' -]/g, ' ') + ' ';
+  const sing = ' ' + t.replace(/[^a-z0-9' -]/g, ' ').split(/\s+/).map(w => w.length > 3 ? w.replace(/(s|x)$/, '') : w).join(' ') + ' ';
+  for (const [w, e] of AUTO_EMO.multi) {
+    const re = new RegExp(`[\\s']${w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}s?[\\s']`);
+    if (re.test(padded) || re.test(sing)) { found = e; break; }
+  }
+  if (!found) {
+    for (const raw of t.split(/[^a-z0-9]+/)) {
+      if (raw.length < 2) continue;
+      const cands = [raw, raw.replace(/(s|x)$/, ''), raw.replace(/aux$/, 'al'), raw.replace(/eaux$/, 'eau')];
+      const hit = cands.find(c => AUTO_EMO.single.has(c));
+      if (hit) { found = AUTO_EMO.single.get(hit); break; }
+    }
+  }
+  autoEmoCache.set(t, found);
+  return found;
+}
 const str = (v, fallback) => (typeof v === 'string' && v.trim()) ? v : fallback;
 
 // Icône libre : 2 caractères maximum (lettres, chiffres ou un émoji du clavier)
@@ -1540,7 +1578,7 @@ function renderOnboarding() {
     <p class="sub">Pour commencer, crée ta maison ou rejoins celle de quelqu'un.</p>
     <form class="card pad sec stack" data-form="create" autocomplete="off">
       <h2>🏡 Créer une maison</h2>
-      <input class="field" name="house" maxlength="40" placeholder="Nom de la maison (ex. Chez nous)">
+      <input class="field" name="q_house" maxlength="40" placeholder="ex. Chez nous">
       <button class="btn primary full" type="submit">Créer</button>
     </form>
     <form class="card pad sec stack" data-form="join" autocomplete="off">
@@ -1565,8 +1603,9 @@ function renderLoading() {
 screen.addEventListener('submit', async e => {
   e.preventDefault();
   if (e.target.id === 'wallForm') return publishPost();
-  const f = e.target, v = n => (f.querySelector(`[name="${n}"]`)?.value || '').trim();
-  const need = n => { const el = f.querySelector(`[name="${n}"]`); if (!el.value.trim()) { el.classList.add('err'); el.focus(); return true; } return false; };
+  const f = e.target, fld = n => f.querySelector(`[name="${n}"]`) || f.querySelector(`[name="q_${n}"]`);
+  const v = n => (fld(n)?.value || '').trim();
+  const need = n => { const el = fld(n); if (!el.value.trim()) { el.classList.add('err'); el.focus(); return true; } return false; };
   const btn = f.querySelector('button[type="submit"]');
   const busy = on => { if (btn) { btn.disabled = on; btn.style.opacity = on ? .6 : ''; } };
 
@@ -1809,7 +1848,7 @@ function itemRow(i) {
   const asg = i.assignees || [];
   const pic = i.link && videoInfo(i.link) ? '' : i.photoId
     ? `<button type="button" class="ithumb" data-action="viewItemPhoto" data-id="${esc(i.photoId)}"><img data-media="${esc(i.photoId)}" alt=""></button>`
-    : i.emoji ? `<span class="iemo">${esc(i.emoji)}</span>` : `<span class="iemo letter" style="--h:${hueOf(i.title)}">${esc(initial(i.title))}</span>`;
+    : (i.emoji || autoEmoji(i.title)) ? `<span class="iemo">${esc(i.emoji || autoEmoji(i.title))}</span>` : `<span class="iemo letter" style="--h:${hueOf(i.title)}">${esc(initial(i.title))}</span>`;
   const inner = `${pic}<span class="ititle">${esc(i.title)}</span>
       ${i.qty ? `<span class="qty">${esc(i.qty)}</span>` : ''}
       ${i.note ? `<span class="note">${linkify(esc(i.note))}</span>` : ''}
@@ -2205,7 +2244,7 @@ function openAddSheet() {
   sheetListId = l.id;
   sheetSec = draft.sec[l.id] || null;
   if (sheetSec && !state.sections.some(s => s.id === sheetSec) && !pendingSecs.has(sheetSec)) sheetSec = null;
-  sheetEmoji = null;
+  sheetEmoji = null; sheetIconManual = false;
   sheetPeople = new Set();
   sheetPhoto = null;
   openSheet(`<div class="view" style="--h:${hueOf(l.id)}">
@@ -2214,7 +2253,7 @@ function openAddSheet() {
     <form data-form="addItem" autocomplete="off">
       <div class="emo-row">
         ${iconInput()}
-        <input class="field" name="title" maxlength="200" placeholder="Nom (ex. Lait, Changer l'ampoule…)" enterkeyhint="done" autocomplete="off">
+        <input class="field" name="q_title" maxlength="200" placeholder="ex. Lait, changer l'ampoule…" enterkeyhint="done" autocomplete="off">
       </div>
       ${emojiPicker(false, true)}
       <div class="label">Catégorie</div>
@@ -2226,13 +2265,13 @@ function openAddSheet() {
         </div>
       </div>
       <div class="addrow">
-        <div><div class="label">Quantité</div><input class="field" name="qty" maxlength="30" placeholder="ex. 2, 500 g, 5 vis" autocomplete="off" enterkeyhint="done"></div>
+        <div><div class="label">Quantité</div><input class="field" name="q_qty" maxlength="30" placeholder="ex. 2, 500 g, 5 vis" autocomplete="off" enterkeyhint="done"></div>
       </div>
       <div class="label">Lien <span class="muted">(vidéo TikTok, YouTube, Instagram, site…)</span></div>
-      <input class="field" name="link" type="text" inputmode="url" maxlength="500" placeholder="Colle un lien ici" autocomplete="off" autocapitalize="off" enterkeyhint="done">
+      <input class="field" name="q_link" type="text" inputmode="url" maxlength="500" placeholder="Colle un lien ici" autocomplete="off" autocapitalize="off" enterkeyhint="done">
       <label class="switch impsw"><input type="checkbox" name="important" ><span class="sw"></span>❗ Important</label>
       <div class="label">Commentaire</div>
-      <textarea class="field" name="note" maxlength="500" rows="1" placeholder="Facultatif"></textarea>
+      <textarea class="field" name="q_note" maxlength="500" rows="1" placeholder="Facultatif"></textarea>
       <div class="label">Pour qui ? <span class="muted">(la personne est prévenue)</span></div>
       <div data-people>${peoplePicker(true)}</div>
       <div class="label">Photo <span class="muted">(facultatif · pour une vidéo, une capture d'écran sert de miniature)</span></div>
@@ -2242,15 +2281,15 @@ function openAddSheet() {
     </form>
   </div>`);
   sheetKind = 'add';
-  sheet.querySelector('[name="title"]').focus();   // ouvre le clavier tout de suite
+  sheet.querySelector('[name="q_title"]').focus();   // ouvre le clavier tout de suite
 }
 
 function submitAddItem(f, title) {
   const listId = sheetListId;
   if (!listId) return;
-  const qtyEl = f.querySelector('[name="qty"]'), noteEl = f.querySelector('[name="note"]'), titleEl = f.querySelector('[name="title"]');
+  const qtyEl = f.querySelector('[name="q_qty"]'), noteEl = f.querySelector('[name="q_note"]'), titleEl = f.querySelector('[name="q_title"]');
   const impEl = f.querySelector('[name="important"]'), important = !!impEl?.checked;
-  const linkEl = f.querySelector('[name="link"]'), link = normLink(linkEl?.value);
+  const linkEl = f.querySelector('[name="q_link"]'), link = normLink(linkEl?.value);
   const photoId = sheetPhoto?.data ? saveMedia(sheetPhoto) : null;
   fire(setDoc(doc(col('items')), {
     photoId,
@@ -2283,7 +2322,8 @@ function submitAddItem(f, title) {
   sheetPeople = new Set();
   sheet.querySelectorAll('[data-pick-person]').forEach(b => b.classList.remove('on'));
   sheetPhoto = null; refreshPhotoField();
-  setEmoji(null);
+  setEmoji(null); sheetIconManual = false;
+  sheet.querySelector('[data-icon]')?.classList.remove('auto');
   sheet.querySelector('.emo-wrap')?.setAttribute('hidden', '');
   titleEl.focus();
 }
@@ -2492,12 +2532,13 @@ function addSection(listId, name, emoji) {
 }
 
 // ================== Feuilles ==================
+let sheetIconManual = false;
 let sheetEmoji = null, sheetSec = null, sheetTarget = null, sheetListId = null;
 
 function emojiPicker() { return ''; }   // plus de grille d'émojis : l'icône se tape directement (2 caractères max)
 const nameRow = (value, placeholder) => `<div class="emo-row">
     ${iconInput()}
-    <input class="field" name="name" maxlength="60" placeholder="${placeholder}" value="${esc(value)}"></div>`;
+    <input class="field" name="q_name" maxlength="60" placeholder="${placeholder}" value="${esc(value)}"></div>`;
 const actions = label => `<div class="actions"><button type="button" class="btn ghost" data-close>Annuler</button><button type="submit" class="btn primary">${label}</button></div>`;
 const secRows = secs => secs.length ? secs.map(s => `<div class="srow" data-row="${esc(s.id)}">
     <button type="button" class="srow-btn" data-sec-edit="${esc(s.id)}"><span class="e">${esc(s.emoji)}</span><span class="t">${esc(s.name)}</span></button>
@@ -2625,7 +2666,7 @@ function openSettingsSheet() {
   openSheet(`<h3>Réglages</h3>
     <form data-form="settings" autocomplete="off">
       <div class="label" style="margin-top:0">Nom de la maison</div>
-      <input class="field" name="house" maxlength="40" value="${esc(state.house?.name || '')}">
+      <input class="field" name="q_house" maxlength="40" value="${esc(state.house?.name || '')}">
       <div class="label">Ton pseudo</div>
       <input class="field" name="me" maxlength="30" value="${esc(state.myName)}">
       ${actions('Enregistrer')}
@@ -2640,7 +2681,7 @@ function openSettingsSheet() {
     <div class="sep"></div>
     <div class="label">Ton compte</div>
     <p class="hint">Connecté avec <b>${esc(state.user?.email || '')}</b>. Connecte-toi avec ce même compte sur ton iPad ou ton autre téléphone : tu y retrouves tout.</p>
-    <p class="hint" style="font-size:11.5px;opacity:.6">Version de l'app : 19 nov. 22 h 15</p>
+    <p class="hint" style="font-size:11.5px;opacity:.6">Version de l'app : 19 nov. 22 h 35</p>
     <div class="actions" style="margin-top:12px">
       <button type="button" class="btn ghost" data-reset-pw>Changer de mot de passe</button>
       <button type="button" class="btn ghost" data-logout>Se déconnecter</button>
@@ -2671,7 +2712,7 @@ function openHousesSheet() {
 function openCreateHouseSheet() {
   openSheet(`<h3>Créer une maison</h3>
     <form data-form="createHouse" autocomplete="off">
-      <input class="field" name="house" maxlength="40" placeholder="Nom de la maison (ex. Chez mes parents)">
+      <input class="field" name="q_house" maxlength="40" placeholder="ex. Chez mes parents">
       ${actions('Créer')}
     </form>`);
 }
@@ -2680,7 +2721,7 @@ function openJoinHouseSheet() {
   openSheet(`<h3>Rejoindre une maison</h3>
     <form data-form="joinHouse" autocomplete="off">
       <p class="hint" style="margin-bottom:10px">Tape le code de la maison (6 caractères) qu'on t'a donné.</p>
-      <input class="field codefield" name="link" maxlength="7" placeholder="CODE" autocapitalize="characters" autocomplete="off" spellcheck="false">
+      <input class="field codefield" name="q_link" maxlength="7" placeholder="CODE" autocapitalize="characters" autocomplete="off" spellcheck="false">
       ${actions('Rejoindre')}
     </form>`);
 }
@@ -2690,7 +2731,7 @@ function openListSheet(list) {
   sheetEmoji = list ? (list.emoji || null) : null;
   let h = `<h3>${list ? 'Modifier la liste' : 'Nouvelle liste'}</h3>
     <form data-form="${list ? 'editList' : 'newList'}" autocomplete="off">
-      ${nameRow(list ? list.name : '', 'Nom de la liste')}${emojiPicker(!list)}
+      ${nameRow(list ? list.name : '', 'ex. Bricolage, Cadeaux…')}${emojiPicker(!list)}
       <label class="switch shopsw"><input type="checkbox" name="shopping" ${list?.shopping ? 'checked' : ''}><span class="sw"></span><span>🛒 Liste de courses<br><small class="muted">Toucher un élément le coche, le retoucher le remet dans la liste.</small></span></label>
       ${actions(list ? 'Enregistrer' : 'Créer')}
     </form>`;
@@ -2717,7 +2758,7 @@ function openSectionSheet(sec) {
   sheetEmoji = sec ? (sec.emoji || null) : null;
   let h = `<h3>${sec ? 'Modifier la catégorie' : 'Nouvelle catégorie'}</h3>
     <form data-form="${sec ? 'editSec' : 'newSec'}" autocomplete="off">
-      ${nameRow(sec ? sec.name : '', 'Nom de la catégorie')}${emojiPicker(!sec)}${actions(sec ? 'Enregistrer' : 'Créer')}
+      ${nameRow(sec ? sec.name : '', 'ex. Fruits, Salle de bain…')}${emojiPicker(!sec)}${actions(sec ? 'Enregistrer' : 'Créer')}
     </form>`;
   if (sec) {
     h += `<div class="sep" style="margin-bottom:16px"></div>
@@ -2762,19 +2803,19 @@ function openSecView(secId) {
   const sec = state.sections.find(s => s.id === secId);
   if (!sec) { if (sheetKind === 'sec') closeSheet(); return; }
   const keepScroll = sheetKind === 'sec' ? sheet.scrollTop : 0;
-  const keepVal = sheetKind === 'sec' ? (sheet.querySelector('[name="title"]')?.value || '') : '';
-  const hadFocus = sheetKind === 'sec' && document.activeElement?.name === 'title';
+  const keepVal = sheetKind === 'sec' ? (sheet.querySelector('[name="q_title"]')?.value || '') : '';
+  const hadFocus = sheetKind === 'sec' && document.activeElement?.name === 'q_title';
   const its = state.items.filter(i => i.sectionId === secId && i.listId === sec.listId);
   const todo = its.filter(i => !i.done), done = its.filter(i => i.done);
   const row = i => `<div class="svrow ${i.done ? 'done' : ''}">
       <button type="button" class="check ${i.done ? 'on' : ''}" data-sv-toggle="${esc(i.id)}" aria-label="${i.done ? 'Décocher' : 'Cocher'}">${i.done ? ICON.check : ''}</button>
-      <button type="button" class="svtext" data-sv-edit="${esc(i.id)}">${i.emoji ? `<span class="iemo">${esc(i.emoji)}</span>` : ''}<span class="ititle">${esc(i.title)}</span>${i.qty ? `<span class="qty">${esc(i.qty)}</span>` : ''}</button>
+      <button type="button" class="svtext" data-sv-edit="${esc(i.id)}">${(i.emoji || autoEmoji(i.title)) ? `<span class="iemo">${esc(i.emoji || autoEmoji(i.title))}</span>` : ''}<span class="ititle">${esc(i.title)}</span>${i.qty ? `<span class="qty">${esc(i.qty)}</span>` : ''}</button>
       <button type="button" class="del" data-sv-del="${esc(i.id)}" aria-label="Supprimer">${ICON.x}</button>
     </div>`;
   openSheet(`<div class="view" style="--h:${hueOf(sec.listId)}">
     <h3 class="svhead"><span>${esc(sec.emoji)}</span> ${esc(sec.name)} <button type="button" class="link" data-sec-edit="${esc(sec.id)}">Modifier</button></h3>
     <form data-form="secAdd" class="svadd" autocomplete="off">
-      <input class="field" name="title" maxlength="200" placeholder="Ajouter dans ${esc(sec.name)}…" enterkeyhint="send" value="${esc(keepVal)}">
+      <input class="field" name="q_title" maxlength="200" placeholder="Ajouter dans ${esc(sec.name)}…" enterkeyhint="send" value="${esc(keepVal)}">
       <button type="submit" class="btn primary" aria-label="Ajouter">＋</button>
     </form>
     <div class="card" style="margin-top:12px">${todo.length ? todo.map(row).join('') : '<div class="pad muted">Rien à faire dans cette catégorie.</div>'}</div>
@@ -2782,7 +2823,7 @@ function openSecView(secId) {
   </div>`);
   sheetKind = 'sec'; sheetTarget = secId;
   sheet.scrollTop = keepScroll;
-  if (hadFocus) sheet.querySelector('[name="title"]')?.focus();
+  if (hadFocus) sheet.querySelector('[name="q_title"]')?.focus();
 }
 
 function openDraftCatSheet() {
@@ -2828,16 +2869,16 @@ function openItemSheet(item) {
     <form data-form="editItem" autocomplete="off">
       <div class="emo-row">
         ${iconInput()}
-        <input class="field" name="title" maxlength="200" value="${esc(item.title)}">
+        <input class="field" name="q_title" maxlength="200" value="${esc(item.title)}">
       </div>
       ${emojiPicker(false, true)}
       <label class="switch impsw"><input type="checkbox" name="important" ${item.important ? 'checked' : ''}><span class="sw"></span>❗ Important</label>
       <div class="label">Commentaire</div>
-      <textarea class="field note-field" name="note" maxlength="500" rows="3" placeholder="Des détails, une précision… (ex. la marque, où ranger, comment faire)">${esc(item.note)}</textarea>
+      <textarea class="field note-field" name="q_note" maxlength="500" rows="3" placeholder="Des détails, une précision… (ex. la marque, où ranger, comment faire)">${esc(item.note)}</textarea>
       <div class="label">Lien <span class="muted">(vidéo TikTok, YouTube, Instagram, site…)</span></div>
-      <input class="field" name="link" type="text" inputmode="url" maxlength="500" placeholder="Colle un lien ici" value="${esc(item.link || '')}" autocomplete="off" autocapitalize="off">
+      <input class="field" name="q_link" type="text" inputmode="url" maxlength="500" placeholder="Colle un lien ici" value="${esc(item.link || '')}" autocomplete="off" autocapitalize="off">
       <div class="label">Quantité</div>
-      <input class="field" name="qty" maxlength="30" placeholder="ex. 2, 500 g, 5 vis, 1 kilo…" value="${esc(item.qty)}" autocomplete="off">
+      <input class="field" name="q_qty" maxlength="30" placeholder="ex. 2, 500 g, 5 vis, 1 kilo…" value="${esc(item.qty)}" autocomplete="off">
       <div class="label">Pour qui ?</div>
       <div data-people>${peoplePicker(true)}</div>
       <div class="label">Photo <span class="muted">(pour une vidéo, une capture d'écran sert de miniature)</span></div>
@@ -3038,7 +3079,7 @@ overlay.addEventListener('change', async e => {
     const file = e.target.files && e.target.files[0];
     e.target.value = '';
     if (!file) return;
-    try { replyPhoto = await compressImage(file); showReplyPhoto(); sheet.querySelector('[name="reply"]')?.focus(); }
+    try { replyPhoto = await compressImage(file); showReplyPhoto(); sheet.querySelector('[name="q_reply"]')?.focus(); }
     catch (err) { console.error(err); toast('Impossible de lire cette photo.'); }
     return;
   }
@@ -3052,19 +3093,25 @@ overlay.addEventListener('change', async e => {
   if (e.target.name === 'allDay') sheet.querySelector('.times').hidden = e.target.checked;
 });
 overlay.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey && e.target.name === 'reply') { e.preventDefault(); sendReply(e.target.closest('form')); return; }
+  if (e.key === 'Enter' && !e.shiftKey && e.target.name === 'q_reply') { e.preventDefault(); sendReply(e.target.closest('form')); return; }
   if (e.key === 'Enter' && e.target.matches('[data-dd-search]')) {
     e.preventDefault();
     sheet.querySelector('[data-dd-list] .dd-opt')?.click();
   }
 });
 overlay.addEventListener('input', e => {
-  if (e.target.name === 'reply') { e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight, 160) + 'px'; }
+  if (e.target.name === 'q_reply') { e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight, 160) + 'px'; }
   if (e.target.matches('[data-dd-search]')) return renderDdList();
   if (e.target.matches('[data-icon]')) {
+    sheetIconManual = true;
     const v = clipIcon(e.target.value);
     if (e.target.value !== v) { e.target.value = v; navigator.vibrate?.(10); }
     sheetEmoji = v || null;
+  }
+  if (e.target.name === 'q_title' && sheetKind === 'add' && !sheetIconManual) {
+    const em = autoEmoji(e.target.value);
+    sheetEmoji = em || null;
+    const box = sheet.querySelector('[data-icon]'); if (box) { box.value = em; box.classList.toggle('auto', !!em); }
   }
   if (e.target.matches('[data-dd-icon]')) { const v = clipIcon(e.target.value); if (e.target.value !== v) e.target.value = v; ddNewEmoji = v; }
   e.target.classList?.remove('err');
@@ -3081,7 +3128,7 @@ overlay.addEventListener('submit', e => {
     closeSheet(); return;
   }
   if (f.dataset.form === 'secAdd') {
-    const el = f.querySelector('[name="title"]');
+    const el = f.querySelector('[name="q_title"]');
     const title = el.value.trim().slice(0, 200);
     const sec = state.sections.find(x => x.id === sheetTarget);
     if (!title || !sec) { el.focus(); return; }
@@ -3092,13 +3139,13 @@ overlay.addEventListener('submit', e => {
     return;
   }
   if (f.dataset.form === 'joinHouse') {
-    const el = f.querySelector('[name="link"]');
+    const el = f.querySelector('[name="q_link"]');
     if (!el.value.trim()) { el.classList.add('err'); el.focus(); return; }
     joinWithCode(el.value);
     return;
   }
 
-  const field = f.querySelector('[name="name"], [name="title"], [name="house"]');
+  const field = f.querySelector('[name="q_name"], [name="q_title"], [name="q_house"]');
   const value = (field?.value || '').trim();
   if (!value) { field?.classList.add('err'); field?.focus(); return; }
 
@@ -3132,12 +3179,12 @@ overlay.addEventListener('submit', e => {
     }
     case 'editItem': {
       const it = state.items.find(x => x.id === sheetTarget), title = value.slice(0, 200);
-      const qty = (f.querySelector('[name="qty"]')?.value || '').trim().slice(0, 30);
+      const qty = (f.querySelector('[name="q_qty"]')?.value || '').trim().slice(0, 30);
       const emoji = sheetEmoji || null;
-      const note = (f.querySelector('[name="note"]')?.value || '').trim().slice(0, 500);
+      const note = (f.querySelector('[name="q_note"]')?.value || '').trim().slice(0, 500);
       const asg = [...sheetPeople];
       const important = !!f.querySelector('[name="important"]')?.checked;
-      const link = normLink(f.querySelector('[name="link"]')?.value);
+      const link = normLink(f.querySelector('[name="q_link"]')?.value);
       const added = asg.some(id => !(it?.assignees || []).includes(id));
       const asgChanged = it && (asg.length !== it.assignees.length || added);
       let photoId = it ? it.photoId : null;
@@ -3644,7 +3691,7 @@ function openEventSheet(ev, day) {
     <form data-form="event" autocomplete="off">
       <div class="emo-row">
         ${iconInput()}
-        <input class="field" name="name" maxlength="80" placeholder="Titre (ex. Anniversaire de Léa)" value="${esc(ev?.title || '')}">
+        <input class="field" name="q_name" maxlength="80" placeholder="ex. Anniversaire de Léa" value="${esc(ev?.title || '')}">
       </div>
       ${emojiPicker(false, true)}
       <div class="label">Date</div>
@@ -3657,7 +3704,7 @@ function openEventSheet(ev, day) {
       <div class="label">Qui est concerné ?</div>
       ${peoplePicker(true)}
       <div class="label">Commentaire</div>
-      <textarea class="field" name="note" maxlength="500" rows="2" placeholder="Lieu, détails…">${esc(ev?.note || '')}</textarea>
+      <textarea class="field" name="q_note" maxlength="500" rows="2" placeholder="Lieu, détails…">${esc(ev?.note || '')}</textarea>
       ${actions(ev ? 'Enregistrer' : 'Ajouter')}
     </form>
     ${ev ? `<div class="sep" style="margin-bottom:16px"></div>
@@ -3674,7 +3721,7 @@ function saveEvent(f, title) {
   const data = {
     title: title.slice(0, 80), emoji: sheetEmoji || null, date, allDay,
     time: allDay ? '' : time, end: allDay ? '' : (f.querySelector('[name="end"]').value || ''),
-    note: (f.querySelector('[name="note"]').value || '').trim().slice(0, 500),
+    note: (f.querySelector('[name="q_note"]').value || '').trim().slice(0, 500),
     people: [...sheetPeople]
   };
   if (sheetTarget) fire(updateDoc(ref('events', sheetTarget), data));
@@ -3797,8 +3844,8 @@ function openThread(postId) {
   const p = state.posts.find(x => x.id === postId);
   if (!p) { if (sheetKind === 'thread') closeSheet(); return; }
   const again = sheetKind === 'thread' && sheetTarget === postId;
-  const keepVal = again ? (sheet.querySelector('[name="reply"]')?.value || '') : '';
-  const hadFocus = again && document.activeElement?.name === 'reply';
+  const keepVal = again ? (sheet.querySelector('[name="q_reply"]')?.value || '') : '';
+  const hadFocus = again && document.activeElement?.name === 'q_reply';
   const rs = repliesOf(postId);
   openSheet(`<h3>Réponses</h3>
     <div class="tpost">
@@ -3820,7 +3867,7 @@ function openThread(postId) {
       <div class="rpending" id="replyAudio"></div>
       <label class="rcam" aria-label="Ajouter une photo">📷<input type="file" accept="image/*" data-reply-photo hidden></label>
       <button type="button" class="rcam" data-rec="reply" aria-label="Message vocal">🎤</button>
-      <textarea class="field" name="reply" maxlength="1000" rows="1" placeholder="Écrire une réponse…">${esc(keepVal)}</textarea>
+      <textarea class="field" name="q_reply" maxlength="1000" rows="1" placeholder="Écrire une réponse…">${esc(keepVal)}</textarea>
       <button type="submit" class="btn primary" aria-label="Envoyer">➤</button>
     </form>`);
   sheetKind = 'thread'; sheetTarget = postId;
@@ -3829,7 +3876,7 @@ function openThread(postId) {
   hydrateMedia(sheet);
   const replies = sheet.querySelector('.replies');
   if (replies && again) sheet.scrollTop = sheet.scrollHeight;
-  if (hadFocus || !again) sheet.querySelector('[name="reply"]')?.focus();
+  if (hadFocus || !again) sheet.querySelector('[name="q_reply"]')?.focus();
 }
 let replyPhoto = null;
 function showReplyPhoto() {
@@ -3837,7 +3884,7 @@ function showReplyPhoto() {
   box.innerHTML = replyPhoto ? `<span class="rpthumb"><img src="${replyPhoto.data}" alt=""><button type="button" data-reply-photo-drop aria-label="Retirer la photo">${ICON.x}</button></span>` : '';
 }
 function sendReply(f) {
-  const ta = f.querySelector('[name="reply"]');
+  const ta = f.querySelector('[name="q_reply"]');
   const text = ta.value.trim().slice(0, 1000);
   if (rec.on) { toast("Arrête d'abord l'enregistrement."); return; }
   if (!text && !replyPhoto && !pendingAudio.reply) { ta.focus(); return; }
