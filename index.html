@@ -721,6 +721,7 @@
   .urow{display:flex;align-items:center;gap:12px;margin-bottom:8px}
   .umeta{font-size:14px;margin-top:4px}
   .adminbadge{display:inline-block;font-size:11px;font-weight:700;color:var(--accent);background:color-mix(in srgb, var(--accent) 13%, transparent);border-radius:999px;padding:2px 8px;vertical-align:2px;letter-spacing:.02em}
+  .aierr{display:block;margin-top:6px;font-size:11.5px;opacity:.7;word-break:break-word}
   .badge{display:inline-block;font-size:12px;font-weight:600;color:#fff;background:#C0392B;border-radius:999px;padding:2px 8px;vertical-align:2px}
   .ucard .btn.sure{background:#C0392B;color:#fff}
   .deluser{color:#C0392B}
@@ -2944,7 +2945,7 @@ $('#addBtn').addEventListener('click', openAddSheet);
 // ================== IA : idées de recettes (liste réfrigérateur) ==================
 const isFridge = l => l.fridge === true || (l.fridge === undefined && /frigo|refrigerateur|frigidaire/.test(norm(l.name)));
 const AI_DAILY_LIMIT = 10;           // demandes par personne et par jour (protège le quota gratuit de la maison)
-const AI_MODELS = ['gemini-flash-latest', 'gemini-2.5-flash', 'gemini-flash-lite-latest', 'gemini-2.5-flash-lite'];
+const AI_MODELS = [{ name: 'gemini-2.5-flash', noThink: true }, { name: 'gemini-2.5-flash-lite', noThink: true }, { name: 'gemini-flash-latest' }, { name: 'gemini-flash-lite-latest' }];
 const ai = { sel: new Set(), time: 30, people: 2, results: [], busy: false };
 let aiMod = null;
 
@@ -2954,29 +2955,60 @@ function aiUsedToday() {
 }
 async function aiAsk(prompt) {
   if (!aiMod) aiMod = await import('https://www.gstatic.com/firebasejs/12.19.0/firebase-ai.js');
-  const { getAI, getGenerativeModel, GoogleAIBackend } = aiMod;
+  const { getAI, getGenerativeModel, GoogleAIBackend, Schema } = aiMod;
   const inst = getAI(fbApp, { backend: new GoogleAIBackend() });
+  // Format imposé à la réponse : l'IA ne peut renvoyer que des recettes bien rangées
+  let schema;
+  try {
+    const S = Schema;
+    schema = S.object({ properties: { recettes: S.array({ items: S.object({ properties: {
+      titre: S.string(), emoji: S.string(), duree_minutes: S.integer(), difficulte: S.string(),
+      ingredients_utilises: S.array({ items: S.string() }),
+      ingredients_manquants: S.array({ items: S.object({ properties: { nom: S.string(), quantite: S.string() } }) }),
+      etapes: S.array({ items: S.string() }), astuce: S.string()
+    }, optionalProperties: ['astuce', 'emoji'] }) }) } });
+  } catch (_) { schema = undefined; }
   let lastErr = null;
-  for (const name of AI_MODELS) {
+  for (const m of AI_MODELS) {
     try {
-      const model = getGenerativeModel(inst, { model: name, generationConfig: { responseMimeType: 'application/json', temperature: 0.8 } });
+      const generationConfig = { responseMimeType: 'application/json', temperature: 0.8, maxOutputTokens: 4096 };
+      if (schema) generationConfig.responseSchema = schema;
+      if (m.noThink) generationConfig.thinkingConfig = { thinkingBudget: 0 };   // réponse plus rapide
+      const model = getGenerativeModel(inst, { model: m.name, generationConfig }, { timeout: 45000 });
       const res = await model.generateContent(prompt);
-      return res.response.text();
+      const txt = res.response.text();
+      if (!txt || !txt.trim()) throw new Error('réponse vide (' + (res.response.candidates?.[0]?.finishReason || '?') + ')');
+      return txt;
     } catch (e) {
       lastErr = e;
+      console.warn('IA', m.name, e);
       const msg = String(e && (e.message || e)).toLowerCase();
-      if (/not found|404|not supported|unsupported model/.test(msg)) continue;   // modèle indisponible : on essaie le suivant
-      throw e;
+      if (/429|quota|resource_exhausted|api has not been used|not enabled|permission|403|failed to fetch|network|offline/.test(msg)) throw e;
+      // autre souci (modèle indisponible, réglage refusé, délai dépassé…) : on essaie le modèle suivant
     }
   }
   throw lastErr;
+}
+// Lit la réponse même si elle est un peu de travers
+function parseRecipes(txt) {
+  let t = String(txt || '').replace(/```(json)?/gi, '').trim();
+  let data;
+  try { data = JSON.parse(t); }
+  catch (_) { const a = t.indexOf('{'), b = t.lastIndexOf('}'); if (a < 0 || b <= a) throw new SyntaxError('pas de JSON'); data = JSON.parse(t.slice(a, b + 1)); }
+  const arr = Array.isArray(data) ? data : (data.recettes || data.recipes || data.recette || Object.values(data).find(Array.isArray) || []);
+  return (Array.isArray(arr) ? arr : [arr]).filter(r => r && (r.titre || r.title)).map(r => ({
+    titre: String(r.titre || r.title), emoji: r.emoji || '🍽️', duree_minutes: Number(r.duree_minutes || r.duree || 0) || '',
+    difficulte: r.difficulte || '', ingredients_utilises: Array.isArray(r.ingredients_utilises) ? r.ingredients_utilises : [],
+    ingredients_manquants: Array.isArray(r.ingredients_manquants) ? r.ingredients_manquants : [],
+    etapes: Array.isArray(r.etapes) ? r.etapes : [], astuce: r.astuce || ''
+  })).slice(0, 4);
 }
 function aiErrorText(e) {
   const msg = String(e && (e.message || e)).toLowerCase();
   if (/429|quota|resource_exhausted|rate/.test(msg)) return "L'IA a atteint sa limite gratuite pour aujourd'hui. Elle revient vers 9 h du matin.";
   if (/api has not been used|disabled|permission|403|firebasevertexai|firebaseml|api key|not enabled/.test(msg)) return "L'IA n'est pas encore activée : dans la console Firebase, active « AI Logic » avec Gemini Developer API.";
   if (/network|failed to fetch|offline/.test(msg)) return "Pas de connexion internet.";
-  return "L'IA n'a pas pu répondre. Réessaie dans un instant.";
+  return "L'IA n'a pas pu répondre. Réessaie dans un instant. (Ta demande n'a pas été décomptée.)";
 }
 
 function openAiSheet() {
@@ -3011,7 +3043,7 @@ function shoppingLists() {
 }
 function renderAiResults() {
   if (ai.busy) return `<div class="aiwait"><span class="dot"></span><span class="dot"></span><span class="dot"></span><p>Le chef cherche des idées…</p></div>`;
-  if (ai.error) return `<div class="banner" style="margin-top:14px">${esc(ai.error)}</div>`;
+  if (ai.error) return `<div class="banner" style="margin-top:14px">${esc(ai.error)}${ai.errDetail ? `<small class="aierr">Détail : ${esc(ai.errDetail)}</small>` : ''}</div>`;
   if (!ai.results.length) return '';
   const targets = shoppingLists();
   return `<div class="label" style="margin-top:22px">Propositions</div>
@@ -3053,21 +3085,22 @@ Propose 3 recettes réalistes et variées, qui utilisent au maximum les ingrédi
 Réponds uniquement avec du JSON, sans aucun texte autour, au format :
 {"recettes":[{"titre":"","emoji":"","duree_minutes":0,"difficulte":"Facile","ingredients_utilises":[""],"ingredients_manquants":[{"nom":"","quantite":""}],"etapes":[""],"astuce":""}]}
 "difficulte" vaut Facile, Moyen ou Difficile. Les quantités sont adaptées à ${ai.people} personne${ai.people > 1 ? 's' : ''}. Tout est en français.`;
-  ai.busy = true; ai.error = null; ai.results = [];
+  ai.busy = true; ai.error = null; ai.errDetail = ''; ai.results = [];
   refreshAiOut();
-  // compte la demande tout de suite (évite les clics répétés)
-  const n = aiUsedToday() + 1;
-  if (state.profile) state.profile.aiUsage = { day: todayYmd(), n };
-  fire(updateDoc(userRef(), { aiUsage: { day: todayYmd(), n } }));
   try {
     const txt = await aiAsk(prompt);
-    const clean = String(txt).replace(/^```(json)?/i, '').replace(/```\s*$/, '').trim();
-    const data = JSON.parse(clean);
-    ai.results = Array.isArray(data.recettes) ? data.recettes.slice(0, 4) : [];
-    if (!ai.results.length) ai.error = "L'IA n'a pas trouvé de recette. Essaie avec d'autres ingrédients.";
+    ai.results = parseRecipes(txt);
+    if (!ai.results.length) { ai.error = "L'IA n'a pas trouvé de recette. Réessaie, ta demande n'a pas été décomptée."; ai.errDetail = String(txt).slice(0, 160); }
+    else {
+      // on ne décompte que les demandes réussies
+      const n = aiUsedToday() + 1;
+      if (state.profile) state.profile.aiUsage = { day: todayYmd(), n };
+      fire(updateDoc(userRef(), { aiUsage: { day: todayYmd(), n } }));
+    }
   } catch (e) {
     console.error(e);
-    ai.error = e instanceof SyntaxError ? "La réponse de l'IA était illisible. Réessaie." : aiErrorText(e);
+    ai.error = e instanceof SyntaxError ? "La réponse de l'IA était illisible. Réessaie, ta demande n'a pas été décomptée." : aiErrorText(e);
+    ai.errDetail = String(e && (e.message || e)).slice(0, 200);
   }
   ai.busy = false;
   if (sheetKind === 'ai') {
