@@ -515,6 +515,41 @@
   .pickbox svg{width:15px;height:15px;color:#fff}
   .picked .pickbox{background:var(--lc);border-color:var(--lc);animation:pop .25s ease}
   .irow{-webkit-touch-callout:none}
+  /* ===== Éléments en cases ===== */
+  .card.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;background:transparent;box-shadow:none;border:0;padding:0;overflow:visible}
+  .tiles .irow{position:relative;display:block;padding:0;min-height:0;border:0!important;border-radius:18px;background-color:var(--card);
+    box-shadow:0 1px 2px rgba(0,0,0,.05),0 4px 14px rgba(0,0,0,.05)}
+  .tiles .irow + .irow{border-top:0}
+  .tiles .itext{display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;padding:16px 7px 11px;min-height:118px;height:100%}
+  .tiles .iemo{font-size:34px;width:auto;line-height:1.1;margin-top:4px}
+  .tiles .ithumb{width:52px;height:52px;border-radius:13px;margin-top:2px}
+  .tiles .ititle{flex:none;font-size:14.5px;font-weight:600;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
+  .tiles .qty{margin:0;font-size:11.5px;padding:2px 8px;max-width:100%}
+  .tiles .note{font-size:11.5px;line-height:1.25;margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;white-space:normal;padding:0}
+  .tiles .iemo.letter{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-size:21px;font-weight:700;margin-top:2px;
+    color:hsl(var(--h) 45% 35%);background:hsl(var(--h) 55% 92%)}
+  html[data-theme="dark"] .tiles .iemo.letter{color:hsl(var(--h) 55% 78%);background:hsl(var(--h) 25% 24%)}
+  .tiles .note{max-width:100%}
+  .tiles .note .shortlink{display:inline;padding:0;background:none;font-size:inherit;white-space:nowrap}
+  .tiles .tav{display:flex;justify-content:center;margin-top:auto}
+  .tiles .check{position:absolute;top:7px;left:7px;width:23px;height:23px;z-index:2;background-color:var(--card)}
+  .tiles .check.on{background-color:var(--lc)}
+  .tiles .check svg{width:13px;height:13px}
+  .tiles .drag{position:absolute;top:5px;right:4px;z-index:2;opacity:.35;padding:4px}
+  .tiles .drag svg{width:15px;height:15px}
+  .tiles .pickbox{position:absolute;top:7px;left:7px;width:23px;height:23px;z-index:2;background:var(--card)}
+  .tiles .picked .pickbox,.tiles .irow.picked .pickbox{background:var(--lc)}
+  .tiles .irow.picked{box-shadow:0 0 0 2.5px var(--lc)}
+  .tiles .irow.done{background-color:color-mix(in srgb, var(--card) 60%, transparent);box-shadow:none}
+  .tiles .irow.done .itext{min-height:96px;padding-top:12px}
+  .tiles .irow.done .iemo{font-size:26px}
+  .tiles .irow.assigned{background-image:var(--pg);background-size:100% 4px;background-position:bottom;background-repeat:no-repeat}
+  .grp.mini .tiles{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+  .grp.mini .tiles .itext{min-height:84px;padding:12px 5px 8px}
+  .grp.mini .tiles .ititle{font-size:12.5px}
+  .grp.mini .tiles .note,.grp.mini .tiles .qty{display:none}
+  .tiles .drag-ghost{opacity:.35}
+
   .selbar{position:fixed;left:0;right:0;bottom:0;z-index:9;padding:10px 14px calc(10px + env(safe-area-inset-bottom));
           background:color-mix(in srgb, var(--card) 94%, transparent);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
           border-top:1px solid var(--line);box-shadow:0 -6px 20px rgba(31,27,22,.08);animation:up .2s ease}
@@ -1495,25 +1530,26 @@ function renderHome() {
 }
 
 function itemRow(i) {
-  const mine = i.by === meId || i.byName === state.myName;
-  const by = i.byName && !mine ? `<div class="by">ajouté par ${esc(i.byName)}</div>` : '';
+  // Chaque élément est une « case » : grosse icône (ou photo), nom, quantité
   const asg = i.assignees || [];
+  const pic = i.photoId
+    ? `<button type="button" class="ithumb" data-action="viewItemPhoto" data-id="${esc(i.photoId)}"><img data-media="${esc(i.photoId)}" alt=""></button>`
+    : i.emoji ? `<span class="iemo">${esc(i.emoji)}</span>` : `<span class="iemo letter" style="--h:${hueOf(i.title)}">${esc(initial(i.title))}</span>`;
+  const inner = `${pic}<span class="ititle">${esc(i.title)}</span>
+      ${i.qty ? `<span class="qty">${esc(i.qty)}</span>` : ''}
+      ${i.note ? `<span class="note">${linkify(esc(i.note))}</span>` : ''}
+      ${asg.length ? `<span class="tav">${miniAvatars(asg)}</span>` : ''}`;
   if (state.selecting) {
     const on = state.selected.has(i.id);
     return `<div class="irow selmode ${on ? 'picked' : ''} ${i.done ? 'done' : ''}" data-id="${esc(i.id)}" data-action="pick">
       <span class="pickbox">${on ? ICON.check : ''}</span>
-      <div class="itext"><div class="iline">${i.emoji ? `<span class="iemo">${esc(i.emoji)}</span>` : ''}<span class="ititle">${esc(i.title)}</span>${i.qty ? `<span class="qty">${esc(i.qty)}</span>` : ''}${miniAvatars(asg)}</div></div>
+      <div class="itext">${inner}</div>
     </div>`;
   }
   return `<div class="irow ${i.done ? 'done' : ''} ${state.fresh.has(i.id) ? 'enter' : ''} ${asg.length ? 'assigned' : ''} ${asg.includes(meId) && !i.done ? 'forme' : ''}" data-id="${esc(i.id)}" ${asg.length ? `style="--pg:${peopleGrad(asg, 1)}"` : ''}>
     <button class="check ${i.done ? 'on' : ''}" data-action="toggle" data-id="${esc(i.id)}" aria-label="${i.done ? 'Décocher' : 'Cocher'}">${i.done ? ICON.check : ''}</button>
-    <div class="itext" data-action="editItem" data-id="${esc(i.id)}">
-      <div class="iline">${i.emoji ? `<span class="iemo">${esc(i.emoji)}</span>` : ''}<span class="ititle">${esc(i.title)}</span>${i.qty ? `<span class="qty">${esc(i.qty)}</span>` : ''}${miniAvatars(asg)}</div>
-      ${i.note ? `<div class="note ${i.emoji ? 'indent' : ''}">${linkify(esc(i.note))}</div>` : ''}
-      ${asg.length ? `<div class="by">pour ${asg.map(id => esc(id === meId ? 'toi' : memberName(id))).join(', ')}</div>` : by}
-    </div>
-    ${i.photoId ? `<button type="button" class="ithumb" data-action="viewItemPhoto" data-id="${esc(i.photoId)}"><img data-media="${esc(i.photoId)}" alt=""></button>` : ''}
     ${i.done ? '' : `<span class="drag" aria-label="Déplacer">${ICON.grip}</span>`}
+    <div class="itext" data-action="editItem" data-id="${esc(i.id)}">${inner}</div>
   </div>`;
 }
 
@@ -1525,7 +1561,7 @@ function group(sec, items, opts = {}) {
     : `<span class="grp-title static">${opts.label || 'Sans catégorie'}<span class="n">${items.length}</span></span>`;
   return `<section class="grp ${opts.mini ? 'mini' : ''}" ${sec && !opts.mini ? `data-sec-id="${esc(sec.id)}"` : ''}>
     <div class="grp-h ${sec ? '' : 'soft'}">${head}</div>
-    <div class="card" ${opts.mini ? '' : `data-drop="${sec ? esc(sec.id) : ''}"`}>${items.map(itemRow).join('')}</div></section>`;
+    <div class="card tiles" ${opts.mini ? '' : `data-drop="${sec ? esc(sec.id) : ''}"`}>${items.map(itemRow).join('')}</div></section>`;
 }
 
 function renderListHead(l) {
@@ -1558,7 +1594,7 @@ function renderList(l) {
   } else {
     const groups = secs.map(s => ({ s, items: todo.filter(i => i.sectionId === s.id) })).filter(g => g.items.length);
     const loose = todo.filter(i => !secIds.has(i.sectionId));
-    if (!groups.length) h += `<section class="sec"><div class="card" data-drop="">${loose.map(itemRow).join('')}</div></section>`;
+    if (!groups.length) h += `<section class="sec"><div class="card tiles" data-drop="">${loose.map(itemRow).join('')}</div></section>`;
     else {
       h += `<div id="groups">${groups.map(g => group(g.s, g.items)).join('')}</div>`;
       if (loose.length) h += group(null, loose);
@@ -1571,7 +1607,7 @@ function renderList(l) {
     h += `<div class="done-zone"><div class="grp-h soft done-h">Cochés<span class="n">${done.length}</span>
         <button class="link act" data-action="clearDone">Tout effacer</button></div>
       ${dg.length ? dg.map(g => group(g.s, g.items, { mini: true })).join('') + (dl.length ? group(null, dl, { mini: true }) : '')
-                  : `<div class="card">${dl.map(itemRow).join('')}</div>`}
+                  : `<div class="card tiles">${dl.map(itemRow).join('')}</div>`}
     </div>`;
   }
   return h;
