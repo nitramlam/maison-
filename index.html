@@ -3215,10 +3215,6 @@ overlay.addEventListener('input', e => {
     sheetEmoji = em || null;
     const box = sheet.querySelector('[data-icon]'); if (box) { box.value = em; box.classList.toggle('auto', !!em); }
   }
-  if (sheetKind === 'event' && e.target.name === 'q_name' && !sheetTarget && /^anniv/i.test(e.target.value.trim())) {
-    const r = sheet.querySelector('[name="repeat"]'); if (r && !r.dataset.touched) r.checked = true;
-  }
-  if (sheetKind === 'event' && e.target.name === 'repeat') e.target.dataset.touched = '1';
   if (e.target.name === 'q_title' && sheetKind === 'add' && !sheetIconManual) {
     const em = autoEmoji(e.target.value);
     sheetEmoji = em || null;
@@ -3451,31 +3447,95 @@ function todayWidget() {
     ${birthdayCard()}
   </div>`;
 }
-function birthdayCard() {
-  const today = todayYmd();
-  const bd = state.events.filter(isBirthday);
-  if (!bd.length) return `<button type="button" class="card bdaycard empty" data-bday-new><span class="bdic">🎂</span><span class="grow"><b>Anniversaires</b><small>Ajoute ceux de la famille, ils s'afficheront ici</small></span><span class="chev">${ICON.chev}</span></button>`;
-  const todays = bd.filter(e => occursOn(e, today));
-  if (todays.length) {
-    return `<button type="button" class="card bdaycard now" data-bday-go="${today}"><span class="bdic">🎉</span><span class="grow"><b>Aujourd'hui</b>
-      <small>${todays.map(e => esc(e.title) + (ageOn(e, today) ? ` (${ageOn(e, today)} ans)` : '')).join(' · ')}</small></span><span class="chev">${ICON.chev}</span></button>`;
+// ================== Anniversaires (à part du calendrier) ==================
+function birthdays() {
+  const arr = Array.isArray(state.house?.birthdays) ? state.house.birthdays : [];
+  return arr.filter(x => x && typeof x.name === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(x.date || ''))
+    .map(x => ({ id: String(x.id || x.name), name: x.name.slice(0, 40), date: x.date, noYear: x.noYear === true }));
+}
+function bdNext(b, from) {     // prochaine date (>= from) de l'anniversaire
+  const fy = Number(from.slice(0, 4));
+  for (let y = fy; y <= fy + 1; y++) {
+    let md = b.date.slice(5);
+    const leap = (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+    if (md === '02-29' && !leap) md = '02-28';
+    const d = `${y}-${md}`;
+    if (d >= from) return d;
   }
-  const tomorrow = ymd(new Date(Date.now() + 86400000));
-  const nx = bd.map(e => ({ e, d: nextOccurrence(e, tomorrow) })).filter(x => x.d).sort((a, b) => a.d < b.d ? -1 : 1)[0];
-  if (!nx) return '';
+  return null;
+}
+const bdAge = (b, on) => { if (b.noYear) return 0; const a = Number(on.slice(0, 4)) - Number(b.date.slice(0, 4)); return a > 0 && a < 130 ? a : 0; };
+const bdLabel = (b, on) => `Anniversaire de ${esc(b.name)}${bdAge(b, on) ? ` (${bdAge(b, on)} ans)` : ''}`;
+function birthdayCard() {
+  const today = todayYmd(), list = birthdays();
+  if (!list.length) return `<button type="button" class="card bdaycard empty" data-bdays><span class="bdic">🎂</span><span class="grow"><b>Anniversaires</b><small>Ajoute ceux de la famille</small></span><span class="chev">${ICON.chev}</span></button>`;
+  const todays = list.filter(b => bdNext(b, today) === today);
+  if (todays.length) return `<button type="button" class="card bdaycard now" data-bdays><span class="bdic">🎉</span><span class="grow"><b>Aujourd'hui</b>
+      <small>${todays.map(b => bdLabel(b, today)).join(' · ')}</small></span><span class="chev">${ICON.chev}</span></button>`;
+  const nx = list.map(b => ({ b, d: bdNext(b, today) })).sort((x, y) => x.d < y.d ? -1 : 1)[0];
   const days = Math.round((fromYmd(nx.d) - fromYmd(today)) / 86400000);
-  return `<button type="button" class="card bdaycard" data-bday-go="${nx.d}"><span class="bdic">🎂</span><span class="grow"><b>Prochain anniversaire</b>
-    <small>${esc(nx.e.title)}${ageOn(nx.e, nx.d) ? ` (${ageOn(nx.e, nx.d)} ans)` : ''} · ${fmtShort(nx.d)} · ${days === 1 ? 'demain' : `dans ${days} j`}</small></span><span class="chev">${ICON.chev}</span></button>`;
+  return `<button type="button" class="card bdaycard" data-bdays><span class="bdic">🎂</span><span class="grow"><b>Prochain anniversaire</b>
+    <small>${bdLabel(nx.b, nx.d)} · ${fmtShort(nx.d)} · ${days === 1 ? 'demain' : `dans ${days} j`}</small></span><span class="chev">${ICON.chev}</span></button>`;
+}
+function openBirthdays() {
+  const today = todayYmd();
+  const list = birthdays().map(b => ({ b, d: bdNext(b, today) })).sort((x, y) => x.d < y.d ? -1 : 1);
+  openSheet(`<h3>🎂 Anniversaires</h3>
+    ${list.length ? `<div class="card exlist">${list.map(({ b, d }) => {
+      const days = Math.round((fromYmd(d) - fromYmd(today)) / 86400000);
+      return `<button type="button" class="exrow" data-bd-edit="${esc(b.id)}"><span class="exic">${days === 0 ? '🎉' : '🎂'}</span>
+        <span class="grow"><b>${esc(b.name)}</b><small>${fmtShort(b.date)}${b.noYear ? '' : ' ' + b.date.slice(0, 4)}</small></span>
+        <span class="examt"><b>${days === 0 ? "Aujourd'hui" : days === 1 ? 'Demain' : `dans ${days} j`}</b><small>${bdAge(b, d) ? `${bdAge(b, d)} ans` : '&nbsp;'}</small></span></button>`;
+    }).join('')}</div>` : '<p class="hint">Aucun anniversaire pour l\'instant.</p>'}
+    <div class="actions"><button type="button" class="btn ghost" data-close>Fermer</button><button type="button" class="btn primary" data-bd-edit="">＋ Ajouter</button></div>`);
+  sheetKind = 'bdays';
+}
+function openBirthdayForm(b) {
+  openSheet(`<h3>${b ? 'Modifier' : 'Nouvel anniversaire'}</h3>
+    <form data-form="bday" autocomplete="off">
+      <div class="label">Prénom</div>
+      <input class="field" name="q_bdname" maxlength="40" placeholder="ex. Léa" value="${esc(b?.name || '')}">
+      <div class="label">Date de naissance</div>
+      <input class="field" type="date" name="bddate" value="${esc(b?.date || '')}">
+      <label class="switch" style="margin-top:12px"><input type="checkbox" name="noyear" ${b?.noYear ? 'checked' : ''}><span class="sw"></span>Je ne connais pas l'année</label>
+      ${actions(b ? 'Enregistrer' : 'Ajouter')}
+    </form>
+    ${b ? `<div class="sep"></div><button type="button" class="btn danger full" data-bd-del>Supprimer</button>` : ''}`);
+  sheetKind = 'bday'; sheetTarget = b ? b.id : null;
+  if (!b) sheet.querySelector('[name="q_bdname"]')?.focus();
+}
+function saveBirthdays(list) {
+  const clean = list.map(b => ({ id: b.id, name: b.name, date: b.date, ...(b.noYear ? { noYear: true } : {}) }));
+  if (state.house) state.house.birthdays = clean;
+  fire(updateDoc(houseRef(), { birthdays: clean }));
+  render();
 }
 document.addEventListener('click', e => {
-  const g = e.target.closest('[data-bday-go]');
-  if (g) { state.tab = 'cal'; state.anim = 'in'; renderedKey = ''; setCalDay(g.dataset.bdayGo); window.scrollTo(0, 0); return; }
-  if (e.target.closest('[data-bday-new]')) {
-    openEventSheet(null, todayYmd());
-    const r = sheet.querySelector('[name="repeat"]'); if (r) { r.checked = true; r.dataset.touched = '1'; }
-    const n = sheet.querySelector('[name="q_name"]'); if (n) { n.value = 'Anniversaire de '; n.focus(); }
+  const t = e.target;
+  if (t.closest('[data-bdays]')) { openBirthdays(); return; }
+  const ed = t.closest('[data-bd-edit]');
+  if (ed) { const b = birthdays().find(x => x.id === ed.dataset.bdEdit); openBirthdayForm(b || null); return; }
+  const del = t.closest('[data-bd-del]');
+  if (del && sheetKind === 'bday') {
+    if (!del.classList.contains('sure')) { del.classList.add('sure'); del.textContent = 'Confirmer la suppression'; return; }
+    saveBirthdays(birthdays().filter(x => x.id !== sheetTarget)); openBirthdays();
   }
 });
+document.addEventListener('submit', e => {
+  const f = e.target; if (f.dataset.form !== 'bday') return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  const name = (f.querySelector('[name="q_bdname"]').value || '').trim().slice(0, 40);
+  const date = f.querySelector('[name="bddate"]').value;
+  if (!name) { const n = f.querySelector('[name="q_bdname"]'); n.classList.add('err'); n.focus(); return; }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { f.querySelector('[name="bddate"]').classList.add('err'); return; }
+  const noYear = f.querySelector('[name="noyear"]').checked;
+  const list = birthdays();
+  if (sheetTarget) { const b = list.find(x => x.id === sheetTarget); if (b) Object.assign(b, { name, date, noYear }); }
+  else list.push({ id: Math.random().toString(36).slice(2, 10), name, date, noYear });
+  saveBirthdays(list);
+  toast(sheetTarget ? 'Anniversaire modifié.' : 'Anniversaire ajouté.');
+  openBirthdays();
+}, true);
 
 // ================== Météo (Open-Meteo : gratuit, sans clé, sans compte) ==================
 const WMO = {0:['☀️','Ensoleillé'],1:['🌤️','Plutôt beau'],2:['⛅','Éclaircies'],3:['☁️','Couvert'],45:['🌫️','Brouillard'],48:['🌫️','Brouillard givrant'],
@@ -3868,7 +3928,7 @@ document.addEventListener('submit', e => {
 
 // ================== Mise à jour automatique ==================
 // L'iPhone garde souvent l'ancienne page en mémoire : on vérifie s'il existe une version plus récente et on recharge.
-const APP_VERSION = '20 nov. 02 h 00';
+const APP_VERSION = '20 nov. 02 h 15';
 let updChecking = false, updLast = 0;
 async function checkUpdate() {
   if (updChecking || Date.now() - updLast < 60 * 1000 || !navigator.onLine) return;
@@ -4186,7 +4246,6 @@ function openEventSheet(ev, day) {
         <div><div class="label">Date</div><input class="field" type="date" name="date" value="${esc(ev?.date || day || state.calDay)}"></div>
         <div><div class="label">Jusqu'au <span class="muted">(facult.)</span></div><input class="field" type="date" name="endDate" value="${esc(ev?.endDate || '')}"></div>
       </div>
-      <label class="switch"><input type="checkbox" name="repeat" ${ev?.repeat === 'year' ? 'checked' : ''}><span class="sw"></span>🔁 Tous les ans <span class="muted">(anniversaire…)</span></label>
       <label class="switch"><input type="checkbox" name="allDay" ${allDay ? 'checked' : ''}><span class="sw"></span>Toute la journée</label>
       <div class="times" ${allDay ? 'hidden' : ''}>
         <div><div class="label">Début</div><input class="field" type="time" name="time" value="${esc(ev?.time || '')}"></div>
@@ -4210,9 +4269,8 @@ function saveEvent(f, title) {
   const time = f.querySelector('[name="time"]').value;
   const allDay = f.querySelector('[name="allDay"]').checked || !time;
   const data = {
-    title: title.slice(0, 80), emoji: sheetEmoji || (f.querySelector('[name="repeat"]').checked && /anniv/i.test(title) ? '🎂' : null), date, allDay,
-    repeat: f.querySelector('[name="repeat"]').checked ? 'year' : '',
-    endDate: (() => { const v = f.querySelector('[name="endDate"]').value; return v && v > date && !f.querySelector('[name="repeat"]').checked ? v : ''; })(),
+    title: title.slice(0, 80), emoji: sheetEmoji || null, date, allDay,
+    endDate: (() => { const v = f.querySelector('[name="endDate"]').value; return v && v > date ? v : ''; })(),
     time: allDay ? '' : time, end: allDay ? '' : (f.querySelector('[name="end"]').value || ''),
     note: (f.querySelector('[name="q_note"]').value || '').trim().slice(0, 500),
     people: [...sheetPeople]
