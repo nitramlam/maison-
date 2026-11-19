@@ -678,11 +678,13 @@
   .recprev .prevx{position:static}
   .wallaudio[hidden]{display:none}
   /* ===== Éléments en cases ===== */
+  .tiles .irow{display:flex!important;flex-direction:column;align-items:stretch!important;overflow:hidden}
+  .tiles .irow > .vthumb{flex:none}
   .card.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;background:transparent;box-shadow:none;border:0;padding:0;overflow:visible}
   .tiles .irow{position:relative;display:block;padding:0;min-height:0;border:0!important;border-radius:18px;background-color:var(--card);
     box-shadow:0 1px 2px rgba(0,0,0,.05),0 4px 14px rgba(0,0,0,.05)}
   .tiles .irow + .irow{border-top:0}
-  .tiles .itext{display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;padding:16px 7px 11px;min-height:118px;height:100%}
+  .tiles .itext{display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;padding:16px 7px 11px;min-height:118px;flex:1 0 auto}
   .tiles .iemo{font-size:34px;width:auto;line-height:1.1;margin-top:4px}
   .tiles .ithumb{width:52px;height:52px;border-radius:13px;margin-top:2px}
   .tiles .ititle{flex:none;font-size:14.5px;font-weight:600;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
@@ -2634,7 +2636,7 @@ function openSettingsSheet() {
     <div class="sep"></div>
     <div class="label">Ton compte</div>
     <p class="hint">Connecté avec <b>${esc(state.user?.email || '')}</b>. Connecte-toi avec ce même compte sur ton iPad ou ton autre téléphone : tu y retrouves tout.</p>
-    <p class="hint" style="font-size:11.5px;opacity:.6">Version de l'app : 19 nov. 21 h 45</p>
+    <p class="hint" style="font-size:11.5px;opacity:.6">Version de l'app : 19 nov. 21 h 50</p>
     <div class="actions" style="margin-top:12px">
       <button type="button" class="btn ghost" data-reset-pw>Changer de mot de passe</button>
       <button type="button" class="btn ghost" data-logout>Se déconnecter</button>
