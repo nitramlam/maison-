@@ -1113,7 +1113,8 @@ function subscribe() {
     console.error(what, e);
     if (e && e.code === 'permission-denied' && !warned) { warned = true; toast(`${what} : mets à jour les règles Firebase.`); }
   };
-  // Seulement les 2 derniers mois et le futur : les vieux mois sont chargés à la demande dans le calendrier
+  // Seulement les 2 derniers mois et le futur (les plus vieux sont supprimés)
+  setTimeout(purgeOldEvents, 4000);
   unsubs.push(onSnapshot(query(col('events'), where('date', '>=', evCutoff())), snap => {
     state.events = snap.docs.map(evFromDoc).filter(e => e.date);
     if (state.tab === 'cal' || (state.tab === 'lists' && state.view !== 'list')) render();
@@ -1170,7 +1171,7 @@ function enterHouse(code) {
   state.code = code;
   if (state.view !== 'admin') state.view = 'home';
   state.house = null; state.members = []; state.lists = []; state.sections = []; state.items = [];
-  state.events = []; state.oldEvents?.clear(); state.posts = []; state.replies = []; state.newMentions = new Set(); pendingTags.clear();
+  state.events = []; state.posts = []; state.replies = []; state.newMentions = new Set(); pendingTags.clear();
   seenItems.clear(); itemsPrimed = false; state.anim = 'first';
   subscribe();
   touchMember(true);
@@ -2575,7 +2576,7 @@ overlay.addEventListener('click', e => {
   const delEv = t.closest('[data-del-event]');
   if (delEv) {
     if (!delEv.classList.contains('sure')) { delEv.classList.add('sure'); delEv.textContent = 'Confirmer la suppression'; return; }
-    fire(deleteDoc(ref('events', sheetTarget))); state.oldEvents.clear(); closeSheet(); toast('Événement supprimé.'); return;
+    fire(deleteDoc(ref('events', sheetTarget))); closeSheet(); toast('Événement supprimé.'); return;
   }
   const pin = t.closest('[data-pin-post]');
   if (pin) { const p = state.posts.find(x => x.id === pin.dataset.pinPost); if (p) fire(updateDoc(ref('posts', p.id), { pinned: !p.pinned })); closeSheet(); return; }
@@ -2795,7 +2796,7 @@ app.addEventListener('click', e => {
     case 'calNext': shiftMonth(1); break;
     case 'calToday': setCalDay(todayYmd()); break;
     case 'newEvent': openEventSheet(null, state.calDay); break;
-    case 'openEvent': { const ev = allEvents().find(x => x.id === id); if (ev) openEventSheet(ev); break; }
+    case 'openEvent': { const ev = state.events.find(x => x.id === id); if (ev) openEventSheet(ev); break; }
     case 'thread': openThread(id); break;
     case 'aiRecipes': ai.results = ai.results || []; openAiSheet(); break;
     case 'favList': toggleHomePref('fav', id); break;
@@ -3271,23 +3272,17 @@ function evFromDoc(d) {
                people: Array.isArray(v.people) ? v.people.filter(x => typeof x === 'string') : [] };
     }
 function evCutoff() { const n = new Date(); return ymd(new Date(n.getFullYear(), n.getMonth() - 2, 1)); }
-state.oldEvents = new Map();      // "AAAA-MM" -> événements de ce vieux mois (null = en cours)
-function allEvents() {
-  const seen = new Set(state.events.map(e => e.id)), out = [...state.events];
-  for (const arr of state.oldEvents.values()) for (const e of arr || []) if (!seen.has(e.id)) { seen.add(e.id); out.push(e); }
-  return out;
-}
-function loadOldMonths(year, month) {
-  const cut = evCutoff();
-  for (const k of [-1, 0, 1]) {
-    const d = new Date(year, month + k, 1), key = ymd(d).slice(0, 7);
-    if (ymd(d) >= cut || state.oldEvents.has(key)) continue;
-    state.oldEvents.set(key, null);
-    const start = ymd(d), end = ymd(new Date(d.getFullYear(), d.getMonth() + 1, 1));
-    getDocs(query(col('events'), where('date', '>=', start), where('date', '<', end > cut ? cut : end)))
-      .then(sn => { state.oldEvents.set(key, sn.docs.map(evFromDoc).filter(e => e.date)); if (state.tab === 'cal') render(); })
-      .catch(e => { console.warn(e); state.oldEvents.delete(key); });
-  }
+// Les événements de plus de 2 mois sont supprimés définitivement (une fois par jour et par appareil)
+function purgeOldEvents() {
+  const house = state.code, key = 'maison.evPurge.' + house, today = todayYmd();
+  if (!house || store.get(key) === today) return;
+  store.set(key, today);
+  getDocs(query(col('events'), where('date', '<', evCutoff()), limit(400))).then(sn => {
+    if (!sn.docs.length || house !== state.code) return;
+    const b = writeBatch(db);
+    sn.docs.forEach(d => b.delete(d.ref || ref('events', d.id)));
+    fire(b.commit());
+  }).catch(e => console.warn('purge', e));
 }
 
 function renderCalendar() {
@@ -3296,8 +3291,7 @@ function renderCalendar() {
   const daysIn = new Date(year, month + 1, 0).getDate();
   const rows = Math.ceil((startOffset + daysIn) / 7);
   const byDay = {};
-  loadOldMonths(year, month);
-  for (const e of allEvents()) (byDay[e.date] = byDay[e.date] || []).push(e);
+  for (const e of state.events) (byDay[e.date] = byDay[e.date] || []).push(e);
   const today = todayYmd(), sel = state.calDay;
 
   let cells = '';
@@ -3404,7 +3398,6 @@ function saveEvent(f, title) {
     note: (f.querySelector('[name="note"]').value || '').trim().slice(0, 500),
     people: [...sheetPeople]
   };
-  state.oldEvents.clear();
   if (sheetTarget) fire(updateDoc(ref('events', sheetTarget), data));
   else fire(setDoc(doc(col('events')), { ...data, by: meId, byName: state.myName, createdAt: Date.now() }));
   closeSheet();
