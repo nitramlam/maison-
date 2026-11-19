@@ -1187,12 +1187,31 @@ function createHouse(name) {
   const b = writeBatch(db);
   b.set(doc(db, 'households', id), { name, createdAt: Date.now(), createdBy: meId, members: [meId], admins: [meId], banned: [], code: jc });
   b.set(doc(db, 'joinCodes', jc), { houseId: id });
-  fire(b.commit());
+  // une fois la maison créée : listes de départ + événement de bienvenue
+  fire(b.commit().then(() => seedHouse(id, name)));
   houses.push({ code: id, name });
   fav = fav || id;
   saveHouses();
   enterHouse(id);
   setTimeout(openInviteSheet, 450);
+}
+
+function seedHouse(id, name) {
+  const t = Date.now(), c = sub => collection(db, 'households', id, sub);
+  const lists = [
+    { name: 'Courses', emoji: '🛒' },
+    { name: 'Réfrigérateur', emoji: '🧊', fridge: true },
+    { name: 'Achats', emoji: '🛍️' },
+    { name: 'Travaux', emoji: '🔨' }
+  ];
+  const b = writeBatch(db);
+  const refs = lists.map((l, i) => { const r = doc(c('lists')); b.set(r, { ...l, createdAt: t + i, order: t + i }); return r; });
+  b.set(doc(c('events')), { title: `Bienvenue dans « ${String(name).slice(0, 50)} »`, emoji: '🎉', date: todayYmd(), allDay: true, time: '', end: '',
+    note: `${state.myName || 'Quelqu\'un'} a créé la maison aujourd'hui.`, people: [meId], by: meId, byName: state.myName, createdAt: t });
+  // la liste Courses en favori pour le créateur
+  b.update(userRef(), { [`homePrefs.${id}.fav`]: [refs[0].id] });
+  if (state.profile) { state.profile.homePrefs = state.profile.homePrefs || {}; state.profile.homePrefs[id] = { fav: [refs[0].id], collapsed: [] }; }
+  return b.commit();
 }
 
 async function joinWithCode(raw) {
