@@ -9,6 +9,14 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#F6F3EE">
 <link rel="apple-touch-icon" href="icon-180.png">
+<script>
+  // Mode nuit : auto (suit l'iPhone), clair ou sombre
+  (function () {
+    var pref = 'auto'; try { pref = localStorage.getItem('maison.theme') || 'auto'; } catch (e) {}
+    var dark = pref === 'dark' || (pref === 'auto' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  })();
+</script>
 <link rel="icon" href="icon-192.png">
 <title>Maison</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,9 +27,8 @@
     --bg:#F6F3EE; --card:#FFFFFF; --ink:#1F1B16; --muted:#8A8178; --line:#ECE6DD;
     --accent:#2F6B4F; --shadow:0 1px 2px rgba(31,27,22,.05), 0 4px 14px rgba(31,27,22,.04);
   }
-  @media (prefers-color-scheme: dark){
-    :root{ --bg:#141210; --card:#1F1C19; --ink:#F2EDE6; --muted:#9A9087; --line:#2E2A26; --accent:#5FA883; --shadow:none; }
-  }
+  html[data-theme="dark"]{ --bg:#141210; --card:#1F1C19; --ink:#F2EDE6; --muted:#9A9087; --line:#2E2A26; --accent:#5FA883; --shadow:none; }
+  html[data-theme="dark"]{color-scheme:dark}
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   [hidden]{display:none!important}
   html,body{background:var(--bg);color:var(--ink)}
@@ -181,7 +188,7 @@
   /* Couleur propre à chaque liste (--h = teinte) */
   :root{--lc:var(--accent)}
   .view{--lc:hsl(var(--h,152) 45% 38%)}
-  @media (prefers-color-scheme: dark){ .view{--lc:hsl(var(--h,152) 45% 60%)} }
+  html[data-theme="dark"] .view{--lc:hsl(var(--h,152) 45% 60%)}
   .hello{color:var(--muted);font-size:15px;font-weight:500;margin-bottom:4px}
 
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px}
@@ -197,15 +204,10 @@
   .lcard.add{background:transparent;border:1.5px dashed var(--line);align-items:center;justify-content:center;color:var(--muted);font-weight:500}
   .lcard.add::after{display:none}
   .lcard.add .plus{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb, var(--accent) 12%, transparent);color:var(--accent);font-size:26px;line-height:1}
-  @media (prefers-color-scheme: dark){
-    .lcard{background:hsl(var(--h) 22% 17%)}
-    .lcard::after{background:hsl(var(--h) 25% 22%)}
-    .lcard .lemo{background:hsl(var(--h) 20% 23%);box-shadow:none}
-    .lcard .lmeta{color:hsl(var(--h) 20% 70%)}
-  }
+  html[data-theme="dark"] .lcard{background:hsl(var(--h) 22% 17%)}html[data-theme="dark"] .lcard::after{background:hsl(var(--h) 25% 22%)}html[data-theme="dark"] .lcard .lemo{background:hsl(var(--h) 20% 23%);box-shadow:none}html[data-theme="dark"] .lcard .lmeta{color:hsl(var(--h) 20% 70%)}
 
   .view .ltitle .tile{width:54px;height:54px;border-radius:17px;font-size:30px;background:hsl(var(--h) 60% 92%)}
-  @media (prefers-color-scheme: dark){ .view .ltitle .tile{background:hsl(var(--h) 22% 20%)} }
+  html[data-theme="dark"] .view .ltitle .tile{background:hsl(var(--h) 22% 20%)}
   .view .back{color:var(--lc)}
   .view .iconbtn{color:var(--lc)}
   .view .check.on{background:var(--lc);border-color:var(--lc)}
@@ -414,6 +416,43 @@
   .tdnone{font-size:15px;color:var(--muted)}
   .tdmore{font-size:13px;color:var(--muted);padding-left:62px}
   .tdnext{margin-top:12px;padding-top:10px;border-top:1px solid var(--line);font-size:13.5px;line-height:1.4}
+
+  /* Accueil : listes avec aperçu, favoris, réduction */
+  .lc-sec{margin:24px 4px 10px}
+  .lcol{display:flex;flex-direction:column;gap:12px}
+  .lcol.first{margin-top:22px}
+  .lcard2{border-radius:20px;background:hsl(var(--h) 60% 95%);overflow:hidden;animation:rise .4s cubic-bezier(.2,.8,.3,1) both;animation-delay:calc(var(--i,0) * 40ms);
+          box-shadow:0 1px 2px rgba(31,27,22,.04)}
+  html[data-theme="dark"] .lcard2{background:hsl(var(--h) 22% 16%)}
+  .lc-head{display:flex;align-items:center;gap:12px;padding:12px 8px 12px 12px;cursor:pointer;-webkit-user-select:none;user-select:none}
+  .lc-head .lemo{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-size:24px;background:var(--card);flex:none;box-shadow:0 2px 6px hsl(var(--h) 40% 40% / .12)}
+  .lc-head .lname{font-weight:600;font-size:17px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lc-head .lmeta{font-size:13px;color:hsl(var(--h) 30% 38%)}
+  html[data-theme="dark"] .lc-head .lmeta{color:hsl(var(--h) 20% 70%)}
+  .lc-btn{flex:none;width:36px;height:36px;border:0;background:none;border-radius:10px;display:grid;place-items:center;color:hsl(var(--h) 30% 40%);font-size:20px;line-height:1}
+  html[data-theme="dark"] .lc-btn{color:hsl(var(--h) 20% 70%)}
+  .lc-btn svg{width:20px;height:20px;transition:transform .2s}
+  .lc-btn:active{background:hsl(var(--h) 50% 50% / .12)}
+  .lc-btn.star.on{color:#E0A100}
+  .collapsed .chev svg{transform:rotate(-90deg)}
+  .lc-items{background:var(--card);margin:0 8px 8px;border-radius:14px;padding:4px 0}
+  .lc-item{display:flex;align-items:center;gap:10px;padding:8px 12px;font-size:15.5px;background-image:var(--pg);background-size:3px 100%;background-repeat:no-repeat}
+  .lc-item + .lc-item{border-top:1px solid var(--line)}
+  .lc-t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .check.sm{width:22px;height:22px}
+  .check.sm svg{width:12px;height:12px}
+  .lc-empty{padding:10px 14px;color:var(--muted);font-size:14.5px}
+  .lc-more{display:block;width:100%;border:0;border-top:1px solid var(--line);background:none;color:hsl(var(--h) 45% 38%);font-weight:600;font-size:14px;padding:10px;text-align:center}
+  html[data-theme="dark"] .lc-more{color:hsl(var(--h) 45% 65%)}
+  .newlist{width:100%;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:10px;border:1.5px dashed var(--line);background:transparent;border-radius:20px;padding:16px;color:var(--muted);font-weight:600;font-size:15.5px}
+  .newlist .plus{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb, var(--accent) 12%, transparent);color:var(--accent);font-size:20px}
+  .lc-hint{text-align:center;margin-top:10px;font-size:12.5px}
+  .seg{display:flex;background:color-mix(in srgb, var(--ink) 7%, transparent);border-radius:12px;padding:3px;gap:3px}
+  .seg button{flex:1;border:0;background:none;border-radius:10px;padding:9px 4px;font-size:14px;font-weight:600;color:var(--muted)}
+  .seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  .swatches{display:flex;flex-wrap:wrap;gap:10px}
+  .swatch{width:34px;height:34px;border-radius:50%;border:0;background:hsl(var(--h) 55% 48%);box-shadow:0 0 0 2px var(--card);transition:transform .12s}
+  .swatch.on{box-shadow:0 0 0 2px var(--card), 0 0 0 4px hsl(var(--h) 55% 48%);transform:scale(1.08)}
 
   /* Sélection de plusieurs éléments */
   .topright{display:flex;align-items:center;gap:2px}
@@ -669,6 +708,14 @@ const seenItems = new Set(); let itemsPrimed = false;
 state.fresh = new Set(); state.anim = 'first';
 
 const HUES = [152, 211, 26, 338, 266, 188, 44, 4, 120, 290];
+// Couleur d'une personne : celle qu'elle a choisie, sinon une couleur automatique
+function pHue(id, chosen) {
+  if (typeof chosen === 'number') return chosen;
+  if (id && id === meId && typeof state.profile?.color === 'number') return state.profile.color;
+  const m = state.members.find(x => x.id === id);
+  if (m && typeof m.hue === 'number') return m.hue;
+  return hueOf(id);
+}
 function hueOf(id) { let h = 0; for (const c of String(id)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return HUES[h % HUES.length]; }
 const byOrder = (a, b) => (a.order - b.order) || 0;
 const sectionsOf = listId => state.sections.filter(s => s.listId === listId).sort(byOrder);
@@ -741,7 +788,8 @@ function touchMember(force) {
   const now = Date.now();
   if (!force && now - lastTouch < 10 * 60 * 1000) return;
   lastTouch = now;
-  fire(setDoc(ref('members', meId), { name: state.myName, removed: false, devices: { [deviceId]: { label: deviceLabel(), lastSeen: now } } }, { merge: true }));
+  const extra = typeof state.profile?.color === 'number' ? { hue: state.profile.color } : {};
+  fire(setDoc(ref('members', meId), { name: state.myName, removed: false, ...extra, devices: { [deviceId]: { label: deviceLabel(), lastSeen: now } } }, { merge: true }));
 }
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') { touchUser(false); touchMember(false); }
@@ -777,6 +825,7 @@ function watchProfile(u) {
     state.profile = p; state.profileLoading = false;
     state.myName = str(p.pseudo, (u.email || '').split('@')[0]);
     state.blocked = p.blocked === true;
+    if (p.theme && p.theme !== store.get('maison.theme')) { store.set('maison.theme', p.theme); applyTheme(p.theme); }
     houses = Array.isArray(p.houses) ? p.houses.filter(h => h && typeof h.code === 'string').map(h => ({ code: h.code, name: String(h.name || '') })) : [];
     fav = p.fav && houses.some(h => h.code === p.fav) ? p.fav : (houses[0]?.code || null);
 
@@ -894,7 +943,7 @@ function subscribe() {
       const v = d.data();
       const devs = v.devices && typeof v.devices === 'object' ? Object.entries(v.devices) : [];
       return {
-        id: d.id, name: str(v.name, "Quelqu'un"), removed: v.removed === true,
+        id: d.id, name: str(v.name, "Quelqu'un"), removed: v.removed === true, hue: typeof v.hue === 'number' ? v.hue : null,
         devices: devs.map(([k, x]) => ({ id: k, label: str(x && x.label, 'Appareil'), lastSeen: Number(x && x.lastSeen) || 0 }))
                      .sort((a, b) => b.lastSeen - a.lastSeen)
       };
@@ -904,7 +953,7 @@ function subscribe() {
   }, e => { if (e && e.code === 'permission-denied') return; console.error('membres', e); }));
 
   unsubs.push(onSnapshot(query(col('lists'), orderBy('createdAt')), snap => {
-    state.lists = snap.docs.map(d => { const v = d.data(); return { id: d.id, name: str(v.name, 'Sans nom'), emoji: str(v.emoji, '📋') }; });
+    state.lists = snap.docs.map(d => { const v = d.data(); return { id: d.id, name: str(v.name, 'Sans nom'), emoji: str(v.emoji, '📋'), order: typeof v.order === 'number' ? v.order : (v.createdAt || 0) }; }).sort(byOrder);
     got('lists');
   }, err));
   unsubs.push(onSnapshot(query(col('sections'), orderBy('createdAt')), snap => {
@@ -1224,7 +1273,7 @@ function renderAdminBody() {
     const isMe = u.id === meId;
     return `<div class="card ucard ${u.blocked ? 'isblocked' : ''}">
       <div class="urow">
-        <span class="avatar lg" style="--h:${hueOf(u.id)}">${esc(initial(u.pseudo))}</span>
+        <span class="avatar lg" style="--h:${pHue(u.id, u.color)}">${esc(initial(u.pseudo))}</span>
         <div class="grow">
           <div class="mname">${esc(str(u.pseudo, 'Sans pseudo'))} ${isMe ? '<span class="muted">(toi)</span>' : ''} ${u.blocked ? '<span class="badge">Bloqué</span>' : ''}</div>
           <div class="mdev muted">${esc(u.email || '')}</div>
@@ -1257,8 +1306,26 @@ function avatarStack() {
   const inHouse = Array.isArray(state.house?.members) ? new Set(state.house.members) : null;
   const ms = (state.members || []).filter(m => inHouse ? inHouse.has(m.id) : !m.removed);
   if (!ms.length) return ICON.people;
-  const shown = ms.slice(0, 3).map(m => `<span class="avatar" style="--h:${hueOf(m.id)}">${esc(initial(m.name))}</span>`).join('');
+  const shown = ms.slice(0, 3).map(m => `<span class="avatar" style="--h:${pHue(m.id)}">${esc(initial(m.name))}</span>`).join('');
   return `<span class="avatars">${shown}${ms.length > 3 ? `<span class="avatar more">+${ms.length - 3}</span>` : ''}</span>`;
+}
+
+// Préférences d'accueil propres à chacun (rangées dans son compte)
+function homePrefs() {
+  const p = state.profile?.homePrefs?.[state.code] || {};
+  return { fav: Array.isArray(p.fav) ? p.fav : [], collapsed: Array.isArray(p.collapsed) ? p.collapsed : [] };
+}
+function toggleHomePref(kind, id) {
+  const p = homePrefs();
+  const set = new Set(p[kind]);
+  set.has(id) ? set.delete(id) : set.add(id);
+  const arr = [...set];
+  if (state.profile) {
+    state.profile.homePrefs = state.profile.homePrefs || {};
+    state.profile.homePrefs[state.code] = { ...p, [kind]: arr };
+  }
+  fire(updateDoc(userRef(), { [`homePrefs.${state.code}.${kind}`]: arr }));
+  render();
 }
 
 function renderHome() {
@@ -1308,16 +1375,38 @@ function renderHome() {
       <p>Aucune liste pour l'instant.</p>
       <button class="btn primary" data-action="newList">Créer ma première liste</button></div>`;
   }
-  h += `<section class="grid">${state.lists.map((l, idx) => {
+  // Mes favoris et listes réduites (propres à chacun), ordre des listes (commun)
+  const prefs = homePrefs();
+  const favs = new Set(prefs.fav), collapsed = new Set(prefs.collapsed);
+  const favL = state.lists.filter(l => favs.has(l.id)), rest = state.lists.filter(l => !favs.has(l.id));
+  let idx = 0;
+  const card = l => {
     const k = cnt[l.id] || { todo: 0, done: 0 };
     const meta = k.todo ? `${k.todo} à faire` : (k.done ? 'Tout est fait ✓' : 'Vide');
-    return `<button class="lcard" style="--h:${hueOf(l.id)};--i:${idx}" data-action="open" data-id="${esc(l.id)}">
-      <span class="lemo">${esc(l.emoji)}</span>
-      <span class="lname">${esc(l.name)}</span>
-      <span class="lmeta">${meta}</span></button>`;
-  }).join('')}
-    <button class="lcard add" style="--i:${state.lists.length}" data-action="newList"><span class="plus">+</span>Nouvelle liste</button>
-  </section>`;
+    const isCol = collapsed.has(l.id), isFav = favs.has(l.id);
+    const todo = state.items.filter(i => i.listId === l.id && !i.done);
+    const shown = todo.slice(0, 5);
+    return `<div class="lcard2 ${isCol ? 'collapsed' : ''}" style="--h:${hueOf(l.id)};--i:${idx++}" data-list-id="${esc(l.id)}">
+      <div class="lc-head" data-action="open" data-id="${esc(l.id)}">
+        <span class="lemo">${esc(l.emoji)}</span>
+        <div class="grow"><div class="lname">${esc(l.name)}</div><div class="lmeta">${meta}</div></div>
+        <button type="button" class="lc-btn star ${isFav ? 'on' : ''}" data-action="favList" data-id="${esc(l.id)}" aria-label="Favori">${isFav ? '★' : '☆'}</button>
+        <button type="button" class="lc-btn" data-action="listMenuHome" data-id="${esc(l.id)}" aria-label="Options">${ICON.more}</button>
+        <button type="button" class="lc-btn chev" data-action="collapseList" data-id="${esc(l.id)}" aria-label="${isCol ? 'Déplier' : 'Réduire'}">${ICON.down}</button>
+      </div>
+      ${isCol ? '' : `<div class="lc-items">
+        ${shown.length ? shown.map(i => `<div class="lc-item" ${(i.assignees || []).length ? `style="--pg:${peopleGrad(i.assignees, 1)}"` : ''}>
+            <button type="button" class="check sm" data-action="toggle" data-id="${esc(i.id)}" aria-label="Cocher"></button>
+            <span class="lc-t">${i.emoji ? esc(i.emoji) + ' ' : ''}${esc(i.title)}</span>${i.qty ? `<span class="qty">${esc(i.qty)}</span>` : ''}${miniAvatars(i.assignees)}
+          </div>`).join('') : `<div class="lc-empty">${k.done ? 'Tout est fait ✓' : 'Rien pour l\'instant'}</div>`}
+        ${todo.length > shown.length ? `<button type="button" class="lc-more" data-action="open" data-id="${esc(l.id)}">Voir les ${todo.length} éléments</button>` : ''}
+      </div>`}
+    </div>`;
+  };
+  if (favL.length) h += `<div class="grp-h soft lc-sec">⭐ Favoris</div><div class="lcol" data-zone="fav">${favL.map(card).join('')}</div>`;
+  h += `${favL.length && rest.length ? '<div class="grp-h soft lc-sec">Listes</div>' : ''}<div class="lcol ${favL.length ? '' : 'first'}" data-zone="rest">${rest.map(card).join('')}</div>
+    <button type="button" class="newlist" data-action="newList"><span class="plus">+</span>Nouvelle liste</button>
+    <p class="hint lc-hint">Maintiens une liste puis glisse-la pour changer l'ordre.</p>`;
   return h;
 }
 
@@ -1558,7 +1647,7 @@ function refreshPhotoField() {
 }
 
 // ----- Couleur de chaque personne (la même que son rond) et surlignage multicolore -----
-const personColor = (id, a = 1, l = 58) => `hsl(${hueOf(id)} 70% ${l}% / ${a})`;
+const personColor = (id, a = 1, l = 58) => `hsl(${pHue(id)} 70% ${l}% / ${a})`;
 function peopleGrad(ids, a) {
   if (!ids || !ids.length) return '';
   const c = ids.map(id => personColor(id, a));
@@ -1566,7 +1655,7 @@ function peopleGrad(ids, a) {
 }
 function miniAvatars(ids) {
   if (!ids || !ids.length) return '';
-  return `<span class="minis">${ids.slice(0, 4).map(id => `<span class="mini" style="--h:${hueOf(id)}" title="${esc(memberName(id))}">${esc(initial(memberName(id)))}</span>`).join('')}</span>`;
+  return `<span class="minis">${ids.slice(0, 4).map(id => `<span class="mini" style="--h:${pHue(id)}" title="${esc(memberName(id))}">${esc(initial(memberName(id)))}</span>`).join('')}</span>`;
 }
 // Sélecteur de personnes dans une fenêtre (sheetPeople = sélection en cours)
 let sheetPeople = new Set();
@@ -1574,7 +1663,7 @@ function peoplePicker(includeMe = true) {
   const ms = houseMembers().filter(m => includeMe || m.id !== meId)
     .sort((a, b) => (b.id === meId) - (a.id === meId) || a.name.localeCompare(b.name));
   if (!ms.length) return '<p class="hint">Personne d\'autre dans la maison pour l\'instant.</p>';
-  return `<div class="pchips">${ms.map(m => `<button type="button" class="pchip ${sheetPeople.has(m.id) ? 'on' : ''}" style="--h:${hueOf(m.id)}" data-pick-person="${esc(m.id)}">
+  return `<div class="pchips">${ms.map(m => `<button type="button" class="pchip ${sheetPeople.has(m.id) ? 'on' : ''}" style="--h:${pHue(m.id)}" data-pick-person="${esc(m.id)}">
       <span class="mini">${esc(initial(m.name))}</span>${esc(m.id === meId ? 'Moi' : m.name)}</button>`).join('')}</div>`;
 }
 
@@ -1656,7 +1745,22 @@ let sortables = [];
 function initSortables() {
   sortables.forEach(x => { try { x.destroy(); } catch (_) {} });
   sortables = [];
-  if (typeof Sortable === 'undefined' || state.view !== 'list' || state.selecting) return;
+  if (typeof Sortable === 'undefined' || state.selecting) return;
+  if (state.view !== 'list') {
+    if (state.tab !== 'lists') return;
+    screen.querySelectorAll('.lcol').forEach(el => sortables.push(Sortable.create(el, {
+      animation: 200, ghostClass: 'drag-ghost', chosenClass: 'drag-chosen', dragClass: 'drag-fly',
+      forceFallback: true, fallbackTolerance: 6, delay: 280, delayOnTouchOnly: true, draggable: '.lcard2',
+      filter: '.lc-btn, .check', preventOnFilter: false,
+      onStart() { state.dragging = true; document.body.classList.add('dragging'); navigator.vibrate?.(12); },
+      onEnd() {
+        state.dragging = false; document.body.classList.remove('dragging');
+        saveListOrder();
+        if (state.renderPending) { state.renderPending = false; render(); }
+      }
+    })));
+    return;
+  }
   const base = {
     animation: 180, ghostClass: 'drag-ghost', chosenClass: 'drag-chosen', dragClass: 'drag-fly',
     forceFallback: true, fallbackTolerance: 4, scroll: true, bubbleScroll: true,
@@ -1672,6 +1776,15 @@ function initSortables() {
     ...base, group: 'secs', handle: '.sec-drag', draggable: '.grp[data-sec-id]',
     onEnd() { saveSectionOrder(g); end(); }
   }));
+}
+function saveListOrder() {
+  const ids = [...screen.querySelectorAll('.lcard2[data-list-id]')].map(el => el.dataset.listId);
+  const b = writeBatch(db); let n = 0;
+  ids.forEach((id, k) => {
+    const l = state.lists.find(x => x.id === id);
+    if (l && l.order !== k + 1) { b.update(ref('lists', id), { order: k + 1 }); l.order = k + 1; n++; }
+  });
+  if (n) fire(b.commit());
 }
 function saveItemOrder(box) {
   const sec = box.dataset.drop || null;
@@ -1772,6 +1885,7 @@ function render() {
   } else {
     screen.innerHTML = `<div class="${anim}">${renderHome()}</div>`;
     body.innerHTML = '';
+    composer.classList.remove('view');
   }
   state.fresh = new Set();
   initSortables();
@@ -1883,7 +1997,7 @@ function openMembersSheet() {
   const active = all.filter(m => inHouse.has(m.id)).sort((a, b) => (b.id === meId) - (a.id === meId) || a.name.localeCompare(b.name));
   const removed = all.filter(m => !inHouse.has(m.id) && m.removed);
   const row = m => `<div class="mrow">
-      <span class="avatar lg" style="--h:${hueOf(m.id)}">${esc(initial(m.name))}</span>
+      <span class="avatar lg" style="--h:${pHue(m.id)}">${esc(initial(m.name))}</span>
       <div class="grow">
         <div class="mname">${esc(m.name)}${m.id === meId ? ' <span class="muted">(toi)</span>' : ''}</div>
         <div class="mdev muted">${lastSeenOf(m) && Date.now() - lastSeenOf(m) < 15 * 60 * 1000 ? '<span class="online"></span>' : ''}${ago(lastSeenOf(m)) || 'pas encore connecté'}</div>
@@ -1918,6 +2032,25 @@ function openInviteSheet() {
   sheetKind = 'invite';
 }
 
+const COLOR_CHOICES = [4, 26, 44, 88, 120, 152, 175, 195, 211, 235, 266, 290, 320, 338];
+const themePref = () => { const t = state.profile?.theme || store.get('maison.theme'); return ['light', 'dark'].includes(t) ? t : 'auto'; };
+function applyTheme(pref) {
+  const dark = pref === 'dark' || (pref === 'auto' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#141210' : '#F6F3EE');
+}
+if (window.matchMedia) matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => applyTheme(themePref()));
+function setTheme(pref) {
+  store.set('maison.theme', pref);
+  applyTheme(pref);
+  if (meId) fire(updateDoc(userRef(), { theme: pref }));
+}
+function setMyColor(h) {
+  if (state.profile) state.profile.color = h;
+  fire(updateDoc(userRef(), { color: h }));
+  if (state.code) fire(setDoc(ref('members', meId), { hue: h }, { merge: true }));
+  render();
+}
 function openSettingsSheet() {
   openSheet(`<h3>Réglages</h3>
     <form data-form="settings" autocomplete="off">
@@ -1927,6 +2060,13 @@ function openSettingsSheet() {
       <input class="field" name="me" maxlength="30" value="${esc(state.myName)}">
       ${actions('Enregistrer')}
     </form>
+    <div class="sep"></div>
+    <div class="label">Apparence</div>
+    <div class="seg" data-seg>
+      ${[['auto', '📱 Auto'], ['light', '☀️ Clair'], ['dark', '🌙 Sombre']].map(([k, l]) => `<button type="button" class="${themePref() === k ? 'on' : ''}" data-theme-set="${k}">${l}</button>`).join('')}
+    </div>
+    <div class="label">Ta couleur <span class="muted">(ton rond, tes événements, ce qu'on te confie)</span></div>
+    <div class="swatches">${COLOR_CHOICES.map(h => `<button type="button" class="swatch ${pHue(meId) === h ? 'on' : ''}" style="--h:${h}" data-color-set="${h}" aria-label="Couleur"></button>`).join('')}</div>
     <div class="sep"></div>
     <div class="label">Ton compte</div>
     <p class="hint">Connecté avec <b>${esc(state.user?.email || '')}</b>. Connecte-toi avec ce même compte sur ton iPad ou ton autre téléphone : tu y retrouves tout.</p>
@@ -2198,6 +2338,10 @@ overlay.addEventListener('click', e => {
     return leaveHouse();
   }
   if (t.closest('[data-logout]')) { closeSheet(); signOut(auth); return; }
+  const th = t.closest('[data-theme-set]');
+  if (th) { setTheme(th.dataset.themeSet); sheet.querySelectorAll('[data-theme-set]').forEach(b => b.classList.toggle('on', b === th)); return; }
+  const cs = t.closest('[data-color-set]');
+  if (cs) { setMyColor(Number(cs.dataset.colorSet)); sheet.querySelectorAll('[data-color-set]').forEach(b => b.classList.toggle('on', b === cs)); return; }
   if (t.closest('[data-admin]')) { closeSheet(); openAdmin(); return; }
   if (t.closest('[data-reset-pw]')) {
     sendPasswordResetEmail(auth, state.user?.email || '').then(
@@ -2360,7 +2504,7 @@ overlay.addEventListener('submit', e => {
   switch (f.dataset.form) {
     case 'newList': {
       const r = doc(col('lists'));
-      fire(setDoc(r, { name: value.slice(0, 60), emoji: sheetEmoji, createdAt: Date.now() }));
+      fire(setDoc(r, { name: value.slice(0, 60), emoji: sheetEmoji, createdAt: Date.now(), order: Date.now() }));
       state.pendingList = r.id;
       closeSheet(); go('list', r.id);
       break;
@@ -2454,6 +2598,9 @@ app.addEventListener('click', e => {
     case 'newEvent': openEventSheet(null, state.calDay); break;
     case 'openEvent': { const ev = state.events.find(x => x.id === id); if (ev) openEventSheet(ev); break; }
     case 'thread': openThread(id); break;
+    case 'favList': toggleHomePref('fav', id); break;
+    case 'collapseList': toggleHomePref('collapsed', id); break;
+    case 'listMenuHome': { const l = state.lists.find(x => x.id === id); if (l) openListSheet(l); break; }
     case 'selectMode': setSelecting(!state.selecting); break;
     case 'pick': {
       const rid = el.dataset.id;
@@ -2738,7 +2885,7 @@ function openTagSheet() {
   openSheet(`<h3>Identifier</h3>
     <p class="hint" style="margin-bottom:10px">Les personnes identifiées verront une notification dans l'app.</p>
     ${ms.length ? `<div class="card">${ms.map(m => `<button type="button" class="tagrow ${pendingTags.has(m.id) ? 'on' : ''}" data-tag="${esc(m.id)}">
-        <span class="avatar" style="--h:${hueOf(m.id)}">${esc(initial(m.name))}</span><span class="grow">${esc(m.name)}</span>
+        <span class="avatar" style="--h:${pHue(m.id)}">${esc(initial(m.name))}</span><span class="grow">${esc(m.name)}</span>
         <span class="tagck">${ICON.check}</span></button>`).join('')}</div>`
       : `<div class="card pad muted">Personne d'autre dans la maison pour l'instant.</div>`}
     <button type="button" class="btn primary full" style="margin-top:14px" data-close>OK</button>`);
@@ -2801,7 +2948,7 @@ function postCard(p) {
   return `<article class="post card ${state.freshPosts?.has(p.id) ? 'enter' : ''} ${tagged ? 'mentioned' : ''}">
     ${tagged ? `<div class="mtag">🔔 ${state.newMentions.has(p.id) ? '<b>Nouveau</b> · ' : ''}Tu es identifié dans cette note</div>` : ''}
     <div class="phead">
-      <span class="avatar" style="--h:${hueOf(p.by || p.byName)}">${esc(initial(p.byName))}</span>
+      <span class="avatar" style="--h:${pHue(p.by || p.byName)}">${esc(initial(p.byName))}</span>
       <div class="grow"><div class="pname">${esc(p.byName || "Quelqu'un")}${mine ? ' <span class="muted">(toi)</span>' : ''}</div><div class="ptime">${whenFr(p.createdAt)}${p.editedAt ? ' · modifié' : ''}</div></div>
       ${p.pinned ? '<span class="pin" title="Épinglé">📌</span>' : ''}
       <button type="button" class="iconbtn pmore" data-action="postMenu" data-id="${esc(p.id)}" aria-label="Options">${ICON.more}</button>
@@ -2832,13 +2979,13 @@ function openThread(postId) {
   const rs = repliesOf(postId);
   openSheet(`<h3>Réponses</h3>
     <div class="tpost">
-      <div class="phead"><span class="avatar" style="--h:${hueOf(p.by || p.byName)}">${esc(initial(p.byName))}</span>
+      <div class="phead"><span class="avatar" style="--h:${pHue(p.by || p.byName)}">${esc(initial(p.byName))}</span>
         <div class="grow"><div class="pname">${esc(p.byName || "Quelqu'un")}</div><div class="ptime">${whenFr(p.createdAt)}</div></div></div>
       ${p.text ? `<div class="ptext">${linkify(esc(p.text))}</div>` : ''}
       ${p.photoId ? `<img class="tthumb" data-media="${esc(p.photoId)}" alt="">` : p.photo ? `<img class="tthumb" src="${p.photo}" alt="">` : ''}
     </div>
     <div class="replies">${rs.length ? rs.map(r => `<div class="reply">
-        <span class="avatar" style="--h:${hueOf(r.by || r.byName)}">${esc(initial(r.byName))}</span>
+        <span class="avatar" style="--h:${pHue(r.by || r.byName)}">${esc(initial(r.byName))}</span>
         <div class="grow"><div class="rbubble"><b>${esc(r.byName || "Quelqu'un")}</b><div class="rtext">${linkify(esc(r.text))}</div></div>
           <div class="ptime">${whenFr(r.createdAt)} · <button type="button" class="link rdel" data-del-reply="${esc(r.id)}">Supprimer</button></div></div>
       </div>`).join('') : '<p class="hint" style="text-align:center;margin:10px 0">Pas encore de réponse.</p>'}</div>
