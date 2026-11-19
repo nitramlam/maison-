@@ -553,6 +553,15 @@
   .tiles .irow.hasvid .impbadge{top:10px;right:30px}
   .grp.mini .vthumb{aspect-ratio:1;margin:4px 4px 0}
   .done .vthumb{opacity:.55}
+
+  /* Icône libre (2 caractères) */
+  .iconbox{width:58px;flex:none;text-align:center;font-size:22px;font-weight:700;padding:10px 4px;text-transform:none}
+  .iconbox::placeholder{font-size:14px;font-weight:500}
+  .dd-newrow{display:flex;align-items:center;gap:10px;margin:4px 0 10px}
+  .dd-newrow .iconbox{width:54px;font-size:19px;padding:8px 4px}
+  .dd-newrow .muted{font-size:13px}
+  .lcard .lemo.letter{font-weight:800;font-size:22px;color:hsl(var(--h) 45% 35%)}
+  html[data-theme="dark"] .lcard .lemo.letter{color:hsl(var(--h) 55% 78%)}
   /* ===== Éléments en cases ===== */
   .card.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;background:transparent;box-shadow:none;border:0;padding:0;overflow:visible}
   .tiles .irow{position:relative;display:block;padding:0;min-height:0;border:0!important;border-radius:18px;background-color:var(--card);
@@ -777,6 +786,16 @@ const screen = $('#screen'), composer = $('#composer'), input = $('#newItem'), s
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
 const str = (v, fallback) => (typeof v === 'string' && v.trim()) ? v : fallback;
+
+// Icône libre : 2 caractères maximum (lettres, chiffres ou un émoji du clavier)
+function graphemes(s) {
+  s = String(s || '');
+  if (window.Intl && Intl.Segmenter) return [...new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(s)].map(x => x.segment);
+  return Array.from(s);
+}
+const clipIcon = v => graphemes(String(v || '').replace(/\s+/g, '')).slice(0, 2).join('');
+const iconOf = (emoji, name) => emoji || initial(name);
+const iconInput = (cls = '') => `<input class="field iconbox ${cls}" data-icon value="${esc(sheetEmoji || '')}" placeholder="Ic." maxlength="16" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Icône (2 caractères max)">`;
 
 function firstGrapheme(s) {
   s = String(s || '').trim();
@@ -1080,11 +1099,11 @@ function subscribe() {
   }, e => { if (e && e.code === 'permission-denied') return; console.error('membres', e); }));
 
   unsubs.push(onSnapshot(query(col('lists'), orderBy('createdAt')), snap => {
-    state.lists = snap.docs.map(d => { const v = d.data(); return { id: d.id, name: str(v.name, 'Sans nom'), emoji: str(v.emoji, '📋'), order: typeof v.order === 'number' ? v.order : (v.createdAt || 0) }; }).sort(byOrder);
+    state.lists = snap.docs.map(d => { const v = d.data(); return { id: d.id, name: str(v.name, 'Sans nom'), emoji: typeof v.emoji === 'string' ? clipIcon(v.emoji) : '', order: typeof v.order === 'number' ? v.order : (v.createdAt || 0) }; }).sort(byOrder);
     got('lists');
   }, err));
   unsubs.push(onSnapshot(query(col('sections'), orderBy('createdAt')), snap => {
-    state.sections = snap.docs.map(d => { const v = d.data(); return { id: d.id, listId: v.listId, name: str(v.name, 'Sans nom'), emoji: str(v.emoji, '🏷️'), order: typeof v.order === 'number' ? v.order : (v.createdAt || 0) }; });
+    state.sections = snap.docs.map(d => { const v = d.data(); return { id: d.id, listId: v.listId, name: str(v.name, 'Sans nom'), emoji: typeof v.emoji === 'string' ? clipIcon(v.emoji) : '', order: typeof v.order === 'number' ? v.order : (v.createdAt || 0) }; });
     if (sheetKind === 'sec') openSecView(sheetTarget);
     got('sections');
   }, err));
@@ -1645,7 +1664,7 @@ function renderHome() {
         <button type="button" class="lc-btn star ${isFav ? 'on' : ''}" data-action="favList" data-id="${esc(l.id)}" aria-label="Favori">${isFav ? '★' : '☆'}</button>
         <button type="button" class="lc-btn" data-action="listMenuHome" data-id="${esc(l.id)}" aria-label="Options">${ICON.more}</button>
       </span>
-      <span class="lemo">${esc(l.emoji)}</span>
+      <span class="lemo ${l.emoji ? '' : 'letter'}">${esc(iconOf(l.emoji, l.name))}</span>
       <span class="lname">${esc(l.name)}</span>
       ${meta ? `<span class="lmeta">${meta}</span>` : ''}
     </div>`;
@@ -1704,7 +1723,7 @@ function renderListHead(l) {
         <button class="iconbtn" data-action="listMenu" aria-label="Modifier la liste">${ICON.more}</button>
       </span>
     </div>
-    <header class="ltitle"><span class="tile">${esc(l.emoji)}</span><div class="grow"><h1 style="font-size:30px">${esc(l.name)}</h1></div></header>`;
+    <header class="ltitle"><span class="tile">${esc(iconOf(l.emoji, l.name))}</span><div class="grow"><h1 style="font-size:30px">${esc(l.name)}</h1></div></header>`;
 }
 
 function renderList(l) {
@@ -2030,7 +2049,7 @@ function openAddSheet() {
     <h3>Nouvel élément</h3>
     <form data-form="addItem" autocomplete="off">
       <div class="emo-row">
-        <button type="button" class="emo-big none" data-emo-toggle aria-label="Choisir un émoji">＋</button>
+        ${iconInput()}
         <input class="field" name="title" maxlength="200" placeholder="Nom (ex. Lait, Changer l'ampoule…)" enterkeyhint="done" autocomplete="off">
       </div>
       ${emojiPicker(false, true)}
@@ -2298,18 +2317,11 @@ function addSection(listId, name, emoji) {
 }
 
 // ================== Feuilles ==================
-let sheetEmoji = '📋', sheetSec = null, sheetTarget = null, sheetListId = null;
+let sheetEmoji = null, sheetSec = null, sheetTarget = null, sheetListId = null;
 
-function emojiPicker(open, allowNone) {
-  return `<div class="emo-wrap" ${open ? '' : 'hidden'}>
-    ${allowNone ? `<button type="button" class="emo-none" data-emo-none>Sans émoji</button>` : ''}
-    <div class="emo-grid">${EMOJIS.map(([g, list]) => `<div class="emo-g">${g}</div><div class="emo-cells">${
-      list.map(e => `<button type="button" class="emo ${e === sheetEmoji ? 'on' : ''}" data-emo="${e}">${e}</button>`).join('')}</div>`).join('')}</div>
-    <input class="field emo-custom" data-emo-custom placeholder="…ou tape n'importe quel émoji" maxlength="16" autocomplete="off">
-  </div>`;
-}
+function emojiPicker() { return ''; }   // plus de grille d'émojis : l'icône se tape directement (2 caractères max)
 const nameRow = (value, placeholder) => `<div class="emo-row">
-    <button type="button" class="emo-big" data-emo-toggle aria-label="Choisir un émoji">${esc(sheetEmoji)}</button>
+    ${iconInput()}
     <input class="field" name="name" maxlength="60" placeholder="${placeholder}" value="${esc(value)}"></div>`;
 const actions = label => `<div class="actions"><button type="button" class="btn ghost" data-close>Annuler</button><button type="submit" class="btn primary">${label}</button></div>`;
 const secRows = secs => secs.length ? secs.map(s => `<div class="srow" data-row="${esc(s.id)}">
@@ -2436,7 +2448,7 @@ function openSettingsSheet() {
     <div class="sep"></div>
     <div class="label">Ton compte</div>
     <p class="hint">Connecté avec <b>${esc(state.user?.email || '')}</b>. Connecte-toi avec ce même compte sur ton iPad ou ton autre téléphone : tu y retrouves tout.</p>
-    <p class="hint" style="font-size:11.5px;opacity:.6">Version de l'app : 19 nov. 18 h 15</p>
+    <p class="hint" style="font-size:11.5px;opacity:.6">Version de l'app : 19 nov. 18 h 25</p>
     <div class="actions" style="margin-top:12px">
       <button type="button" class="btn ghost" data-reset-pw>Changer de mot de passe</button>
       <button type="button" class="btn ghost" data-logout>Se déconnecter</button>
@@ -2483,7 +2495,7 @@ function openJoinHouseSheet() {
 
 function openListSheet(list) {
   sheetTarget = list ? list.id : null;
-  sheetEmoji = list ? list.emoji : '📋';
+  sheetEmoji = list ? (list.emoji || null) : null;
   let h = `<h3>${list ? 'Modifier la liste' : 'Nouvelle liste'}</h3>
     <form data-form="${list ? 'editList' : 'newList'}" autocomplete="off">
       ${nameRow(list ? list.name : '', 'Nom de la liste')}${emojiPicker(!list)}
@@ -2502,14 +2514,14 @@ function openListSheet(list) {
 function openSectionsSheet() {
   const secs = sectionsOf(state.listId);
   openSheet(`<h3>Catégories</h3><div>${secRows(secs)}</div>
-    ${secs.length ? `<p class="hint" style="margin-top:10px">Touche une catégorie pour changer son nom ou son émoji.</p>` : ''}
+    ${secs.length ? `<p class="hint" style="margin-top:10px">Touche une catégorie pour changer son nom ou son icône.</p>` : ''}
     <div class="actions"><button type="button" class="btn ghost" data-close>Fermer</button>
       <button type="button" class="btn primary" data-sec-new>+ Nouvelle catégorie</button></div>`);
 }
 
 function openSectionSheet(sec) {
   sheetTarget = sec ? sec.id : null;
-  sheetEmoji = sec ? sec.emoji : '🏷️';
+  sheetEmoji = sec ? (sec.emoji || null) : null;
   let h = `<h3>${sec ? 'Modifier la catégorie' : 'Nouvelle catégorie'}</h3>
     <form data-form="${sec ? 'editSec' : 'newSec'}" autocomplete="off">
       ${nameRow(sec ? sec.name : '', 'Nom de la catégorie')}${emojiPicker(!sec)}${actions(sec ? 'Enregistrer' : 'Créer')}
@@ -2527,8 +2539,7 @@ function ddLabel() {
   const s = state.sections.find(x => x.id === sheetSec) || pendingSecs.get(sheetSec);
   return s ? `<span class="e">${esc(s.emoji)}</span>${esc(s.name)}` : '<span class="muted">Sans catégorie</span>';
 }
-let ddNewEmoji = '🏷️';
-const QUICK_EMOJIS = '🏷️ 🥛 🥦 🍎 🥩 🐟 🥖 🧀 🥫 🍝 🍫 🥤 🍷 ❄️ 🧴 🧻 🧹 🧽 🧺 🔧 🔨 💡 🪴 🎁 💊 🐶 👶 📦 🛒 ✅ ⭐ ❤️'.split(' ');
+let ddNewEmoji = '';
 function renderDdList() {
   const box = sheet.querySelector('[data-dd-list]');
   if (!box) return;
@@ -2541,9 +2552,9 @@ function renderDdList() {
   if (!q || norm('Sans catégorie').includes(q)) h += `<button type="button" class="dd-opt" data-dd-opt=""><span class="e">–</span><span class="t muted">Sans catégorie</span>${tick(null)}</button>`;
   h += secs.map(s => `<button type="button" class="dd-opt" data-dd-opt="${esc(s.id)}"><span class="e">${esc(s.emoji)}</span><span class="t">${esc(s.name)}</span>${tick(s.id)}</button>`).join('');
   if (q && !all.some(s => norm(s.name) === q)) h += `<div class="dd-new">
-      <div class="dd-new-t">Nouvelle catégorie « ${esc(typed.slice(0, 40))} » — choisis son émoji :</div>
-      <div class="dd-emos">${QUICK_EMOJIS.map(e => `<button type="button" class="emo ${e === ddNewEmoji ? 'on' : ''}" data-dd-emo="${e}">${e}</button>`).join('')}</div>
-      <button type="button" class="btn primary full" data-dd-create>${esc(ddNewEmoji)} Créer « ${esc(typed.slice(0, 40))} »</button>
+      <div class="dd-new-t">Nouvelle catégorie « ${esc(typed.slice(0, 40))} »</div>
+      <div class="dd-newrow"><input class="field iconbox" data-dd-icon value="${esc(ddNewEmoji)}" placeholder="Ic." maxlength="16" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Icône (2 caractères max)"><span class="muted">Icône facultative (2 caractères max)</span></div>
+      <button type="button" class="btn primary full" data-dd-create>Créer « ${esc(typed.slice(0, 40))} »</button>
     </div>`;
   box.innerHTML = h || `<div class="dd-empty">Aucune catégorie trouvée.</div>`;
 }
@@ -2623,7 +2634,7 @@ function openItemSheet(item) {
   openSheet(`<h3>Modifier l'élément</h3>
     <form data-form="editItem" autocomplete="off">
       <div class="emo-row">
-        <button type="button" class="emo-big ${sheetEmoji ? '' : 'none'}" data-emo-toggle aria-label="Choisir un émoji">${sheetEmoji ? esc(sheetEmoji) : '＋'}</button>
+        ${iconInput()}
         <input class="field" name="title" maxlength="200" value="${esc(item.title)}">
       </div>
       ${emojiPicker(false, true)}
@@ -2655,9 +2666,7 @@ function openItemSheet(item) {
 
 function setEmoji(e) {
   sheetEmoji = e || null;
-  const big = sheet.querySelector('[data-emo-toggle]');
-  if (big) { big.textContent = e || '＋'; big.classList.toggle('none', !e); }
-  sheet.querySelectorAll('[data-emo]').forEach(b => b.classList.toggle('on', b.dataset.emo === e));
+  const box = sheet.querySelector('[data-icon]'); if (box && box.value !== (e || '')) box.value = e || '';
   if (sheetKind === 'draftEmo') {
     draft.emoji = e || null;
     closeSheet();
@@ -2687,9 +2696,9 @@ overlay.addEventListener('click', e => {
   if (t.closest('[data-dd-create]')) {
     const name = (sheet.querySelector('[data-dd-search]')?.value || '').trim().slice(0, 40);
     if (!name) return;
-    const emo = ddNewEmoji;
+    const emo = clipIcon(ddNewEmoji) || '';
     const newId = addSection(sheetListId, name, emo);
-    ddNewEmoji = '🏷️';
+    ddNewEmoji = '';
     if (sheetKind === 'draftCat' || sheetKind === 'bulkCat') return chooseSection(newId);
     sheetSec = newId;
     sheet.querySelector('[data-dd-label]').innerHTML = `<span class="e">${esc(emo)}</span>${esc(name)}`;
@@ -2755,8 +2764,6 @@ overlay.addEventListener('click', e => {
   if (t.closest('[data-sec-new]')) return openSectionSheet(null);
   if (t.closest('[data-sec-manage-open]')) return openSectionsSheet();
   if (t.closest('[data-photo-drop]')) { sheetPhoto = null; refreshPhotoField(); return; }
-  const dEmo = t.closest('[data-dd-emo]');
-  if (dEmo) { ddNewEmoji = dEmo.dataset.ddEmo; renderDdList(); return; }
   const pp = t.closest('[data-pick-person]');
   if (pp) { const id = pp.dataset.pickPerson; sheetPeople.has(id) ? sheetPeople.delete(id) : sheetPeople.add(id); pp.classList.toggle('on', sheetPeople.has(id)); return; }
   const tg = t.closest('[data-tag]');
@@ -2845,7 +2852,12 @@ overlay.addEventListener('keydown', e => {
 overlay.addEventListener('input', e => {
   if (e.target.name === 'reply') { e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight, 160) + 'px'; }
   if (e.target.matches('[data-dd-search]')) return renderDdList();
-  if (e.target.matches('[data-emo-custom]')) { const g = firstGrapheme(e.target.value); if (g) setEmoji(g); }
+  if (e.target.matches('[data-icon]')) {
+    const v = clipIcon(e.target.value);
+    if (e.target.value !== v) { e.target.value = v; navigator.vibrate?.(10); }
+    sheetEmoji = v || null;
+  }
+  if (e.target.matches('[data-dd-icon]')) { const v = clipIcon(e.target.value); if (e.target.value !== v) e.target.value = v; ddNewEmoji = v; }
   e.target.classList?.remove('err');
 });
 
@@ -3398,7 +3410,7 @@ function openEventSheet(ev, day) {
   openSheet(`<h3>${ev ? "Modifier l'événement" : 'Nouvel événement'}</h3>
     <form data-form="event" autocomplete="off">
       <div class="emo-row">
-        <button type="button" class="emo-big ${sheetEmoji ? '' : 'none'}" data-emo-toggle aria-label="Choisir un émoji">${sheetEmoji ? esc(sheetEmoji) : '＋'}</button>
+        ${iconInput()}
         <input class="field" name="name" maxlength="80" placeholder="Titre (ex. Anniversaire de Léa)" value="${esc(ev?.title || '')}">
       </div>
       ${emojiPicker(false, true)}
