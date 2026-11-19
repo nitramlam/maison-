@@ -3325,7 +3325,7 @@ app.addEventListener('click', e => {
     case 'jumpSec': {
       const g = body.querySelector(`.grp[data-sec-id="${CSS.escape(id)}"]`);
       if (!g) break;
-      const y = g.getBoundingClientRect().top + window.scrollY - 16;
+      const y = g.getBoundingClientRect().top + window.scrollY - window.innerHeight * 0.4;   // la catégorie arrive vers le milieu de l'écran
       window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
       g.classList.remove('flash'); void g.offsetWidth; g.classList.add('flash');
       break;
@@ -3815,7 +3815,7 @@ document.addEventListener('submit', e => {
 
 // ================== Mise à jour automatique ==================
 // L'iPhone garde souvent l'ancienne page en mémoire : on vérifie s'il existe une version plus récente et on recharge.
-const APP_VERSION = '20 nov. 01 h 25';
+const APP_VERSION = '20 nov. 01 h 30';
 let updChecking = false, updLast = 0;
 async function checkUpdate() {
   if (updChecking || Date.now() - updLast < 60 * 1000 || !navigator.onLine) return;
