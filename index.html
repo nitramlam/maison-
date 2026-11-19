@@ -689,6 +689,62 @@
   .dfav .n{font-size:12.5px;color:var(--muted);font-weight:600}
   .dfav .chev{color:var(--muted);display:flex}
   .dfav .chev svg{width:16px;height:16px}
+
+  /* Dépenses */
+  .bseg{margin-bottom:4px}
+  .bhero{display:flex;align-items:center;gap:16px;padding:16px}
+  .bring{position:relative;width:132px;height:132px;flex:none}
+  .ring{width:100%;height:100%;transform:rotate(-90deg)}
+  .ring-bg{fill:none;stroke:color-mix(in srgb, var(--ink) 9%, transparent);stroke-width:13}
+  .ring-fg,.ring-seg{fill:none;stroke-width:13;stroke-linecap:round;transition:stroke-dasharray .6s cubic-bezier(.2,.8,.3,1)}
+  .ring-seg{stroke-linecap:butt}
+  .bring-in{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+  .bring-in small{font-size:11.5px;color:var(--muted)}
+  .bring-in b{font-size:22px;letter-spacing:-.02em;line-height:1.15}
+  .bstats{flex:1;display:flex;flex-direction:column;gap:8px;min-width:0}
+  .bstats > div{display:flex;flex-direction:column}
+  .bstats small{font-size:12px;color:var(--muted)}
+  .bstats b{font-size:16px}
+  .bstats p{margin:0 0 6px;font-size:14px}
+  .bstats .link{align-self:flex-start;font-size:13px}
+  .bnote{margin:-4px 4px 0;font-size:12px}
+  .blegend{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0;font-size:13.5px}
+  .blegend > div{display:flex;align-items:center;gap:8px}
+  .blegend i{width:10px;height:10px;border-radius:3px;flex:none}
+  .blegend .grow{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .exlist{padding:0;overflow:hidden}
+  .exrow{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;color:var(--ink);text-align:left;padding:12px 14px;font-family:inherit}
+  .exrow + .exrow{border-top:1px solid var(--line)}
+  .exrow.past{opacity:.55}
+  .exic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:21px;background:color-mix(in srgb, var(--ink) 6%, var(--card));flex:none}
+  .exrow .grow{min-width:0;display:flex;flex-direction:column}
+  .exrow .grow b{font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .exrow small{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .examt{display:flex;flex-direction:column;align-items:flex-end;flex:none}
+  .examt b{font-size:15px;font-variant-numeric:tabular-nums}
+  .examt small{font-size:11.5px;color:var(--muted)}
+  .bpeople{display:flex;flex-direction:column;gap:10px}
+  .bperson{display:flex;align-items:center;gap:12px;padding:12px 14px}
+  .bperson .grow{min-width:0;display:flex;flex-direction:column;gap:5px}
+  .bperson small{font-size:12.5px;color:var(--muted)}
+  .bbar{height:7px;border-radius:4px;background:color-mix(in srgb, var(--ink) 9%, transparent);overflow:hidden}
+  .bbar i{display:block;height:100%;border-radius:4px;transition:width .6s cubic-bezier(.2,.8,.3,1)}
+  .bleft{display:flex;flex-direction:column;align-items:flex-end;flex:none}
+  .bleft b{font-size:17px}
+  .bleft b.neg{color:#E0533D}
+  .fabadd{position:fixed;right:18px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:9;border:0;border-radius:999px;padding:13px 18px;background:var(--accent);color:#fff;
+    font:700 15px Inter,system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.22)}
+  .fabadd:active{transform:scale(.96)}
+  .addrow2{display:grid;grid-template-columns:1.4fr 1fr;gap:10px}
+  .eurfield{position:relative}
+  .eurfield .field{padding-right:30px;font-size:18px;font-weight:600}
+  .eurfield span{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-weight:600}
+  .expfreq{margin-top:14px}
+  .exsplit{margin-top:8px;color:var(--accent);font-weight:600}
+  .dtile.wide{grid-column:1 / -1;min-height:0;flex-direction:row;align-items:center;gap:12px;padding:14px 16px}
+  .dtile.wide .dt-ic{margin:0}
+  .dtile.wide b{margin:0}
+  .dtile.wide small{margin-left:auto}
   /* Messages vocaux */
   .iconchip{font-size:18px;padding:6px 12px}
   .vplayer{display:flex;align-items:center;gap:10px;margin-top:10px;padding:8px 12px 8px 8px;border-radius:999px;background:color-mix(in srgb, var(--accent) 10%, var(--card));max-width:300px}
@@ -932,7 +988,7 @@ const norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLow
 // ----- Icône automatique : « Œufs » → 🥚, « Pâtes carbo » → 🍝… (dictionnaire de mots courants) -----
 const AUTO_EMO = (() => {
   const single = new Map(), multi = [];
-  `🥚 oeuf|🥛 lait,lait d'avoine,lait d'amande,boisson vegetale|🧈 beurre,margarine|🧀 fromage,emmental,gruyere,comte,camembert,brie,mozzarella,parmesan,raclette,roquefort,feta,chevre,cheddar,mascarpone,ricotta,reblochon,fromage rape|🍦 glace,sorbet,creme glacee|🥣 cereale,muesli,granola,flocon d'avoine,porridge|🍶 yaourt,yogourt,skyr,fromage blanc,petit suisse,creme fraiche,creme,faisselle|🍞 pain,baguette,pain de mie,brioche,biscotte,pain complet|🥐 croissant,pain au chocolat,chocolatine,viennoiserie|🥖 ficelle,tradition|🍝 pate,spaghetti,tagliatelle,penne,fusilli,lasagne,macaroni,coquillette,raviolis,gnocchi,nouille,ramen,udon|🍚 riz,risotto,semoule,quinoa,boulgour,couscous|🥔 pomme de terre,patate,frite,puree|🍅 tomate,coulis,sauce tomate,concentre de tomate|🥕 carotte|🥒 concombre,cornichon,courgette|🥬 salade,laitue,epinard,chou,mache,roquette,blette,endive|🥦 brocoli,chou fleur|🧅 oignon,echalote|🧄 ail|🌶️ piment,harissa,tabasco|🫑 poivron|🍆 aubergine|🌽 mais|🍄 champignon,cepe,girolle|🥑 avocat,guacamole|🫛 petit pois,haricot vert,feve,pois|🫘 haricot,lentille,pois chiche,flageolet|🎃 potiron,citrouille,courge,butternut,potimarron|🥜 cacahuete,arachide,beurre de cacahuete|🌰 noix,noisette,amande,chataigne,marron,pistache,noix de cajou|🍎 pomme,compote|🍐 poire|🍊 orange,clementine,mandarine|🍋 citron,citron vert|🍌 banane|🍉 pasteque|🍈 melon|🍇 raisin|🍓 fraise,framboise|🫐 myrtille,cassis,mure|🍒 cerise|🍑 peche,nectarine,abricot|🥭 mangue|🍍 ananas|🥥 noix de coco,coco|🥝 kiwi|🍏 pomme verte|🥩 viande,steak,boeuf,entrecote,bavette,roti,veau,agneau,gigot,cote de boeuf|🍗 poulet,dinde,cuisse,aile de poulet,blanc de poulet,volaille,canard|🥓 lardon,bacon,jambon,chorizo,saucisson,charcuterie,rillette,pate de campagne|🌭 saucisse,merguez,knacki,hot dog,chipolata|🍔 burger,hamburger,steak hache|🐟 poisson,saumon,cabillaud,colin,truite,sardine,maquereau,merlu,lieu|🍤 crevette,gambas,langoustine,fruits de mer|🦪 huitre,moule|🦀 crabe,surimi|🐙 poulpe,calamar,encornet|🥫 thon,conserve,boite,mais en boite,ravioli en boite|🍕 pizza,pate a pizza|🌮 tacos,tortilla,wrap,fajitas|🥪 sandwich,croque monsieur|🥗 taboule,salade composee|🍲 soupe,veloute,bouillon,ragout,pot au feu|🍛 curry,chili|🍣 sushi,maki|🥟 dumpling,ravioli chinois,gyoza,bao,xiao long bao,nem|🥞 crepe,pancake,gaufre|🧇 gaufre|🍰 gateau,tarte,cake,dessert,patisserie,fraisier,tiramisu,cheesecake|🎂 anniversaire,gateau d'anniversaire|🧁 muffin,cupcake,madeleine|🍪 biscuit,cookie,gateau sec,petit beurre,sable|🍫 chocolat,nutella,pate a tartiner,cacao|🍬 bonbon,friandise,haribo|🍭 sucette|🍯 miel,confiture|🧂 sel,poivre,epice,cumin,curcuma,paprika,herbes de provence|🫒 huile,huile d'olive,olive|🍾 champagne,cremant|🍷 vin,rouge,rose,bordeaux|🍺 biere|🥃 whisky,rhum,vodka,alcool,pastis,gin|🧃 jus,jus d'orange,jus de pomme|🥤 soda,coca,limonade,ice tea,sirop|💧 eau,eau gazeuse,eau petillante,bouteille d'eau|☕ cafe,capsule,dosette,expresso|🍵 the,tisane,infusion|🧊 glacon|🥄 sucre,farine,levure,maizena,vanille,sucre glace|🫙 bocal,pot|🥫 sauce,ketchup,mayonnaise,moutarde,vinaigrette,vinaigre,pesto|🍿 popcorn|🥨 bretzel,chips,apero,biscuit apero,crackers|🧻 papier toilette,pq,essuie tout,sopalin,mouchoir|🧼 savon,gel douche,liquide vaisselle,lessive,adoucissant|🧽 eponge|🧴 shampoing,apres shampoing,creme hydratante,lotion,demaquillant,deodorant,dentifrice,creme solaire|🪥 brosse a dents|🧹 balai,serpilliere,menage,aspirateur|🗑️ sac poubelle,poubelle|🧺 linge,panier a linge|🪣 seau|🧤 gant|🧷 epingle|🪒 rasoir|💊 medicament,doliprane,paracetamol,ibuprofene,vitamine,pharmacie|🩹 pansement|🧸 jouet,peluche|🍼 biberon,lait infantile|👶 bebe,couche,lingette|🐶 chien,croquette,patee|🐱 chat,litiere|🐟 aquarium|🪴 plante,terreau,engrais,pot de fleur|🌸 fleur,bouquet|💡 ampoule,lampe,lumiere|🔋 pile,batterie|🔌 prise,rallonge,multiprise,chargeur,cable|🔧 cle,plomberie,fuite,robinet,reparer,reparation|🔨 marteau,clou,bricolage|🪛 tournevis|🪚 scie|🔩 vis,boulon,cheville,ecrou|🪜 echelle,escabeau|🎨 peinture,peindre,pinceau,rouleau,enduit|🧱 brique,ciment,platre,carrelage,joint|🚪 porte,serrure|🪟 fenetre,vitre,rideau,store|🛏️ lit,matelas,drap,couette,oreiller|🛋️ canape,coussin,meuble,table,chaise|🚿 douche,salle de bain|🚽 toilette,wc|🧯 extincteur|🚗 voiture,garage,pneu,vidange,controle technique,essence,carburant|🚲 velo|🛒 courses,supermarche,marche|🎁 cadeau,noel|🎉 fete,soiree|📦 colis,carton,demenagement|✉️ courrier,lettre,timbre|📄 papier,document,dossier,impot,facture|💳 banque,carte bancaire|📞 telephone,appeler|💻 ordinateur,pc|📚 livre|✏️ stylo,crayon,cahier,fourniture|✂️ ciseaux|🧵 couture,fil,bouton|👕 vetement,t-shirt,tee shirt,pull,chemise|👖 pantalon,jean|👟 chaussure,basket|🧦 chaussette|🧥 manteau,veste|🌳 jardin,tondre,pelouse,haie,tondeuse|🔥 bois,cheminee,barbecue,charbon|❄️ congelateur,surgele|🧊 frigo,refrigerateur|🍽️ vaisselle,assiette,couverts|🥘 poele,casserole,cuisine|🕯️ bougie|🧳 valise,vacances|✈️ avion,voyage|🏥 medecin,docteur,rdv,rendez vous,dentiste|💈 coiffeur|🏋️ sport,salle de sport|🎂 anniv|🛍️ achat,shopping|🔨 travaux,renovation|🍽️ restaurant,resto,repas,plat,diner,dejeuner|🍝 idees repas,idee repas,recette|🎬 film,cinema|📺 serie,netflix|🎵 musique,concert|🎮 jeu,jeux video|✅ a faire,todo,tache|🎄 noel,sapin|🥗 entree,healthy,leger|🥐 petit dejeuner,brunch|🥕 legume|🍎 fruit|🥤 boisson|🥫 epicerie|🧴 hygiene,beaute|🥖 boulangerie|🥩 boucherie|🐟 poissonnerie|🍔 fast food,fastfood|🛏️ chambre|🛋️ salon|⏱️ minute,min,mins,rapide,express|💰 euro,euros,budget,argent,prix|💡 idee|🏠 maison|🥛 laitier,produit laitier,cremerie`.split('|').forEach(b => {
+  `🥚 oeuf|🥛 lait,lait d'avoine,lait d'amande,boisson vegetale|🧈 beurre,margarine|🧀 fromage,emmental,gruyere,comte,camembert,brie,mozzarella,parmesan,raclette,roquefort,feta,chevre,cheddar,mascarpone,ricotta,reblochon,fromage rape|🍦 glace,sorbet,creme glacee|🥣 cereale,muesli,granola,flocon d'avoine,porridge|🍶 yaourt,yogourt,skyr,fromage blanc,petit suisse,creme fraiche,creme,faisselle|🍞 pain,baguette,pain de mie,brioche,biscotte,pain complet|🥐 croissant,pain au chocolat,chocolatine,viennoiserie|🥖 ficelle,tradition|🍝 pate,spaghetti,tagliatelle,penne,fusilli,lasagne,macaroni,coquillette,raviolis,gnocchi,nouille,ramen,udon|🍚 riz,risotto,semoule,quinoa,boulgour,couscous|🥔 pomme de terre,patate,frite,puree|🍅 tomate,coulis,sauce tomate,concentre de tomate|🥕 carotte|🥒 concombre,cornichon,courgette|🥬 salade,laitue,epinard,chou,mache,roquette,blette,endive|🥦 brocoli,chou fleur|🧅 oignon,echalote|🧄 ail|🌶️ piment,harissa,tabasco|🫑 poivron|🍆 aubergine|🌽 mais|🍄 champignon,cepe,girolle|🥑 avocat,guacamole|🫛 petit pois,haricot vert,feve,pois|🫘 haricot,lentille,pois chiche,flageolet|🎃 potiron,citrouille,courge,butternut,potimarron|🥜 cacahuete,arachide,beurre de cacahuete|🌰 noix,noisette,amande,chataigne,marron,pistache,noix de cajou|🍎 pomme,compote|🍐 poire|🍊 orange,clementine,mandarine|🍋 citron,citron vert|🍌 banane|🍉 pasteque|🍈 melon|🍇 raisin|🍓 fraise,framboise|🫐 myrtille,cassis,mure|🍒 cerise|🍑 peche,nectarine,abricot|🥭 mangue|🍍 ananas|🥥 noix de coco,coco|🥝 kiwi|🍏 pomme verte|🥩 viande,steak,boeuf,entrecote,bavette,roti,veau,agneau,gigot,cote de boeuf|🍗 poulet,dinde,cuisse,aile de poulet,blanc de poulet,volaille,canard|🥓 lardon,bacon,jambon,chorizo,saucisson,charcuterie,rillette,pate de campagne|🌭 saucisse,merguez,knacki,hot dog,chipolata|🍔 burger,hamburger,steak hache|🐟 poisson,saumon,cabillaud,colin,truite,sardine,maquereau,merlu,lieu|🍤 crevette,gambas,langoustine,fruits de mer|🦪 huitre,moule|🦀 crabe,surimi|🐙 poulpe,calamar,encornet|🥫 thon,conserve,boite,mais en boite,ravioli en boite|🍕 pizza,pate a pizza|🌮 tacos,tortilla,wrap,fajitas|🥪 sandwich,croque monsieur|🥗 taboule,salade composee|🍲 soupe,veloute,bouillon,ragout,pot au feu|🍛 curry,chili|🍣 sushi,maki|🥟 dumpling,ravioli chinois,gyoza,bao,xiao long bao,nem|🥞 crepe,pancake,gaufre|🧇 gaufre|🍰 gateau,tarte,cake,dessert,patisserie,fraisier,tiramisu,cheesecake|🎂 anniversaire,gateau d'anniversaire|🧁 muffin,cupcake,madeleine|🍪 biscuit,cookie,gateau sec,petit beurre,sable|🍫 chocolat,nutella,pate a tartiner,cacao|🍬 bonbon,friandise,haribo|🍭 sucette|🍯 miel,confiture|🧂 sel,poivre,epice,cumin,curcuma,paprika,herbes de provence|🫒 huile,huile d'olive,olive|🍾 champagne,cremant|🍷 vin,rouge,rose,bordeaux|🍺 biere|🥃 whisky,rhum,vodka,alcool,pastis,gin|🧃 jus,jus d'orange,jus de pomme|🥤 soda,coca,limonade,ice tea,sirop|💧 eau,eau gazeuse,eau petillante,bouteille d'eau|☕ cafe,capsule,dosette,expresso|🍵 the,tisane,infusion|🧊 glacon|🥄 sucre,farine,levure,maizena,vanille,sucre glace|🫙 bocal,pot|🥫 sauce,ketchup,mayonnaise,moutarde,vinaigrette,vinaigre,pesto|🍿 popcorn|🥨 bretzel,chips,apero,biscuit apero,crackers|🧻 papier toilette,pq,essuie tout,sopalin,mouchoir|🧼 savon,gel douche,liquide vaisselle,lessive,adoucissant|🧽 eponge|🧴 shampoing,apres shampoing,creme hydratante,lotion,demaquillant,deodorant,dentifrice,creme solaire|🪥 brosse a dents|🧹 balai,serpilliere,menage,aspirateur|🗑️ sac poubelle,poubelle|🧺 linge,panier a linge|🪣 seau|🧤 gant|🧷 epingle|🪒 rasoir|💊 medicament,doliprane,paracetamol,ibuprofene,vitamine,pharmacie|🩹 pansement|🧸 jouet,peluche|🍼 biberon,lait infantile|👶 bebe,couche,lingette|🐶 chien,croquette,patee|🐱 chat,litiere|🐟 aquarium|🪴 plante,terreau,engrais,pot de fleur|🌸 fleur,bouquet|💡 ampoule,lampe,lumiere|🔋 pile,batterie|🔌 prise,rallonge,multiprise,chargeur,cable|🔧 cle,plomberie,fuite,robinet,reparer,reparation|🔨 marteau,clou,bricolage|🪛 tournevis|🪚 scie|🔩 vis,boulon,cheville,ecrou|🪜 echelle,escabeau|🎨 peinture,peindre,pinceau,rouleau,enduit|🧱 brique,ciment,platre,carrelage,joint|🚪 porte,serrure|🪟 fenetre,vitre,rideau,store|🛏️ lit,matelas,drap,couette,oreiller|🛋️ canape,coussin,meuble,table,chaise|🚿 douche,salle de bain|🚽 toilette,wc|🧯 extincteur|🚗 voiture,garage,pneu,vidange,controle technique,essence,carburant|🚲 velo|🛒 courses,supermarche,marche|🎁 cadeau,noel|🎉 fete,soiree|📦 colis,carton,demenagement|✉️ courrier,lettre,timbre|📄 papier,document,dossier,impot,facture|💳 banque,carte bancaire|📞 telephone,appeler|💻 ordinateur,pc|📚 livre|✏️ stylo,crayon,cahier,fourniture|✂️ ciseaux|🧵 couture,fil,bouton|👕 vetement,t-shirt,tee shirt,pull,chemise|👖 pantalon,jean|👟 chaussure,basket|🧦 chaussette|🧥 manteau,veste|🌳 jardin,tondre,pelouse,haie,tondeuse|🔥 bois,cheminee,barbecue,charbon|❄️ congelateur,surgele|🧊 frigo,refrigerateur|🍽️ vaisselle,assiette,couverts|🥘 poele,casserole,cuisine|🕯️ bougie|🧳 valise,vacances|✈️ avion,voyage|🏥 medecin,docteur,rdv,rendez vous,dentiste|💈 coiffeur|🏋️ sport,salle de sport|🎂 anniv|🛍️ achat,shopping|🔨 travaux,renovation|🍽️ restaurant,resto,repas,plat,diner,dejeuner|🍝 idees repas,idee repas,recette|🎬 film,cinema|📺 serie,netflix|🎵 musique,concert|🎮 jeu,jeux video|✅ a faire,todo,tache|🎄 noel,sapin|🥗 entree,healthy,leger|🥐 petit dejeuner,brunch|🥕 legume|🍎 fruit|🥤 boisson|🥫 epicerie|🧴 hygiene,beaute|🥖 boulangerie|🥩 boucherie|🐟 poissonnerie|🍔 fast food,fastfood|🛏️ chambre|🛋️ salon|⏱️ minute,min,mins,rapide,express|💰 euro,euros,budget,argent,prix|💡 idee|🏠 maison,loyer,credit immobilier,pret immobilier,syndic,charges|🥛 laitier,produit laitier,cremerie|📺 netflix,disney,canal,prime video,abonnement tv,deezer,spotify|📱 forfait,mobile,box,internet,fibre|⚡ electricite,edf,engie,gaz,energie|💧 eau|🛡️ assurance,mutuelle,prevoyance|🚗 credit auto,voiture,parking,peage,navigo,transport|🏋️ salle de sport,basic fit,fitness|🎓 ecole,cantine,creche,nounou|💳 credit,pret|🧾 impot,taxe fonciere,taxe|🐶 veterinaire`.split('|').forEach(b => {
     const sp = b.indexOf(' '), e = b.slice(0, sp);
     b.slice(sp + 1).split(',').forEach(w => {
       w = norm(w).replace(/œ/g, 'oe');
@@ -1229,6 +1285,13 @@ function closeHouse() {
 
 function subscribe() {
   unsubs.forEach(u => u()); unsubs = [];
+  state.expenses = []; state.expDenied = false;
+  unsubs.push(onSnapshot(query(col('expenses'), orderBy('createdAt')), snap => {
+    state.expenses = snap.docs.map(d => { const v = d.data(); return { id: d.id, name: str(v.name, 'Dépense'), emoji: typeof v.emoji === 'string' ? clipIcon(v.emoji) : '',
+      amount: Math.max(0, Math.round(Number(v.amount) || 0)), freq: v.freq === 'year' ? 'year' : 'month', day: Math.min(31, Math.max(1, Number(v.day) || 1)),
+      people: Array.isArray(v.people) ? v.people.filter(x => typeof x === 'string') : [], by: v.by || null, createdAt: Number(v.createdAt) || 0 }; });
+    if (state.tab === 'budget' || state.tab === 'home') render();
+  }, e => { if (e && e.code === 'permission-denied') { state.expDenied = true; if (state.tab === 'budget') render(); return; } console.warn('dépenses', e); }));
   state.loading = true; state.error = null;
   const have = {};
   const kinds = ['lists', 'sections', 'items'];
@@ -1274,6 +1337,7 @@ function subscribe() {
       const devs = v.devices && typeof v.devices === 'object' ? Object.entries(v.devices) : [];
       return {
         id: d.id, name: str(v.name, "Quelqu'un"), removed: v.removed === true, hue: typeof v.hue === 'number' ? v.hue : null,
+        budget: v.budget && typeof v.budget === 'object' && Number(v.budget.salary) > 0 ? { salary: Math.round(Number(v.budget.salary)), payday: Math.min(31, Math.max(1, Number(v.budget.payday) || 1)) } : null,
         devices: devs.map(([k, x]) => ({ id: k, label: str(x && x.label, 'Appareil'), lastSeen: Number(x && x.lastSeen) || 0 }))
                      .sort((a, b) => b.lastSeen - a.lastSeen)
       };
@@ -2438,6 +2502,14 @@ function render() {
     renderedKey = 'home';
     return;
   }
+  if (state.tab === 'budget') {
+    const anim = state.anim ? 'anim-' + state.anim : ''; state.anim = null;
+    screen.innerHTML = `<div class="${anim}">${pageHead('Dépenses', 'Le mois de chacun, et celui du foyer.')}</div>`;
+    body.innerHTML = `<div class="${anim}">${renderBudget()}</div>`;
+    composer.hidden = true;
+    renderedKey = 'budget';
+    return;
+  }
   if (state.tab === 'cal') {
     const anim = state.anim ? 'anim-' + state.anim : ''; state.anim = null;
     screen.innerHTML = `<div class="${anim}">${renderCalendar()}</div>`;
@@ -2683,7 +2755,7 @@ function openSettingsSheet() {
     <div class="sep"></div>
     <div class="label">Ton compte</div>
     <p class="hint">Connecté avec <b>${esc(state.user?.email || '')}</b>. Connecte-toi avec ce même compte sur ton iPad ou ton autre téléphone : tu y retrouves tout.</p>
-    <p class="hint" style="font-size:11.5px;opacity:.6">Version de l'app : 19 nov. 23 h 10</p>
+    <p class="hint" style="font-size:11.5px;opacity:.6">Version de l'app : 20 nov. 00 h 05</p>
     <div class="actions" style="margin-top:12px">
       <button type="button" class="btn ghost" data-reset-pw>Changer de mot de passe</button>
       <button type="button" class="btn ghost" data-logout>Se déconnecter</button>
@@ -3110,7 +3182,7 @@ overlay.addEventListener('input', e => {
     if (e.target.value !== v) { e.target.value = v; navigator.vibrate?.(10); }
     sheetEmoji = v || null;
   }
-  if (e.target.name === 'q_name' && !sheetIconManual && e.target.closest('[data-form="newList"],[data-form="editList"],[data-form="newSec"],[data-form="editSec"]')) {
+  if (e.target.name === 'q_name' && !sheetIconManual && e.target.closest('[data-form="newList"],[data-form="editList"],[data-form="newSec"],[data-form="editSec"],[data-form="expense"]')) {
     const em = autoEmoji(e.target.value);
     sheetEmoji = em || null;
     const box = sheet.querySelector('[data-icon]'); if (box) { box.value = em; box.classList.toggle('auto', !!em); }
@@ -3524,6 +3596,7 @@ overlay.addEventListener('input', e => {
 
 // ================== Onglets : Listes / Calendrier / Notes ==================
 const TAB_ICONS = {
+  budget: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="3"/><path d="M2.5 10h19"/><path d="M7 15h3"/></svg>',
   home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg>',
   lists: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>',
   cal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>',
@@ -3537,7 +3610,7 @@ function renderTabbar(show) {
   const n = t === 'notes' ? 0 : unreadMentions().length + unreadReplies().length;
   const a = unreadAssigned().length;
   const badge = k => k === 'notes' && n ? `<i class="tabbadge">${n}</i>` : k === 'lists' && a ? `<i class="tabbadge">${a}</i>` : '';
-  tabbar.innerHTML = [['home', 'Accueil'], ['lists', 'Listes'], ['cal', 'Calendrier'], ['notes', 'Notes']].map(([k, label]) =>
+  tabbar.innerHTML = [['home', 'Accueil'], ['lists', 'Listes'], ['cal', 'Agenda'], ['notes', 'Notes'], ['budget', 'Dépenses']].map(([k, label]) =>
     `<button type="button" class="tab ${t === k ? 'on' : ''}" data-tab="${k}">${TAB_ICONS[k]}<span>${label}</span>${badge(k)}</button>`).join('');
 }
 tabbar.addEventListener('click', e => {
@@ -3558,6 +3631,237 @@ tabbar.addEventListener('click', e => {
   render();
   window.scrollTo(0, 0);
 });
+
+// ================== Dépenses : récurrentes, partagées, et ce qu'il reste à chacun ==================
+state.expenses = []; state.budgetView = 'me';
+const eur = c => (Number(c) / 100).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR', minimumFractionDigits: Number(c) % 100 ? 2 : 0, maximumFractionDigits: 2 });
+const eurInt = c => (Math.round(Number(c) / 100)).toLocaleString('fr-FR') + ' €';
+function parseEuros(v) {
+  const t = String(v || '').replace(/\s/g, '').replace('€', '').replace(',', '.');
+  if (!/^\d+(\.\d{0,2})?$/.test(t)) return null;
+  return Math.round(parseFloat(t) * 100);
+}
+const monthlyOf = e => e.freq === 'year' ? Math.round(e.amount / 12) : e.amount;
+function shareOf(e, uid) {
+  const ppl = e.people.length ? e.people : [e.by];
+  return ppl.includes(uid) ? Math.round(monthlyOf(e) / ppl.length) : 0;
+}
+function myBudget() {
+  const b = state.profile?.budget?.[state.code];
+  return b && Number(b.salary) > 0 ? { salary: Math.round(Number(b.salary)), payday: Math.min(31, Math.max(1, Number(b.payday) || 1)), shared: b.shared === true } : null;
+}
+function budgetOf(uid) {
+  if (uid === meId) return myBudget();
+  return (state.members || []).find(m => m.id === uid)?.budget || null;
+}
+const daysInMonth = (y, m) => new Date(y, m + 1, 0).getDate();
+// Chronologie depuis la dernière paie : salaire reçu, puis chaque prélèvement dans l'ordre
+function payCycle(uid) {
+  const b = budgetOf(uid);
+  const now = new Date(), y = now.getFullYear(), m = now.getMonth(), today = now.getDate();
+  const pay = b ? b.payday : 1;
+  // début du cycle = dernier jour de paie passé
+  let cy = y, cm = m;
+  if (today < Math.min(pay, daysInMonth(y, m))) { cm = m - 1; if (cm < 0) { cm = 11; cy = y - 1; } }
+  const start = new Date(cy, cm, Math.min(pay, daysInMonth(cy, cm)));
+  const nm = (cm + 1) % 12, ny = cm === 11 ? cy + 1 : cy;
+  const end = new Date(ny, nm, Math.min(pay, daysInMonth(ny, nm)));
+  const items = [];
+  for (const e of state.expenses) {
+    const part = shareOf(e, uid); if (!part) continue;
+    if (e.freq === 'year') { items.push({ e, part, date: null }); continue; }   // annuelle : lissée sur 12 mois
+    // date du prélèvement dans le cycle
+    let d = new Date(cy, cm, Math.min(e.day, daysInMonth(cy, cm)));
+    if (d < start) d = new Date(ny, nm, Math.min(e.day, daysInMonth(ny, nm)));
+    items.push({ e, part, date: d });
+  }
+  items.sort((a, b) => (a.date === null) - (b.date === null) || (a.date && b.date ? a.date - b.date : 0));
+  const total = items.reduce((t, x) => t + x.part, 0);
+  let bal = b ? b.salary : 0;
+  const nowT = new Date(y, m, today).getTime();
+  for (const x of items) { bal -= x.part; x.after = bal; x.past = x.date ? x.date.getTime() < nowT : false; }
+  const spentSoFar = items.filter(x => x.past).reduce((t, x) => t + x.part, 0);
+  return { b, start, end, items, total, left: b ? b.salary - total : null, nowLeft: b ? b.salary - spentSoFar : null };
+}
+function budgetTileText() {
+  if (!state.expenses.length && !myBudget()) return 'Tes dépenses du mois';
+  const c = payCycle(meId);
+  return c.left != null ? `Il te reste ${eurInt(c.left)}` : `${eurInt(c.total)} / mois pour toi`;
+}
+function ring(pct, color) {
+  const r = 52, C = 2 * Math.PI * r, v = Math.max(0, Math.min(1, pct));
+  return `<svg viewBox="0 0 120 120" class="ring"><circle cx="60" cy="60" r="${r}" class="ring-bg"/>
+    <circle cx="60" cy="60" r="${r}" class="ring-fg" style="stroke:${color};stroke-dasharray:${(C * v).toFixed(1)} ${C.toFixed(1)}"/></svg>`;
+}
+function donut(parts) {   // [{label, value, color}]
+  const tot = parts.reduce((t, p) => t + p.value, 0) || 1, r = 52, C = 2 * Math.PI * r;
+  let off = 0;
+  return `<svg viewBox="0 0 120 120" class="ring">${parts.map(p => {
+    const len = C * p.value / tot, seg = `<circle cx="60" cy="60" r="${r}" class="ring-seg" style="stroke:${p.color};stroke-dasharray:${Math.max(0, len - 1.5).toFixed(1)} ${C.toFixed(1)};stroke-dashoffset:${(-off).toFixed(1)}"/>`;
+    off += len; return seg; }).join('')}</svg>`;
+}
+const fmtDay = d => d ? d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }).replace('.', '') : 'lissée sur l\'année';
+function expRow(x, uid) {
+  const e = x.e, ppl = e.people.length ? e.people : [e.by];
+  return `<button type="button" class="exrow ${x.past ? 'past' : ''}" data-exp="${esc(e.id)}">
+    <span class="exic">${esc(e.emoji || autoEmoji(e.name) || '💶')}</span>
+    <span class="grow"><b>${esc(e.name)}</b><small>${x.date ? (x.past ? 'Passé · ' : '') + fmtDay(x.date) : 'Annuelle · ' + eur(e.amount) + '/an'}${ppl.length > 1 ? ` · ${miniAvatars(ppl)}` : ''}</small></span>
+    <span class="examt"><b>− ${eur(x.part)}</b>${x.after != null && budgetOf(uid) ? `<small>reste ${eurInt(x.after)}</small>` : ''}</span></button>`;
+}
+function renderBudget() {
+  if (state.expDenied) return `<div class="banner">Les dépenses ne sont pas encore autorisées : publie les nouvelles règles Firestore.</div>`;
+  const v = state.budgetView;
+  let h = `<div class="seg bseg sec"><button type="button" class="${v === 'me' ? 'on' : ''}" data-bview="me">Moi</button><button type="button" class="${v === 'home' ? 'on' : ''}" data-bview="home">Le foyer</button><button type="button" class="${v === 'all' ? 'on' : ''}" data-bview="all">Toutes</button></div>`;
+  if (v === 'me') {
+    const c = payCycle(meId), b = c.b;
+    if (b) {
+      const pct = b.salary ? c.left / b.salary : 0, col = c.left < 0 ? '#E0533D' : pct < .15 ? '#E89B2E' : '#2fbf71';
+      h += `<div class="card bhero sec">
+        <div class="bring">${ring(Math.max(0, c.left) / (b.salary || 1), col)}<div class="bring-in"><small>Il te reste</small><b style="color:${col}">${eurInt(c.left)}</b><small>ce mois-ci</small></div></div>
+        <div class="bstats">
+          <div><small>Salaire · le ${b.payday}</small><b>${eur(b.salary)}</b></div>
+          <div><small>Tes dépenses</small><b>− ${eur(c.total)}</b></div>
+          <div><small>Sur ton compte aujourd'hui*</small><b>${eurInt(c.nowLeft)}</b></div>
+          <button type="button" class="link" data-salary>Modifier mon salaire</button>
+        </div></div>
+        <p class="hint bnote">* salaire du ${c.start.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })} moins les prélèvements déjà passés. ${b.shared ? 'Ton salaire est visible par la maison.' : 'Ton salaire est privé : toi seul le vois.'}</p>`;
+    } else {
+      const c2 = payCycle(meId);
+      h += `<div class="card bhero sec empty-b"><div class="bring">${ring(0, '#ccc')}<div class="bring-in"><small>Tes dépenses</small><b>${eurInt(c2.total)}</b><small>par mois</small></div></div>
+        <div class="bstats"><p>Ajoute ton salaire pour savoir ce qu'il te reste chaque mois.</p><button type="button" class="btn primary" data-salary>💶 Ajouter mon salaire</button></div></div>`;
+    }
+    const upcoming = c.items.filter(x => !x.past), past = c.items.filter(x => x.past);
+    h += `<div class="sec"><div class="grp-h soft dh">À venir<span class="n">${upcoming.length}</span><button class="link act" data-exp-new>＋ Ajouter</button></div>
+      <div class="card exlist">${upcoming.length ? upcoming.map(x => expRow(x, meId)).join('') : '<div class="pad muted">Rien d\'autre ce mois-ci 🎉</div>'}</div></div>`;
+    if (past.length) h += `<div class="sec"><div class="grp-h soft dh">Déjà passées<span class="n">${past.length}</span></div><div class="card exlist">${past.map(x => expRow(x, meId)).join('')}</div></div>`;
+  } else if (v === 'home') {
+    const total = state.expenses.reduce((t, e) => t + monthlyOf(e), 0);
+    const people = houseMembers().sort((a, b) => (b.id === meId) - (a.id === meId) || a.name.localeCompare(b.name));
+    const palette = ['#5B8DEF', '#2fbf71', '#E89B2E', '#E0533D', '#9B6BDF', '#2BB3C0', '#C77D4A', '#8A8F98'];
+    const top = [...state.expenses].sort((a, b) => monthlyOf(b) - monthlyOf(a));
+    const parts = top.slice(0, 6).map((e, i) => ({ label: e.name, value: monthlyOf(e), color: palette[i], emoji: e.emoji || autoEmoji(e.name) }));
+    const restV = top.slice(6).reduce((t, e) => t + monthlyOf(e), 0); if (restV) parts.push({ label: 'Autres', value: restV, color: palette[7], emoji: '•' });
+    h += `<div class="card bhero sec"><div class="bring">${total ? donut(parts) : ring(0, '#ccc')}<div class="bring-in"><small>Le foyer</small><b>${eurInt(total)}</b><small>par mois</small></div></div>
+      <div class="blegend">${parts.map(p => `<div><i style="background:${p.color}"></i><span class="grow">${esc(p.emoji ? p.emoji + ' ' : '')}${esc(p.label)}</span><b>${eurInt(p.value)}</b></div>`).join('') || '<p class="muted">Aucune dépense pour l\'instant.</p>'}</div></div>`;
+    h += `<div class="sec"><div class="grp-h soft dh">Chacun</div><div class="bpeople">${people.map(m => {
+      const c = payCycle(m.id), b = c.b;
+      const pct = b ? Math.max(0, Math.min(1, c.total / b.salary)) : (total ? c.total / total : 0);
+      return `<div class="card bperson"><span class="avatar lg" style="--h:${pHue(m.id)}">${esc(initial(m.name))}</span>
+        <div class="grow"><b>${esc(m.id === meId ? 'Toi' : m.name)}</b>
+          <div class="bbar"><i style="width:${(pct * 100).toFixed(1)}%;background:hsl(${pHue(m.id)} 60% 55%)"></i></div>
+          <small>${eur(c.total)} / mois${b ? ` · salaire ${eurInt(b.salary)}` : ''}</small></div>
+        <div class="bleft">${b ? `<small>reste</small><b class="${c.left < 0 ? 'neg' : ''}">${eurInt(c.left)}</b>` : `<small>${m.id === meId ? '<button class="link" data-salary>salaire ?</button>' : 'salaire privé'}</small>`}</div></div>`;
+    }).join('')}</div></div>`;
+  } else {
+    const rows = [...state.expenses].sort((a, b) => (a.freq === 'year') - (b.freq === 'year') || a.day - b.day);
+    h += `<div class="sec"><div class="grp-h soft dh">Toutes les dépenses<span class="n">${rows.length}</span><button class="link act" data-exp-new>＋ Ajouter</button></div>
+      <div class="card exlist">${rows.length ? rows.map(e => { const ppl = e.people.length ? e.people : [e.by];
+        return `<button type="button" class="exrow" data-exp="${esc(e.id)}"><span class="exic">${esc(e.emoji || autoEmoji(e.name) || '💶')}</span>
+          <span class="grow"><b>${esc(e.name)}</b><small>${e.freq === 'year' ? 'Chaque année' : `Le ${e.day} du mois`} · ${miniAvatars(ppl)} ${ppl.length > 1 ? `${eur(Math.round(monthlyOf(e) / ppl.length))} chacun` : ''}</small></span>
+          <span class="examt"><b>${eur(e.amount)}</b><small>${e.freq === 'year' ? 'par an' : 'par mois'}</small></span></button>`; }).join('')
+        : '<div class="pad muted">Aucune dépense. Ajoute le loyer, les abonnements, l\'assurance…</div>'}</div></div>`;
+  }
+  h += `<div style="height:76px"></div><button type="button" class="fabadd" data-exp-new aria-label="Ajouter une dépense">＋ Dépense</button>`;
+  return h;
+}
+let expFreq = 'month';
+function openExpenseSheet(e) {
+  sheetTarget = e ? e.id : null;
+  sheetEmoji = e ? (e.emoji || null) : null; sheetIconManual = !!(e && e.emoji);
+  sheetPeople = new Set(e ? (e.people.length ? e.people : [e.by]) : [meId]);
+  expFreq = e ? e.freq : 'month';
+  const day = e ? e.day : new Date().getDate();
+  openSheet(`<h3>${e ? 'Modifier la dépense' : 'Nouvelle dépense'}</h3>
+    <form data-form="expense" autocomplete="off">
+      ${nameRow(e ? e.name : '', 'ex. Loyer, Netflix, Assurance auto…')}
+      <div class="addrow2">
+        <div><div class="label">Montant</div><div class="eurfield"><input class="field" name="q_amount" inputmode="decimal" placeholder="0,00" value="${e ? (e.amount / 100).toFixed(2).replace('.', ',').replace(',00', '') : ''}" autocomplete="off"><span>€</span></div></div>
+        <div><div class="label">Prélevé le</div><select class="field" name="q_day">${Array.from({ length: 31 }, (_, i) => `<option value="${i + 1}" ${i + 1 === day ? 'selected' : ''}>${i + 1}</option>`).join('')}</select></div>
+      </div>
+      <div class="seg expfreq"><button type="button" class="${expFreq === 'month' ? 'on' : ''}" data-freq="month">Chaque mois</button><button type="button" class="${expFreq === 'year' ? 'on' : ''}" data-freq="year">Chaque année</button></div>
+      <div class="label">Pour qui ? <span class="muted">(partagé à parts égales)</span></div>
+      <div data-people>${peoplePicker(true)}</div>
+      <button type="button" class="link" data-exp-all style="margin-top:8px">Tout le monde</button>
+      <p class="hint exsplit" id="expSplit"></p>
+      ${actions(e ? 'Enregistrer' : 'Ajouter')}
+    </form>
+    ${e ? `<div class="sep"></div><button type="button" class="btn danger full" data-exp-del>Supprimer la dépense</button>` : ''}`);
+  sheetKind = 'expense';
+  updateExpSplit();
+  if (!e) sheet.querySelector('[name="q_name"]')?.focus();
+}
+function updateExpSplit() {
+  const box = sheet.querySelector('#expSplit'); if (!box) return;
+  const c = parseEuros(sheet.querySelector('[name="q_amount"]')?.value);
+  const n = sheetPeople.size || 1;
+  if (!c) { box.textContent = ''; return; }
+  const m = expFreq === 'year' ? c / 12 : c;
+  box.textContent = n > 1 ? `Soit ${eur(Math.round(m / n))} par personne et par mois.` : expFreq === 'year' ? `Soit ${eur(Math.round(m))} par mois.` : '';
+}
+function openSalarySheet() {
+  const b = myBudget();
+  openSheet(`<h3>Mon salaire</h3>
+    <form data-form="salary" autocomplete="off">
+      <div class="addrow2">
+        <div><div class="label">Net par mois</div><div class="eurfield"><input class="field" name="q_salary" inputmode="decimal" placeholder="0" value="${b ? (b.salary / 100).toFixed(2).replace('.', ',').replace(',00', '') : ''}" autocomplete="off"><span>€</span></div></div>
+        <div><div class="label">Versé le</div><select class="field" name="q_payday">${Array.from({ length: 31 }, (_, i) => `<option value="${i + 1}" ${i + 1 === (b ? b.payday : 1) ? 'selected' : ''}>${i + 1}</option>`).join('')}</select></div>
+      </div>
+      <label class="switch" style="margin-top:14px"><input type="checkbox" name="shared" ${b?.shared ? 'checked' : ''}><span class="sw"></span><span>Visible par la maison<br><small class="muted">Sinon, toi seul vois ton salaire et ton reste.</small></span></label>
+      ${actions('Enregistrer')}
+    </form>
+    ${b ? `<button type="button" class="link" data-salary-del style="margin-top:12px">Retirer mon salaire</button>` : ''}`);
+  sheetKind = 'salary';
+  sheet.querySelector('[name="q_salary"]')?.focus();
+}
+document.addEventListener('click', e => {
+  const t = e.target;
+  const bv = t.closest('[data-bview]'); if (bv) { state.budgetView = bv.dataset.bview; renderedKey = ''; render(); return; }
+  if (t.closest('[data-exp-new]')) { openExpenseSheet(null); return; }
+  const ex = t.closest('[data-exp]'); if (ex) { const it = state.expenses.find(x => x.id === ex.dataset.exp); if (it) openExpenseSheet(it); return; }
+  if (t.closest('[data-salary]')) { openSalarySheet(); return; }
+  if (sheetKind === 'expense') {
+    const fq = t.closest('[data-freq]');
+    if (fq) { expFreq = fq.dataset.freq; sheet.querySelectorAll('[data-freq]').forEach(b => b.classList.toggle('on', b === fq)); updateExpSplit(); return; }
+    if (t.closest('[data-exp-all]')) { houseMembers().forEach(m => sheetPeople.add(m.id)); sheet.querySelectorAll('[data-pick-person]').forEach(b => b.classList.add('on')); updateExpSplit(); return; }
+    if (t.closest('[data-pick-person]')) setTimeout(updateExpSplit, 0);
+    const del = t.closest('[data-exp-del]');
+    if (del) {
+      if (!del.classList.contains('sure')) { del.classList.add('sure'); del.textContent = 'Confirmer la suppression'; return; }
+      fire(deleteDoc(ref('expenses', sheetTarget))); closeSheet(); return;
+    }
+  }
+  if (sheetKind === 'salary' && t.closest('[data-salary-del]')) { saveSalary(null); closeSheet(); }
+});
+document.addEventListener('input', e => { if (sheetKind === 'expense' && e.target.name === 'q_amount') updateExpSplit(); });
+function saveSalary(b) {
+  const key = `budget.${state.code}`;
+  if (state.profile) { state.profile.budget = { ...(state.profile.budget || {}) }; if (b) state.profile.budget[state.code] = b; else delete state.profile.budget[state.code]; }
+  fire(updateDoc(userRef(), { [key]: b || deleteField() }));
+  // partagé : copie dans la fiche de membre de la maison (lisible par les autres) ; sinon on l'enlève
+  fire(updateDoc(ref('members', meId), { budget: b && b.shared ? { salary: b.salary, payday: b.payday } : deleteField() }));
+  renderedKey = ''; render();
+}
+document.addEventListener('submit', e => {
+  const f = e.target;
+  if (f.dataset.form === 'expense') {
+    e.preventDefault(); e.stopImmediatePropagation();
+    const name = (f.querySelector('[name="q_name"]').value || '').trim().slice(0, 60);
+    const amount = parseEuros(f.querySelector('[name="q_amount"]').value);
+    if (!name) { f.querySelector('[name="q_name"]').classList.add('err'); f.querySelector('[name="q_name"]').focus(); return; }
+    if (amount == null || amount <= 0) { const a = f.querySelector('[name="q_amount"]'); a.classList.add('err'); a.focus(); return; }
+    const data = { name, emoji: sheetEmoji || autoEmoji(name) || '', amount, freq: expFreq, day: Number(f.querySelector('[name="q_day"]').value) || 1,
+      people: [...sheetPeople].length ? [...sheetPeople] : [meId] };
+    if (sheetTarget) fire(updateDoc(ref('expenses', sheetTarget), data));
+    else fire(setDoc(doc(col('expenses')), { ...data, by: meId, byName: state.myName, createdAt: Date.now() }));
+    closeSheet(); toast(sheetTarget ? 'Dépense modifiée.' : 'Dépense ajoutée.');
+  } else if (f.dataset.form === 'salary') {
+    e.preventDefault(); e.stopImmediatePropagation();
+    const salary = parseEuros(f.querySelector('[name="q_salary"]').value);
+    if (salary == null || salary <= 0) { const a = f.querySelector('[name="q_salary"]'); a.classList.add('err'); a.focus(); return; }
+    saveSalary({ salary, payday: Number(f.querySelector('[name="q_payday"]').value) || 1, shared: !!f.querySelector('[name="shared"]').checked });
+    closeSheet(); toast('Salaire enregistré.');
+  }
+}, true);
 
 // ================== Page d'accueil ==================
 function notifCards(onlyAssigned) {
@@ -3634,10 +3938,11 @@ function renderDashboard() {
     ${tile('lists', '📝', 'Listes', `${state.lists.length} liste${state.lists.length > 1 ? 's' : ''}${imp ? ` · ❗ ${imp}` : ''}`, unreadAssigned().length, 150)}
     ${tile('cal', '📅', 'Calendrier', evToday ? `${evToday} aujourd'hui` : evNext ? esc(`${relDay(evNext.date)} · ${evNext.title}`) : 'Rien de prévu', 0, 25)}
     ${tile('notes', '💬', 'Notes', lastPost ? esc(`${lastPost.byName || ''} : ${lastPost.text || (lastPost.audioId ? '🎤 vocal' : '📷 photo')}`) : 'Écris le premier mot', unreadN, 265)}
+    ${tile('budget', '💶', 'Dépenses', budgetTileText(), 0, 45)}
     ${(() => { const shop = state.lists.find(l => l.shopping);
-      if (!shop) return tile('newlist', '➕', 'Nouvelle liste', 'Créer une liste', 0, 205);
+      if (!shop) return '';
       const n = state.items.filter(i => i.listId === shop.id && !i.done).length;
-      return `<button type="button" class="dtile" data-open-list="${esc(shop.id)}" style="--h:205"><span class="dt-ic">${esc(iconOf(shop.emoji, shop.name))}</span>
+      return `<button type="button" class="dtile wide" data-open-list="${esc(shop.id)}" style="--h:205"><span class="dt-ic">${esc(iconOf(shop.emoji, shop.name))}</span>
         <b>${esc(shop.name)}</b><small>${n ? `${n} à acheter` : 'Rien à acheter'}</small></button>`; })()}
   </div>`;
 
