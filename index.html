@@ -461,6 +461,45 @@
   .swatch{width:34px;height:34px;border-radius:50%;border:0;background:hsl(var(--h) 55% 48%);box-shadow:0 0 0 2px var(--card);transition:transform .12s}
   .swatch.on{box-shadow:0 0 0 2px var(--card), 0 0 0 4px hsl(var(--h) 55% 48%);transform:scale(1.08)}
 
+  /* IA : idées de recettes */
+  .aicard{width:100%;margin-top:14px;display:flex;align-items:center;gap:12px;border:0;border-radius:18px;padding:14px 16px;text-align:left;color:#fff;
+          background:linear-gradient(120deg, #7B5CFA, #E0569B 60%, #F4A13A);box-shadow:0 8px 22px rgba(123,92,250,.28);transition:transform .12s}
+  .aicard:active{transform:scale(.98)}
+  .aicard .aiico{font-size:26px}
+  .aicard b{display:block;font-size:16.5px}
+  .aicard small{display:block;font-size:13px;opacity:.9}
+  .aicard .chev{color:#fff}
+  .aichips{display:flex;flex-wrap:wrap;gap:7px}
+  .aichip{border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:7px 12px;font-size:14.5px;font-weight:500;color:var(--muted);transition:all .15s}
+  .aichip.on{border-color:#7B5CFA;background:color-mix(in srgb, #7B5CFA 12%, var(--card));color:var(--ink)}
+  .stepper{display:inline-flex;align-items:center;gap:14px;background:color-mix(in srgb, var(--ink) 6%, transparent);border-radius:14px;padding:4px}
+  .stepper button{width:42px;height:42px;border:0;border-radius:11px;background:var(--card);font-size:22px;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+  .stepper b{min-width:26px;text-align:center;font-size:18px}
+  .aigo{margin-top:20px;background:linear-gradient(120deg, #7B5CFA, #E0569B)}
+  .aigo:disabled{opacity:.5}
+  .aiwait{text-align:center;padding:26px 0 10px;color:var(--muted)}
+  .aiwait .dot{display:inline-block;width:10px;height:10px;margin:0 4px;border-radius:50%;background:#7B5CFA;animation:pop 1s infinite ease-in-out}
+  .aiwait .dot:nth-child(2){animation-delay:.15s;background:#E0569B}
+  .aiwait .dot:nth-child(3){animation-delay:.3s;background:#F4A13A}
+  .aitarget{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px;color:var(--muted);margin-bottom:10px}
+  .aitarget select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:6px 8px}
+  .recipe{padding:14px;margin-top:12px;animation:rise .4s ease both}
+  .rhead{display:flex;align-items:center;gap:12px}
+  .remo{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:26px;background:color-mix(in srgb, #F4A13A 16%, var(--card));flex:none}
+  .rhead b{font-size:16.5px}
+  .rmeta{font-size:13px;color:var(--muted);margin-top:2px}
+  .ring{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .ring span{font-size:13px;border-radius:999px;padding:3px 9px}
+  .ring .ok{background:color-mix(in srgb, #2EAD5B 14%, transparent);color:#1F8A46}
+  .ring .miss{background:color-mix(in srgb, #E0569B 14%, transparent);color:#C23B7E}
+  .recipe details{margin-top:10px}
+  .recipe summary{cursor:pointer;font-weight:600;color:var(--accent);font-size:14.5px;list-style:none}
+  .recipe summary::-webkit-details-marker{display:none}
+  .recipe summary::before{content:"▸ ";}
+  .recipe details[open] summary::before{content:"▾ ";}
+  .rsteps{margin:8px 0 0 20px;font-size:15px;line-height:1.5}
+  .rsteps li{margin-bottom:6px}
+
   /* Sélection de plusieurs éléments */
   .topright{display:flex;align-items:center;gap:2px}
   .selbtn{border:0;background:none;color:var(--lc);font-weight:600;font-size:15.5px;padding:8px 10px;border-radius:10px}
@@ -584,6 +623,7 @@
   .umeta{font-size:14px;margin-top:4px}
   .badge{display:inline-block;font-size:12px;font-weight:600;color:#fff;background:#C0392B;border-radius:999px;padding:2px 8px;vertical-align:2px}
   .ucard .btn.sure{background:#C0392B;color:#fff}
+  .deluser{color:#C0392B}
   .toast{position:fixed;left:50%;bottom:calc(110px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);
          padding:11px 16px;border-radius:12px;font-size:14px;z-index:30;max-width:calc(100% - 40px);text-align:center}
 </style>
@@ -617,16 +657,16 @@
 </script>
 <script type="module">
 import { firebaseConfig } from './firebase-config.js';
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
 import {
   getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword,
   sendPasswordResetEmail, signOut, updateProfile
-} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
 import {
   initializeFirestore, getFirestore, persistentLocalCache, persistentMultipleTabManager,
   collection, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, writeBatch,
   arrayUnion, arrayRemove, limit, getDocFromCache
-} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
 
 // ================== Outils ==================
 const ICON = {
@@ -710,7 +750,7 @@ const state = {
   users: [], adminQuery: '',
   tab: 'lists'
 };
-let db = null, auth = null, unsubs = [], renderedKey = '';
+let db = null, auth = null, fbApp = null, unsubs = [], renderedKey = '';
 const seenItems = new Set(); let itemsPrimed = false;
 state.fresh = new Set(); state.anim = 'first';
 
@@ -731,7 +771,7 @@ const currentList = () => state.lists.find(l => l.id === state.listId);
 // ================== Firebase ==================
 const configured = firebaseConfig && firebaseConfig.projectId && !String(firebaseConfig.projectId).includes('COLLE');
 if (configured) {
-  const fbApp = initializeApp(firebaseConfig);
+  fbApp = initializeApp(firebaseConfig);
   auth = getAuth(fbApp);
   try {
     db = initializeFirestore(fbApp, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) });
@@ -960,7 +1000,7 @@ function subscribe() {
   }, e => { if (e && e.code === 'permission-denied') return; console.error('membres', e); }));
 
   unsubs.push(onSnapshot(query(col('lists'), orderBy('createdAt')), snap => {
-    state.lists = snap.docs.map(d => { const v = d.data(); return { id: d.id, name: str(v.name, 'Sans nom'), emoji: str(v.emoji, '📋'), order: typeof v.order === 'number' ? v.order : (v.createdAt || 0) }; }).sort(byOrder);
+    state.lists = snap.docs.map(d => { const v = d.data(); return { id: d.id, name: str(v.name, 'Sans nom'), emoji: str(v.emoji, '📋'), order: typeof v.order === 'number' ? v.order : (v.createdAt || 0), fridge: typeof v.fridge === 'boolean' ? v.fridge : undefined }; }).sort(byOrder);
     got('lists');
   }, err));
   unsubs.push(onSnapshot(query(col('sections'), orderBy('createdAt')), snap => {
@@ -1260,6 +1300,19 @@ function watchUsers() {
   }, e => { console.error(e); toast("Impossible de lire les comptes (es-tu bien administrateur ?)."); });
 }
 
+// Supprimer un compte (admin) : son profil est effacé et il est retiré de toutes ses maisons.
+// S'il se reconnecte avec son e-mail, il repart de zéro (pour l'empêcher de revenir, bloque-le plutôt).
+function adminDeleteUser(uid) {
+  const u = state.users.find(x => x.id === uid);
+  const hs = Array.isArray(u?.houses) ? u.houses.map(h => h && h.code).filter(Boolean) : [];
+  hs.forEach(h => {
+    updateDoc(doc(db, 'households', h), { members: arrayRemove(uid), banned: arrayRemove(uid) }).catch(e => console.warn(e));
+    deleteDoc(doc(db, 'households', h, 'members', uid)).catch(e => console.warn(e));
+  });
+  fire(deleteDoc(userRef(uid)));
+  toast(`Compte de ${u?.pseudo || 'cette personne'} supprimé.`);
+}
+
 function renderAdminHead() {
   return `<div class="topbar">
       <button class="back" data-action="admin-back">${ICON.back}${state.code ? 'Maison' : 'Retour'}</button>
@@ -1290,11 +1343,18 @@ function renderAdminBody() {
       <div class="umeta">🏠 ${hs.length ? hs.map(esc).join(', ') : '<span class="muted">Aucune maison</span>'}</div>
       ${devs.map(d => `<div class="umeta">${deviceIcon(d.label)} ${esc(d.label)} <span class="muted">· ${ago(d.lastSeen)}</span></div>`).join('')}
       ${isMe ? '' : `<button type="button" class="btn ${u.blocked ? 'ghost' : 'danger'} full" style="margin-top:12px" data-block="${esc(u.id)}" data-state="${u.blocked ? '1' : '0'}">${u.blocked ? 'Débloquer' : 'Bloquer'}</button>`}
+      ${isMe ? '' : `<button type="button" class="btn ghost full deluser" style="margin-top:8px" data-deluser="${esc(u.id)}">Supprimer le compte</button>`}
     </div>`;
   }).join('') : `<div class="card pad muted">Aucun compte trouvé.</div>`}</div>`;
 }
 
 body.addEventListener('click', e => {
+  const du = e.target.closest('[data-deluser]');
+  if (du) {
+    if (!du.classList.contains('sure')) { du.classList.add('sure'); du.textContent = 'Confirmer : supprimer ce compte'; return; }
+    adminDeleteUser(du.dataset.deluser);
+    return;
+  }
   const b = e.target.closest('[data-block]');
   if (!b) return;
   const unblock = b.dataset.state === '1';
@@ -1455,13 +1515,17 @@ function renderListHead(l) {
 }
 
 function renderList(l) {
+  const aiCard = isFridge(l) ? `<button type="button" class="aicard" data-action="aiRecipes">
+      <span class="aiico">✨</span>
+      <span class="grow"><b>Idées de recettes</b><small>L'IA te propose des plats avec ce que tu as</small></span>
+      <span class="chev">${ICON.chev}</span></button>` : '';
   const its = state.items.filter(i => i.listId === l.id);
   const todo = its.filter(i => !i.done), done = its.filter(i => i.done);
   const secs = sectionsOf(l.id), secIds = new Set(secs.map(s => s.id));
   let h = `<nav class="catbar">${secs.map(s => {
       const n = todo.filter(i => i.sectionId === s.id).length;
       return `<button type="button" class="catchip" data-action="openSec" data-id="${esc(s.id)}"><span class="e">${esc(s.emoji)}</span>${esc(s.name)}${n ? `<span class="n">${n}</span>` : ''}</button>`;
-    }).join('')}<button type="button" class="catchip add" data-action="newSec">＋ Catégorie</button></nav>`;
+    }).join('')}<button type="button" class="catchip add" data-action="newSec">＋ Catégorie</button></nav>` + aiCard;
 
   if (!todo.length) {
     h += `<section class="sec"><div class="card"><div class="pad muted">${
@@ -2119,7 +2183,9 @@ function openListSheet(list) {
   sheetEmoji = list ? list.emoji : '📋';
   let h = `<h3>${list ? 'Modifier la liste' : 'Nouvelle liste'}</h3>
     <form data-form="${list ? 'editList' : 'newList'}" autocomplete="off">
-      ${nameRow(list ? list.name : '', 'Nom de la liste')}${emojiPicker(!list)}${actions(list ? 'Enregistrer' : 'Créer')}
+      ${nameRow(list ? list.name : '', 'Nom de la liste')}${emojiPicker(!list)}
+      <label class="switch"><input type="checkbox" name="fridge" ${list && isFridge(list) ? 'checked' : ''}><span class="sw"></span>🧊 Liste réfrigérateur <span class="muted">(idées de recettes avec l'IA)</span></label>
+      ${actions(list ? 'Enregistrer' : 'Créer')}
     </form>`;
   if (list) {
     h += `<div class="sep"></div><div class="label">Catégories de cette liste</div>
@@ -2369,6 +2435,15 @@ overlay.addEventListener('click', e => {
 
   if (t.closest('[data-sec-new]')) return openSectionSheet(null);
   if (t.closest('[data-sec-manage-open]')) return openSectionsSheet();
+  const aiIng = t.closest('[data-ai-ing]');
+  if (aiIng) { const id = aiIng.dataset.aiIng; ai.sel.has(id) ? ai.sel.delete(id) : ai.sel.add(id); aiIng.classList.toggle('on', ai.sel.has(id)); return; }
+  const aiT = t.closest('[data-ai-time]');
+  if (aiT) { ai.time = Number(aiT.dataset.aiTime); sheet.querySelectorAll('[data-ai-time]').forEach(b => b.classList.toggle('on', b === aiT)); return; }
+  const aiP = t.closest('[data-ai-ppl]');
+  if (aiP) { ai.people = Math.min(20, Math.max(1, ai.people + Number(aiP.dataset.aiPpl))); const el = $('#aiPpl'); if (el) el.textContent = ai.people; return; }
+  if (t.closest('[data-ai-go]')) { runAi(); return; }
+  const aiA = t.closest('[data-ai-add]');
+  if (aiA) { addMissingToList(Number(aiA.dataset.aiAdd)); aiA.disabled = true; aiA.textContent = '✓ Ajouté'; return; }
   if (t.closest('[data-photo-drop]')) { sheetPhoto = null; refreshPhotoField(); return; }
   const dEmo = t.closest('[data-dd-emo]');
   if (dEmo) { ddNewEmoji = dEmo.dataset.ddEmo; renderDdList(); return; }
@@ -2503,14 +2578,16 @@ overlay.addEventListener('submit', e => {
   switch (f.dataset.form) {
     case 'newList': {
       const r = doc(col('lists'));
-      fire(setDoc(r, { name: value.slice(0, 60), emoji: sheetEmoji, createdAt: Date.now(), order: Date.now() }));
+      const fridge = !!f.querySelector('[name="fridge"]')?.checked;
+      fire(setDoc(r, { name: value.slice(0, 60), emoji: sheetEmoji, createdAt: Date.now(), order: Date.now(), ...(fridge ? { fridge: true } : {}) }));
       state.pendingList = r.id;
       closeSheet(); go('list', r.id);
       break;
     }
     case 'editList': {
       const l = state.lists.find(x => x.id === sheetTarget), name = value.slice(0, 60);
-      if (l && (l.name !== name || l.emoji !== sheetEmoji)) fire(updateDoc(ref('lists', l.id), { name, emoji: sheetEmoji }));
+      const fridge = !!f.querySelector('[name="fridge"]')?.checked;
+      if (l && (l.name !== name || l.emoji !== sheetEmoji || isFridge(l) !== fridge)) fire(updateDoc(ref('lists', l.id), { name, emoji: sheetEmoji, fridge }));
       closeSheet(); break;
     }
     case 'newSec': {
@@ -2597,6 +2674,7 @@ app.addEventListener('click', e => {
     case 'newEvent': openEventSheet(null, state.calDay); break;
     case 'openEvent': { const ev = state.events.find(x => x.id === id); if (ev) openEventSheet(ev); break; }
     case 'thread': openThread(id); break;
+    case 'aiRecipes': ai.results = ai.results || []; openAiSheet(); break;
     case 'favList': toggleHomePref('fav', id); break;
     case 'collapseList': toggleHomePref('collapsed', id); break;
     case 'listMenuHome': { const l = state.lists.find(x => x.id === id); if (l) openListSheet(l); break; }
@@ -2639,6 +2717,158 @@ fab.addEventListener('click', () => openListSheet(null));
 $('#addBtn').addEventListener('click', openAddSheet);
 
 
+
+// ================== IA : idées de recettes (liste réfrigérateur) ==================
+const isFridge = l => l.fridge === true || (l.fridge === undefined && /frigo|refrigerateur|frigidaire/.test(norm(l.name)));
+const AI_DAILY_LIMIT = 10;           // demandes par personne et par jour (protège le quota gratuit de la maison)
+const AI_MODELS = ['gemini-flash-latest', 'gemini-2.5-flash', 'gemini-flash-lite-latest', 'gemini-2.5-flash-lite'];
+const ai = { sel: new Set(), time: 30, people: 2, results: [], busy: false };
+let aiMod = null;
+
+function aiUsedToday() {
+  const u = state.profile?.aiUsage;
+  return u && u.day === todayYmd() ? Number(u.n) || 0 : 0;
+}
+async function aiAsk(prompt) {
+  if (!aiMod) aiMod = await import('https://www.gstatic.com/firebasejs/12.19.0/firebase-ai.js');
+  const { getAI, getGenerativeModel, GoogleAIBackend } = aiMod;
+  const inst = getAI(fbApp, { backend: new GoogleAIBackend() });
+  let lastErr = null;
+  for (const name of AI_MODELS) {
+    try {
+      const model = getGenerativeModel(inst, { model: name, generationConfig: { responseMimeType: 'application/json', temperature: 0.8 } });
+      const res = await model.generateContent(prompt);
+      return res.response.text();
+    } catch (e) {
+      lastErr = e;
+      const msg = String(e && (e.message || e)).toLowerCase();
+      if (/not found|404|not supported|unsupported model/.test(msg)) continue;   // modèle indisponible : on essaie le suivant
+      throw e;
+    }
+  }
+  throw lastErr;
+}
+function aiErrorText(e) {
+  const msg = String(e && (e.message || e)).toLowerCase();
+  if (/429|quota|resource_exhausted|rate/.test(msg)) return "L'IA a atteint sa limite gratuite pour aujourd'hui. Elle revient vers 9 h du matin.";
+  if (/api has not been used|disabled|permission|403|firebasevertexai|firebaseml|api key|not enabled/.test(msg)) return "L'IA n'est pas encore activée : dans la console Firebase, active « AI Logic » avec Gemini Developer API.";
+  if (/network|failed to fetch|offline/.test(msg)) return "Pas de connexion internet.";
+  return "L'IA n'a pas pu répondre. Réessaie dans un instant.";
+}
+
+function openAiSheet() {
+  const l = currentList();
+  if (!l) return;
+  const its = state.items.filter(i => i.listId === l.id);
+  if (!ai.sel.size || ![...ai.sel].some(id => its.some(i => i.id === id))) { ai.sel = new Set(its.map(i => i.id)); }
+  ai.people = ai.people || Math.max(1, houseMembers().length || 2);
+  const left = Math.max(0, AI_DAILY_LIMIT - aiUsedToday());
+  openSheet(`<div class="view" style="--h:${hueOf(l.id)}">
+    <h3>✨ Idées de recettes</h3>
+    ${its.length ? `
+    <div class="label" style="margin-top:0">Ce que j'ai <span class="muted">(décoche ce que tu ne veux pas utiliser)</span></div>
+    <div class="aichips">${its.map(i => `<button type="button" class="aichip ${ai.sel.has(i.id) ? 'on' : ''}" data-ai-ing="${esc(i.id)}">${i.emoji ? esc(i.emoji) + ' ' : ''}${esc(i.title)}</button>`).join('')}</div>
+    <div class="label">Temps disponible</div>
+    <div class="seg">${[[15, '15 min'], [30, '30 min'], [45, '45 min'], [60, '1 h'], [90, '1 h 30 +']].map(([v, t]) => `<button type="button" class="${ai.time === v ? 'on' : ''}" data-ai-time="${v}">${t}</button>`).join('')}</div>
+    <div class="label">Nombre de personnes</div>
+    <div class="stepper"><button type="button" data-ai-ppl="-1" aria-label="Moins">−</button><b id="aiPpl">${ai.people}</b><button type="button" data-ai-ppl="1" aria-label="Plus">＋</button></div>
+    <div class="label">Une envie ? <span class="muted">(facultatif)</span></div>
+    <input class="field" id="aiWish" maxlength="120" placeholder="ex. végétarien, sans four, réconfortant…" value="${esc(ai.wish || '')}">
+    <button type="button" class="btn primary full aigo" data-ai-go ${left ? '' : 'disabled'}>${ai.busy ? 'Le chef réfléchit…' : '✨ Proposer des recettes'}</button>
+    <p class="hint" style="text-align:center;margin-top:8px">${left ? `Encore ${left} demande${left > 1 ? 's' : ''} pour toi aujourd'hui.` : "Tu as utilisé tes demandes d'aujourd'hui. Reviens demain !"}</p>`
+    : `<div class="card pad muted">Ajoute d'abord ce que tu as dans ton frigo à cette liste.</div>`}
+    <div id="aiOut">${renderAiResults()}</div>
+  </div>`);
+  sheetKind = 'ai';
+}
+
+function shoppingLists() {
+  const ls = state.lists.filter(x => !isFridge(x));
+  return ls.sort((a, b) => (/course/.test(norm(b.name)) - /course/.test(norm(a.name))));
+}
+function renderAiResults() {
+  if (ai.busy) return `<div class="aiwait"><span class="dot"></span><span class="dot"></span><span class="dot"></span><p>Le chef cherche des idées…</p></div>`;
+  if (ai.error) return `<div class="banner" style="margin-top:14px">${esc(ai.error)}</div>`;
+  if (!ai.results.length) return '';
+  const targets = shoppingLists();
+  return `<div class="label" style="margin-top:22px">Propositions</div>
+    ${targets.length ? `<div class="aitarget">Ajouter les ingrédients manquants à :
+      <select id="aiTarget">${targets.map(t => `<option value="${esc(t.id)}" ${ai.target === t.id ? 'selected' : ''}>${esc(t.emoji)} ${esc(t.name)}</option>`).join('')}</select></div>` : ''}
+    ${ai.results.map((r, k) => {
+      const miss = Array.isArray(r.ingredients_manquants) ? r.ingredients_manquants : [];
+      const used = Array.isArray(r.ingredients_utilises) ? r.ingredients_utilises : [];
+      const steps = Array.isArray(r.etapes) ? r.etapes : [];
+      return `<div class="recipe card">
+        <div class="rhead"><span class="remo">${esc(r.emoji || '🍽️')}</span>
+          <div class="grow"><b>${esc(r.titre || 'Recette')}</b>
+            <div class="rmeta">⏱ ${esc(String(r.duree_minutes || '?'))} min · 👥 ${ai.people} · ${esc(r.difficulte || 'Facile')}</div></div></div>
+        <div class="ring">${used.map(x => `<span class="ok">✓ ${esc(x)}</span>`).join('')}${miss.map(x => `<span class="miss">＋ ${esc(x.nom || x)}${x.quantite ? ` (${esc(x.quantite)})` : ''}</span>`).join('')}</div>
+        <details><summary>Voir la recette</summary>
+          <ol class="rsteps">${steps.map(st => `<li>${esc(st)}</li>`).join('')}</ol>
+          ${r.astuce ? `<p class="hint">💡 ${esc(r.astuce)}</p>` : ''}
+        </details>
+        ${miss.length && targets.length ? `<button type="button" class="btn ghost full" style="margin-top:10px" data-ai-add="${k}">🛒 Ajouter ${miss.length} ingrédient${miss.length > 1 ? 's' : ''} manquant${miss.length > 1 ? 's' : ''}</button>` : ''}
+      </div>`;
+    }).join('')}`;
+}
+function refreshAiOut() { const o = $('#aiOut'); if (o) o.innerHTML = renderAiResults(); const b = sheet.querySelector('[data-ai-go]'); if (b) b.textContent = ai.busy ? 'Le chef réfléchit…' : '✨ Proposer des recettes'; }
+
+async function runAi() {
+  if (ai.busy) return;
+  if (aiUsedToday() >= AI_DAILY_LIMIT) { toast("Plus de demandes pour aujourd'hui."); return; }
+  const l = currentList();
+  const ings = state.items.filter(i => i.listId === l?.id && ai.sel.has(i.id)).map(i => i.title + (i.qty ? ` (${i.qty})` : ''));
+  if (!ings.length) { toast('Coche au moins un ingrédient.'); return; }
+  ai.wish = ($('#aiWish')?.value || '').trim().slice(0, 120);
+  const prompt = `Tu es un chef cuisinier qui aide une famille française à cuisiner avec ce qu'elle a dans son réfrigérateur.
+Ingrédients disponibles : ${ings.join(', ')}.
+On suppose aussi disponibles les basiques du placard : sel, poivre, huile, eau.
+Temps maximum : ${ai.time >= 90 ? 'environ 1 h 30 ou plus' : ai.time + ' minutes'} (préparation + cuisson).
+Nombre de personnes : ${ai.people}.
+${ai.wish ? 'Envie particulière : ' + ai.wish + '.' : ''}
+Propose 3 recettes réalistes et variées, qui utilisent au maximum les ingrédients disponibles et demandent le moins possible d'ingrédients à acheter.
+Réponds uniquement avec du JSON, sans aucun texte autour, au format :
+{"recettes":[{"titre":"","emoji":"","duree_minutes":0,"difficulte":"Facile","ingredients_utilises":[""],"ingredients_manquants":[{"nom":"","quantite":""}],"etapes":[""],"astuce":""}]}
+"difficulte" vaut Facile, Moyen ou Difficile. Les quantités sont adaptées à ${ai.people} personne${ai.people > 1 ? 's' : ''}. Tout est en français.`;
+  ai.busy = true; ai.error = null; ai.results = [];
+  refreshAiOut();
+  // compte la demande tout de suite (évite les clics répétés)
+  const n = aiUsedToday() + 1;
+  if (state.profile) state.profile.aiUsage = { day: todayYmd(), n };
+  fire(updateDoc(userRef(), { aiUsage: { day: todayYmd(), n } }));
+  try {
+    const txt = await aiAsk(prompt);
+    const clean = String(txt).replace(/^```(json)?/i, '').replace(/```\s*$/, '').trim();
+    const data = JSON.parse(clean);
+    ai.results = Array.isArray(data.recettes) ? data.recettes.slice(0, 4) : [];
+    if (!ai.results.length) ai.error = "L'IA n'a pas trouvé de recette. Essaie avec d'autres ingrédients.";
+  } catch (e) {
+    console.error(e);
+    ai.error = e instanceof SyntaxError ? "La réponse de l'IA était illisible. Réessaie." : aiErrorText(e);
+  }
+  ai.busy = false;
+  if (sheetKind === 'ai') {
+    refreshAiOut();
+    const hint = sheet.querySelector('.aigo + .hint'); const left = Math.max(0, AI_DAILY_LIMIT - aiUsedToday());
+    if (hint) hint.textContent = left ? `Encore ${left} demande${left > 1 ? 's' : ''} pour toi aujourd'hui.` : "Tu as utilisé tes demandes d'aujourd'hui. Reviens demain !";
+    if (!left) sheet.querySelector('[data-ai-go]')?.setAttribute('disabled', '');
+    $('#aiOut')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function addMissingToList(k) {
+  const r = ai.results[k];
+  const target = $('#aiTarget')?.value || shoppingLists()[0]?.id;
+  if (!r || !target) return;
+  ai.target = target;
+  const miss = (r.ingredients_manquants || []).map(x => ({ nom: String(x.nom || x).slice(0, 200), quantite: String(x.quantite || '').slice(0, 30) })).filter(x => x.nom);
+  const b = writeBatch(db); let t = Date.now();
+  miss.forEach(x => b.set(doc(col('items')), { listId: target, sectionId: null, title: x.nom, qty: x.quantite, note: `Pour : ${String(r.titre || '').slice(0, 80)}`,
+    done: false, createdAt: t, order: t++, emoji: null, byName: state.myName, by: meId, assignees: [], assignedAt: 0, assignedBy: '' }));
+  fire(b.commit());
+  const tl = state.lists.find(x => x.id === target);
+  toast(`${miss.length} ingrédient${miss.length > 1 ? 's' : ''} ajouté${miss.length > 1 ? 's' : ''} à « ${tl?.name || 'la liste'} ».`);
+}
 
 // ================== Résumé du jour (accueil) ==================
 function relDay(date) {
