@@ -820,6 +820,7 @@
   .avhint{font-size:12.5px;line-height:1.3}
   .fbbtn{font-size:19px}
   .helpbtn{font-size:17px;padding-left:4px;padding-right:4px}
+  .grp-h{display:flex;align-items:center}.grp-edit{border:0;background:none;font-size:14px;padding:6px 8px;margin-left:2px;opacity:.6;border-radius:10px}.grp-edit:active{opacity:1;background:color-mix(in srgb, var(--ink) 8%, transparent)}
   .setlinks{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 18px}
   .setlink{display:flex;align-items:center;gap:10px;border:0;border-radius:16px;padding:13px 12px;text-align:left;background:color-mix(in srgb, var(--accent) 10%, var(--card));color:var(--ink)}
   .setlink span{font-size:20px}.setlink b{font-size:14.5px;line-height:1.2}
@@ -2042,7 +2043,7 @@ function itemRow(i) {
 function group(sec, items, opts = {}) {
   const head = sec
     ? `<button type="button" class="grp-title" data-action="openSec" data-id="${esc(sec.id)}"><span class="e">${esc(sec.emoji)}</span>${esc(sec.name)}<span class="n">${items.length}</span></button>
-       `
+       ${state.selecting ? '' : `<button type="button" class="grp-edit" data-sec-edit="${esc(sec.id)}" aria-label="Modifier la catégorie">✏️</button>`}`
     : `<span class="grp-title static">${opts.label || 'Sans catégorie'}<span class="n">${items.length}</span></span>`;
   return `<section class="grp ${opts.mini ? 'donegrp' : ''}" ${sec && !opts.mini ? `data-sec-id="${esc(sec.id)}"` : ''}>
     <div class="grp-h ${sec ? '' : 'soft'}">${head}</div>
@@ -2072,7 +2073,7 @@ function renderList(l) {
   let h = `<nav class="catbar">${secs.map(s => {
       const n = todo.filter(i => i.sectionId === s.id).length;
       return `<button type="button" class="catchip" data-action="jumpSec" data-id="${esc(s.id)}"><span class="e">${esc(s.emoji)}</span>${esc(s.name)}${n ? `<span class="n">${n}</span>` : ''}</button>`;
-    }).join('')}<button type="button" class="catchip add" data-action="newSec">＋ Catégorie</button></nav>`;
+    }).join('')}<button type="button" class="catchip add" data-action="newSec">＋ Catégorie</button>${secs.length ? `<button type="button" class="catchip add" data-sec-manage-open>⚙️ Gérer</button>` : ''}</nav>`;
 
   const loose = todo.filter(i => !secIds.has(i.sectionId));
   if (secs.length) {
@@ -4502,6 +4503,7 @@ const HELP = [
     "Touche un élément pour le modifier (nom, quantité, lien, photo, ❗ Important, pour qui).",
     "Appui long sur un élément : mode sélection pour en déplacer, cocher ou supprimer plusieurs.",
     "Touche le nom d'une catégorie en haut pour y sauter. Les plus remplies passent en premier.",
+    "✏️ à côté d'une catégorie pour la renommer, changer son icône ou la supprimer (« ⚙️ Gérer » pour toutes les voir).",
     "Option « 🛒 Liste de courses » (quand tu modifies la liste) : un toucher coche ou décoche."]],
   ['🎬', 'Liens et vidéos', [
     "Dans TikTok, YouTube ou Instagram : Partager → Copier le lien.",
@@ -4576,6 +4578,14 @@ document.addEventListener('input', e => {
     d.open = !!q && ok;
   });
   const none = sheet.querySelector('.helpnone'); if (none) none.hidden = n > 0;
+});
+
+// Catégories : boutons ✏️ et « ⚙️ Gérer » dans la page de la liste
+document.addEventListener('click', e => {
+  if (e.target.closest('#overlay')) return;          // dans une fenêtre : déjà géré
+  const ed = e.target.closest('[data-sec-edit]');
+  if (ed) { const sc = state.sections.find(x => x.id === ed.dataset.secEdit); if (sc) openSectionSheet(sc); return; }
+  if (e.target.closest('[data-sec-manage-open]')) openSectionsSheet();
 });
 
 // ================== Ajout rapide (depuis l'accueil) ==================
@@ -4713,7 +4723,7 @@ document.addEventListener('click', e => {
 
 // ================== Mise à jour automatique ==================
 // L'iPhone garde souvent l'ancienne page en mémoire : on vérifie s'il existe une version plus récente et on recharge.
-const APP_VERSION = '20 nov. 16 h 40';
+const APP_VERSION = '20 nov. 16 h 50';
 let updChecking = false, updLast = 0;
 async function checkUpdate() {
   if (updChecking || Date.now() - updLast < 60 * 1000 || !navigator.onLine) return;
