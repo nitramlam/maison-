@@ -514,6 +514,7 @@
   .lc-hint{text-align:center;margin-top:10px;font-size:12.5px}
   .seg{display:flex;background:color-mix(in srgb, var(--ink) 7%, transparent);border-radius:12px;padding:3px;gap:3px}
   .seg button{flex:1;border:0;background:none;border-radius:10px;padding:9px 4px;font-size:14px;font-weight:600;color:var(--muted)}
+  .repseg button,.freqseg button{font-size:13.5px;padding:9px 2px}
   .seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
   .swatches{display:flex;flex-wrap:wrap;gap:10px}
   .swatch{width:34px;height:34px;border-radius:50%;border:0;background:hsl(var(--h) 55% 48%);box-shadow:0 0 0 2px var(--card);transition:transform .12s}
@@ -1322,7 +1323,7 @@ function subscribe() {
   state.expenses = []; state.expDenied = false;
   unsubs.push(onSnapshot(query(col('expenses'), orderBy('createdAt')), snap => {
     state.expenses = snap.docs.map(d => { const v = d.data(); return { id: d.id, name: str(v.name, 'Dépense'), emoji: typeof v.emoji === 'string' ? clipIcon(v.emoji) : '',
-      amount: Math.max(0, Math.round(Number(v.amount) || 0)), freq: v.freq === 'year' ? 'year' : 'month', day: Math.min(31, Math.max(1, Number(v.day) || 1)),
+      amount: Math.max(0, Math.round(Number(v.amount) || 0)), freq: ['week', 'year'].includes(v.freq) ? v.freq : 'month', day: Math.min(31, Math.max(1, Number(v.day) || 1)),
       people: Array.isArray(v.people) ? v.people.filter(x => typeof x === 'string') : [], by: v.by || null, createdAt: Number(v.createdAt) || 0 }; });
     if (state.tab === 'budget' || state.tab === 'home') render();
   }, e => { if (e && e.code === 'permission-denied') { state.expDenied = true; if (state.tab === 'budget') render(); return; } console.warn('dépenses', e); }));
@@ -1405,7 +1406,7 @@ function subscribe() {
     evRecent = snap.docs.map(evFromDoc); mergeEv();
     if (state.tab === 'cal' || state.tab === 'home') render();
   }, soft('Calendrier')));
-  unsubs.push(onSnapshot(query(col('events'), where('repeat', '==', 'year')), snap => {
+  unsubs.push(onSnapshot(query(col('events'), where('repeat', 'in', REPEATS)), snap => {
     evYearly = snap.docs.map(evFromDoc); mergeEv();
     if (state.tab === 'cal' || state.tab === 'home') render();
   }, e => console.warn('anniversaires', e)));
@@ -3469,7 +3470,9 @@ function todayWidget() {
   const now = new Date(), today = todayYmd();
   const in7 = ymd(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7));
   const evToday = state.events.filter(e => !isBirthday(e) && occursOn(e, today)).sort(evSort);
-  const next = state.events.filter(e => !isBirthday(e) && e.date > today && e.date <= in7).sort(evSort);
+  const tomorrow = addDays(today, 1);
+  const next = state.events.map(e => ({ ...e, _on: e.repeat ? nextOccurrence(e, tomorrow) : (e.date > today ? e.date : null) }))
+    .filter(e => e._on && e._on <= in7).sort((a, b) => a._on < b._on ? -1 : a._on > b._on ? 1 : evSort(a, b));
   const hl = (e, inner) => (e.people || []).length ? `<span class="hl" style="background:${peopleGrad(e.people, .32)}">${inner}</span>` : inner;
   const line = (e, when) => `<div class="tdline">${hl(e, `${e.emoji ? esc(e.emoji) + ' ' : ''}${esc(e.title)}`)}<small>${when}</small></div>`;
   let body;
@@ -3477,7 +3480,7 @@ function todayWidget() {
     body = evToday.slice(0, 2).map(e => line(e, e.allDay ? 'Journée' : esc(e.time))).join('')
       + (evToday.length > 2 ? `<div class="tdmore">+ ${evToday.length - 2} autre${evToday.length - 2 > 1 ? 's' : ''}</div>` : '');
   } else if (next.length) {
-    body = `<div class="tdnone">Rien aujourd'hui</div>` + line(next[0], relDay(next[0].date));
+    body = `<div class="tdnone">Rien aujourd'hui</div>` + line(next[0], relDay(next[0]._on));
   } else body = `<div class="tdnone">Rien de prévu 🌿</div>`;
   return `<div class="homerow sec">
     <div class="card todaycard tdsmall" role="button" tabindex="0" data-action="goCal">
@@ -3811,7 +3814,10 @@ function parseEuros(v) {
   if (!/^\d+(\.\d{0,2})?$/.test(t)) return null;
   return Math.round(parseFloat(t) * 100);
 }
-const monthlyOf = e => e.freq === 'year' ? Math.round(e.amount / 12) : e.amount;
+// Tout est ramené au mois : semaine × 52 / 12, année / 12
+const toMonthly = (c, f) => f === 'year' ? c / 12 : f === 'week' ? c * 52 / 12 : c;
+const monthlyOf = e => Math.round(toMonthly(e.amount, e.freq));
+const FREQ_LABEL = { week: 'par semaine', month: 'par mois', year: 'par an' };
 function shareOf(e, uid) {
   const ppl = e.people.length ? e.people : [e.by];
   return ppl.includes(uid) ? Math.round(monthlyOf(e) / ppl.length) : 0;
@@ -3877,7 +3883,7 @@ function expLine(e, uid) {
   const ppl = e.people.length ? e.people : [e.by];
   const part = uid ? shareOf(e, uid) : monthlyOf(e);
   return `<button type="button" class="exrow" data-exp="${esc(e.id)}"><span class="exic">${esc(e.emoji || autoEmoji(e.name) || '💶')}</span>
-    <span class="grow"><b>${esc(e.name)}</b><small>${miniAvatars(ppl)}${ppl.length > 1 ? ` partagé · ${eur(monthlyOf(e))} au total` : ''}</small></span>
+    <span class="grow"><b>${esc(e.name)}</b><small>${miniAvatars(ppl)}${e.freq !== 'month' ? ` ${eur(e.amount)} ${FREQ_LABEL[e.freq]}${ppl.length > 1 ? ' ·' : ''}` : ''}${ppl.length > 1 ? ` partagé · ${eur(monthlyOf(e))} au total` : ''}</small></span>
     <span class="examt"><b>${eur(part)}</b><small>par mois</small></span></button>`;
 }
 let expFreq = 'month';
@@ -3885,12 +3891,14 @@ function openExpenseSheet(e) {
   sheetTarget = e ? e.id : null;
   sheetEmoji = e ? (e.emoji || null) : null; sheetIconManual = !!(e && e.emoji);
   sheetPeople = new Set(e ? (e.people.length ? e.people : [e.by]) : [meId]);
-  expFreq = 'month';
+  expFreq = e ? e.freq : 'month';
   openSheet(`<h3>${e ? 'Modifier la charge' : 'Nouvelle charge fixe'}</h3>
     <form data-form="expense" autocomplete="off">
       ${nameRow(e ? e.name : '', 'ex. Loyer, Netflix, Assurance auto…')}
-      <div class="label">Montant par mois</div>
-      <div class="eurfield"><input class="field" name="q_amount" inputmode="decimal" placeholder="0,00" value="${e ? (monthlyOf(e) / 100).toFixed(2).replace('.', ',').replace(',00', '') : ''}" autocomplete="off"><span>€</span></div>
+      <div class="label">Tous les combien ?</div>
+      <div class="seg freqseg">${[['week', 'Semaine'], ['month', 'Mois'], ['year', 'Année']].map(([k, t]) => `<button type="button" data-freq="${k}" class="${expFreq === k ? 'on' : ''}">${t}</button>`).join('')}</div>
+      <div class="label" id="amtLabel">Montant ${FREQ_LABEL[expFreq]}</div>
+      <div class="eurfield"><input class="field" name="q_amount" inputmode="decimal" placeholder="0,00" value="${e ? (e.amount / 100).toFixed(2).replace('.', ',').replace(',00', '') : ''}" autocomplete="off"><span>€</span></div>
       <div class="label">Pour qui ? <span class="muted">(partagé à parts égales)</span></div>
       <div data-people>${peoplePicker(true)}</div>
       <button type="button" class="link" data-exp-all style="margin-top:8px">Tout le monde</button>
@@ -3907,8 +3915,8 @@ function updateExpSplit() {
   const c = parseEuros(sheet.querySelector('[name="q_amount"]')?.value);
   const n = sheetPeople.size || 1;
   if (!c) { box.textContent = ''; return; }
-  const m = expFreq === 'year' ? c / 12 : c;
-  box.textContent = n > 1 ? `Soit ${eur(Math.round(m / n))} par personne.` : '';
+  const m = toMonthly(c, expFreq);
+  box.textContent = expFreq !== 'month' || n > 1 ? `Soit ${eur(Math.round(m / n))} par mois${n > 1 ? ' et par personne' : ''}.` : '';
 }
 function openSalarySheet() {
   const b = myBudget();
@@ -3924,11 +3932,18 @@ function openSalarySheet() {
   sheet.querySelector('[name="q_salary"]')?.focus();
 }
 document.addEventListener('click', e => {
+  const rp = sheetKind === 'event' && e.target.closest('[data-rep]');
+  if (rp) { sheet.querySelectorAll('[data-rep]').forEach(b => b.classList.toggle('on', b === rp)); sheet.querySelector('[name="repeat"]').value = rp.dataset.rep; }
+});
+document.addEventListener('click', e => {
   const t = e.target;
   if (t.closest('[data-exp-new]')) { openExpenseSheet(null); return; }
   const ex = t.closest('[data-exp]'); if (ex) { const it = state.expenses.find(x => x.id === ex.dataset.exp); if (it) openExpenseSheet(it); return; }
   if (t.closest('[data-salary]')) { openSalarySheet(); return; }
   if (sheetKind === 'expense') {
+    const fq = t.closest('[data-freq]');
+    if (fq) { expFreq = fq.dataset.freq; sheet.querySelectorAll('[data-freq]').forEach(b => b.classList.toggle('on', b === fq));
+      const l = sheet.querySelector('#amtLabel'); if (l) l.textContent = 'Montant ' + FREQ_LABEL[expFreq]; updateExpSplit(); return; }
     if (t.closest('[data-exp-all]')) { houseMembers().forEach(m => sheetPeople.add(m.id)); sheet.querySelectorAll('[data-pick-person]').forEach(b => b.classList.add('on')); updateExpSplit(); return; }
     if (t.closest('[data-pick-person]')) setTimeout(updateExpSplit, 0);
     const del = t.closest('[data-exp-del]');
@@ -3956,7 +3971,7 @@ document.addEventListener('submit', e => {
     const amount = parseEuros(f.querySelector('[name="q_amount"]').value);
     if (!name) { f.querySelector('[name="q_name"]').classList.add('err'); f.querySelector('[name="q_name"]').focus(); return; }
     if (amount == null || amount <= 0) { const a = f.querySelector('[name="q_amount"]'); a.classList.add('err'); a.focus(); return; }
-    const data = { name, emoji: sheetEmoji || autoEmoji(name) || '', amount, freq: 'month',
+    const data = { name, emoji: sheetEmoji || autoEmoji(name) || '', amount, freq: expFreq,
       people: [...sheetPeople].length ? [...sheetPeople] : [meId] };
     if (sheetTarget) fire(updateDoc(ref('expenses', sheetTarget), data));
     else fire(setDoc(doc(col('expenses')), { ...data, by: meId, byName: state.myName, createdAt: Date.now() }));
@@ -4024,7 +4039,7 @@ document.addEventListener('click', e => {
 
 // ================== Mise à jour automatique ==================
 // L'iPhone garde souvent l'ancienne page en mémoire : on vérifie s'il existe une version plus récente et on recharge.
-const APP_VERSION = '20 nov. 13 h 00';
+const APP_VERSION = '20 nov. 13 h 30';
 let updChecking = false, updLast = 0;
 async function checkUpdate() {
   if (updChecking || Date.now() - updLast < 60 * 1000 || !navigator.onLine) return;
@@ -4115,7 +4130,8 @@ function renderDashboard() {
   const imp = todo.filter(i => i.important).length;
   const today = todayYmd();
   const evToday = state.events.filter(e => !isBirthday(e) && occursOn(e, today)).length;
-  const evNext = state.events.filter(e => !isBirthday(e) && e.date >= today).sort(evSort)[0];
+  const evNext = state.events.map(e => ({ ...e, _on: e.repeat ? nextOccurrence(e, today) : (e.date >= today ? e.date : null) }))
+    .filter(e => e._on).sort((a, b) => a._on < b._on ? -1 : a._on > b._on ? 1 : evSort(a, b))[0];
   const lastPost = state.posts.filter(p => !p.pinned).sort((a, b) => b.createdAt - a.createdAt)[0] || state.posts[0];
   const unreadN = unreadMentions().length + unreadReplies().length;
   const tile = (go, icon, title, sub, badge, hue) => `<button type="button" class="dtile" data-go-tab="${go}" style="--h:${hue}">
@@ -4180,7 +4196,7 @@ function eventCard(e, showDate) {
     <span class="evbar"></span>
     <span class="grow">
       <span class="evtitle">${e.emoji ? `<span class="evemo">${esc(e.emoji)}</span>` : ''}${esc(e.title)}</span>
-      <span class="evmeta">${e.repeat === 'year' ? `🔁 Tous les ans${ageOn(e, e._on || state.calDay) ? ` · ${ageOn(e, e._on || state.calDay)} ans` : ''} · ` : ''}${e.endDate ? `Du ${fmtShort(e.date)} au ${fmtShort(e.endDate)} · ` : ''}${showDate && !e.endDate ? (e.allDay ? 'Toute la journée' : esc(e.time) + (e.end ? ' – ' + esc(e.end) : '')) + ' · ' : ''}${pp.length ? 'pour ' + pp.map(id => esc(id === meId ? 'toi' : memberName(id))).join(', ') + (e.note ? ' · ' + esc(e.note) : '') : (e.note ? esc(e.note) : (e.byName ? 'ajouté par ' + esc(e.byName) : ''))}</span>
+      <span class="evmeta">${e.repeat ? `🔁 ${REPEAT_LABEL[e.repeat]} · ` : ''}${e.endDate && !e.repeat ? `Du ${fmtShort(e.date)} au ${fmtShort(e.endDate)} · ` : ''}${showDate && (!e.endDate || e.repeat) ? (e.allDay ? 'Toute la journée' : esc(e.time) + (e.end ? ' – ' + esc(e.end) : '')) + ' · ' : ''}${pp.length ? 'pour ' + pp.map(id => esc(id === meId ? 'toi' : memberName(id))).join(', ') + (e.note ? ' · ' + esc(e.note) : '') : (e.note ? esc(e.note) : (e.byName ? 'ajouté par ' + esc(e.byName) : ''))}</span>
     </span>
     ${miniAvatars(pp)}
   </button>`;
@@ -4193,32 +4209,37 @@ function evFromDoc(d) {
                date: typeof v.date === 'string' ? v.date : '', allDay: v.allDay !== false, time: typeof v.time === 'string' ? v.time : '',
                end: typeof v.end === 'string' ? v.end : '', note: typeof v.note === 'string' ? v.note : '', byName: typeof v.byName === 'string' ? v.byName : '',
                people: Array.isArray(v.people) ? v.people.filter(x => typeof x === 'string') : [],
-               endDate: typeof v.endDate === 'string' && v.endDate > (v.date || '') ? v.endDate : '', repeat: v.repeat === 'year' ? 'year' : '' };
+               endDate: typeof v.endDate === 'string' && v.endDate > (v.date || '') ? v.endDate : '', repeat: REPEATS.includes(v.repeat) ? v.repeat : '' };
     }
-// ----- Plusieurs jours / tous les ans -----
-const mmdd = ymdStr => ymdStr.slice(5);
-function occursOn(e, day) {
-  if (e.repeat === 'year') {
-    if (day < e.date && e.date.slice(0, 4) === day.slice(0, 4)) return false;
-    const md = mmdd(e.date), y = Number(day.slice(0, 4));
-    const leap = (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
-    return mmdd(day) === md || (md === '02-29' && !leap && mmdd(day) === '02-28');
-  }
-  return day >= e.date && day <= (e.endDate || e.date);
+// ----- Plusieurs jours / répétition (semaine, mois, année) -----
+const REPEATS = ['week', 'month', 'year'];
+const REPEAT_LABEL = { week: 'Chaque semaine', month: 'Chaque mois', year: 'Chaque année' };
+const addDays = (s, n) => { const d = fromYmd(s); d.setDate(d.getDate() + n); return ymd(d); };
+const dayDiff = (a, b) => Math.round((fromYmd(b) - fromYmd(a)) / 86400000);
+const lastDayOf = (y, m) => new Date(y, m, 0).getDate();   // m : 1..12
+// Est-ce qu'une répétition commence ce jour-là ?
+function startsOn(e, day) {
+  if (day < e.date) return false;
+  if (!e.repeat) return day === e.date;
+  if (e.repeat === 'week') return dayDiff(e.date, day) % 7 === 0;
+  const [, , d0] = e.date.split('-').map(Number), [y, m, d] = day.split('-').map(Number);
+  const want = Math.min(d0, lastDayOf(y, m));   // 31 → dernier jour du mois, 29 févr. → 28
+  if (e.repeat === 'month') return d === want;
+  return m === Number(e.date.slice(5, 7)) && d === want;
 }
-function nextOccurrence(e, from) {   // première date >= from
-  if (e.repeat !== 'year') return (e.endDate || e.date) >= from ? (e.date >= from ? e.date : from) : null;
-  const fy = Number(from.slice(0, 4));
-  for (let y = fy; y <= fy + 1; y++) {
-    let md = mmdd(e.date);
-    const leap = (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
-    if (md === '02-29' && !leap) md = '02-28';
-    const d = `${y}-${md}`;
-    if (d >= from && d >= e.date.slice(0, 4) + '-01-01') return d;
-  }
+function occursOn(e, day) {
+  if (!e.repeat) return day >= e.date && day <= (e.endDate || e.date);
+  const len = e.endDate ? Math.min(dayDiff(e.date, e.endDate), 30) : 0;
+  for (let k = 0; k <= len; k++) if (startsOn(e, addDays(day, -k))) return true;
+  return false;
+}
+function nextOccurrence(e, from) {   // première date >= from où l'événement a lieu
+  if (!e.repeat) return (e.endDate || e.date) >= from ? (e.date >= from ? e.date : from) : null;
+  let d = e.date > from ? e.date : from;
+  for (let i = 0; i < 370; i++, d = addDays(d, 1)) if (startsOn(e, d)) return d;
   return null;
 }
-const isBirthday = e => e.repeat === 'year';
+const isBirthday = () => false;
 function ageOn(e, day) {
   const by = Number(e.date.slice(0, 4)), y = Number(day.slice(0, 4));
   return by > 1900 && y - by > 0 && y - by < 130 ? y - by : 0;
@@ -4233,7 +4254,7 @@ function purgeOldEvents() {
   getDocs(query(col('events'), where('date', '<', evCutoff()), limit(400))).then(sn => {
     if (!sn.docs.length || house !== state.code) return;
     const cut = evCutoff();
-    const old = sn.docs.filter(d => { const v = d.data(); return v.repeat !== 'year' && !(typeof v.endDate === 'string' && v.endDate >= cut); });
+    const old = sn.docs.filter(d => { const v = d.data(); return !REPEATS.includes(v.repeat) && !(typeof v.endDate === 'string' && v.endDate >= cut); });
     if (!old.length) return;
     const b = writeBatch(db);
     old.forEach(d => b.delete(d.ref || ref('events', d.id)));
@@ -4268,7 +4289,7 @@ function renderCalendar() {
   const dayEvs = (byDay[sel] || []).sort(evSort);
   const selLabel = cap(fromYmd(sel).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }));
   const from = ymd(new Date(fromYmd(sel > today ? sel : today).getTime() + 86400000));
-  const upcoming = state.events.map(e => ({ e, d: e.repeat === 'year' ? nextOccurrence(e, from) : (e.date >= from ? e.date : null) }))
+  const upcoming = state.events.map(e => ({ e, d: e.repeat ? nextOccurrence(e, from) : (e.date >= from ? e.date : null) }))
     .filter(x => x.d).sort((a, b) => a.d < b.d ? -1 : a.d > b.d ? 1 : evSort(a.e, b.e)).slice(0, 6).map(x => ({ ...x.e, _on: x.d }));
 
   return `${pageHead('Calendrier')}
@@ -4335,7 +4356,10 @@ function openEventSheet(ev, day) {
         <div><div class="label">Date</div><input class="field" type="date" name="date" value="${esc(ev?.date || day || state.calDay)}"></div>
         <div><div class="label">Jusqu'au <span class="muted">(facult.)</span></div><input class="field" type="date" name="endDate" value="${esc(ev?.endDate || '')}"></div>
       </div>
-      <label class="switch"><input type="checkbox" name="allDay" ${allDay ? 'checked' : ''}><span class="sw"></span>Toute la journée</label>
+      <div class="label">Répéter</div>
+      <div class="seg repseg">${[['', 'Non'], ['week', 'Semaine'], ['month', 'Mois'], ['year', 'Année']].map(([k, t]) => `<button type="button" data-rep="${k}" class="${(ev?.repeat || '') === k ? 'on' : ''}">${t}</button>`).join('')}</div>
+      <input type="hidden" name="repeat" value="${esc(ev?.repeat || '')}">
+      <label class="switch" style="margin-top:14px"><input type="checkbox" name="allDay" ${allDay ? 'checked' : ''}><span class="sw"></span>Toute la journée</label>
       <div class="times" ${allDay ? 'hidden' : ''}>
         <div><div class="label">Début</div><input class="field" type="time" name="time" value="${esc(ev?.time || '')}"></div>
         <div><div class="label">Fin <span class="muted">(facultatif)</span></div><input class="field" type="time" name="end" value="${esc(ev?.end || '')}"></div>
@@ -4362,7 +4386,8 @@ function saveEvent(f, title) {
     endDate: (() => { const v = f.querySelector('[name="endDate"]').value; return v && v > date ? v : ''; })(),
     time: allDay ? '' : time, end: allDay ? '' : (f.querySelector('[name="end"]').value || ''),
     note: (f.querySelector('[name="q_note"]').value || '').trim().slice(0, 500),
-    people: [...sheetPeople]
+    people: [...sheetPeople],
+    repeat: (() => { const r = f.querySelector('[name="repeat"]').value; return REPEATS.includes(r) ? r : ''; })()
   };
   if (sheetTarget) fire(updateDoc(ref('events', sheetTarget), data));
   else fire(setDoc(doc(col('events')), { ...data, by: meId, byName: state.myName, createdAt: Date.now() }));
