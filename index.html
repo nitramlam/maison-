@@ -3964,7 +3964,7 @@ document.addEventListener('submit', e => {
 
 // ================== Mise à jour automatique ==================
 // L'iPhone garde souvent l'ancienne page en mémoire : on vérifie s'il existe une version plus récente et on recharge.
-const APP_VERSION = '20 nov. 12 h 05';
+const APP_VERSION = '20 nov. 12 h 20';
 let updChecking = false, updLast = 0;
 async function checkUpdate() {
   if (updChecking || Date.now() - updLast < 60 * 1000 || !navigator.onLine) return;
@@ -4040,6 +4040,15 @@ function renderDashboard() {
   h += notifCards(false);
   h += todayWidget();
 
+  // Raccourcis vers les listes favorites (au-dessus des grandes cases)
+  const favs = new Set(homePrefs().fav);
+  const favL = state.lists.filter(l => favs.has(l.id));
+  if (favL.length) {
+    h += `<div class="sec"><div class="grp-h soft dh">⭐ Mes favoris</div><div class="dfavs">${favL.map(l => {
+      const n = state.items.filter(i => i.listId === l.id && !isDoneItem(i)).length;
+      return `<button type="button" class="dfav" data-open-list="${esc(l.id)}" style="--h:${hueOf(l.id)}"><span class="lemo ${l.emoji ? '' : 'letter'}">${esc(iconOf(l.emoji, l.name))}</span><span class="grow">${esc(l.name)}</span>${n ? `<span class="n">${n}</span>` : ''}<span class="chev">${ICON.chev}</span></button>`;
+    }).join('')}</div></div>`;
+  }
   // Les grandes cases
   const todo = state.items.filter(i => !isDoneItem(i));
   const imp = todo.filter(i => i.important).length;
@@ -4056,16 +4065,14 @@ function renderDashboard() {
     ${tile('cal', '📅', 'Calendrier', evToday ? `${evToday} aujourd'hui` : evNext ? esc(`${relDay(evNext.date)} · ${evNext.title}`) : 'Rien de prévu', 0, 25)}
     ${tile('notes', '💬', 'Notes', lastPost ? esc(`${lastPost.byName || ''} : ${lastPost.text || (lastPost.audioId ? '🎤 vocal' : '📷 photo')}`) : 'Écris le premier mot', unreadN, 265)}
     ${tile('budget', '💶', 'Dépenses', budgetTileText(), 0, 45)}
-    ${(() => {
-      const favs = new Set(homePrefs().fav);
-      const favL = state.lists.filter(l => favs.has(l.id));
-      if (!favL.length) {   // pas de favori : raccourci vers la liste de courses s'il y en a une
-        const shop = state.lists.find(l => l.shopping);
-        return shop ? favTile(shop) : '';
-      }
-      return favL.map(favTile).join('');
-    })()}
   </div>`;
+
+  const shop = state.lists.find(l => l.shopping);
+  if (shop) {
+    const n = state.items.filter(i => i.listId === shop.id && !i.done).length;
+    h += `<div class="dtiles sec"><button type="button" class="dtile wide" data-open-list="${esc(shop.id)}" style="--h:205"><span class="dt-ic">${esc(iconOf(shop.emoji, shop.name))}</span>
+      <b>${esc(shop.name)}</b><small>${n ? `${n} à acheter` : 'Rien à acheter'}</small></button></div>`;
+  }
   return h;
 }
 screen.addEventListener('click', e => {
