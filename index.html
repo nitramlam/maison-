@@ -537,6 +537,7 @@
   .fd{width:9px;height:9px;border-radius:50%;display:block}.fd.petit{background:#F1B3BE}.fd.moyen{background:#D6455D}.fd.fort{background:#8E1A30}
   .stepper{display:flex;align-items:center;gap:8px}.stepper button{width:46px;height:46px;border-radius:14px;border:0;font-size:22px;background:color-mix(in srgb, var(--ink) 8%, transparent);color:var(--ink)}
   .stepper .field{width:70px;text-align:center}.stepper span{color:var(--muted)}
+  .dtile.wide{grid-column:1 / -1;min-height:88px}
   .pdhome .bdic{background:color-mix(in srgb, #D6455D 14%, var(--card))}
   .seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
   .swatches{display:flex;flex-wrap:wrap;gap:10px}
@@ -3818,7 +3819,7 @@ function renderTabbar(show) {
   const n = t === 'notes' ? 0 : unreadMentions().length + unreadReplies().length;
   const a = unreadAssigned().length;
   const badge = k => k === 'notes' && n ? `<i class="tabbadge">${n}</i>` : k === 'lists' && a ? `<i class="tabbadge">${a}</i>` : '';
-  tabbar.innerHTML = [['home', 'Accueil'], ['lists', 'Listes'], ['cal', 'Agenda'], ['notes', 'Bento'], ['budget', 'Dépenses'], ['regles', 'Règles']].map(([k, label]) =>
+  tabbar.innerHTML = [['home', 'Accueil'], ['lists', 'Listes'], ['cal', 'Agenda'], ['notes', 'Bento'], ['budget', 'Dépenses']].map(([k, label]) =>
     `<button type="button" class="tab ${t === k ? 'on' : ''}" data-tab="${k}">${TAB_ICONS[k]}<span>${label}</span>${badge(k)}</button>`).join('');
 }
 tabbar.addEventListener('click', e => {
@@ -4106,6 +4107,12 @@ function periodEvents() {
   return out;
 }
 // Bandeau de l'accueil : règles en cours ou prévues dans les 3 jours
+function reglesTileText() {
+  const ts = allTrackers();
+  if (!ts.length) return 'Suivi des cycles';
+  return ts.slice(0, 2).map(t => { const st = cycleStats(t);
+    return esc(t.name) + ' · ' + (st.current ? `jour ${st.day}` : st.late ? `en retard de ${st.late} j` : st.next ? relIn(st.next) : 'rien d\'enregistré'); }).join(' · ');
+}
 function periodHomeCard() {
   const lines = [];
   for (const t of allTrackers()) {
@@ -4315,7 +4322,7 @@ document.addEventListener('click', e => {
 
 // ================== Mise à jour automatique ==================
 // L'iPhone garde souvent l'ancienne page en mémoire : on vérifie s'il existe une version plus récente et on recharge.
-const APP_VERSION = '20 nov. 14 h 20';
+const APP_VERSION = '20 nov. 14 h 30';
 let updChecking = false, updLast = 0;
 async function checkUpdate() {
   if (updChecking || Date.now() - updLast < 60 * 1000 || !navigator.onLine) return;
@@ -4418,6 +4425,7 @@ function renderDashboard() {
     ${tile('cal', '📅', 'Calendrier', evToday ? `${evToday} aujourd'hui` : evNext ? esc(`${relDay(evNext._on)} · ${evNext.title}`) : 'Rien de prévu', 0, 25)}
     ${tile('notes', '💬', 'Bento', lastPost ? esc(`${lastPost.byName || ''} : ${lastPost.text || (lastPost.audioId ? '🎤 vocal' : '📷 photo')}`) : 'Écris le premier mot', unreadN, 265)}
     ${tile('budget', '💶', 'Dépenses', budgetTileText(), 0, 45)}
+    ${tile('regles', '🩸', 'Règles', reglesTileText(), 0, 350).replace('class="dtile"', 'class="dtile wide"')}
   </div>`;
 
   return h;
