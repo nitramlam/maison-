@@ -823,7 +823,8 @@
   .grp-h{display:flex;align-items:center}.grp-edit{border:0;background:none;font-size:14px;padding:6px 8px;margin-left:2px;opacity:.6;border-radius:10px}.grp-edit:active{opacity:1;background:color-mix(in srgb, var(--ink) 8%, transparent)}
   .setlinks{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 18px}.setlinks .setlink:first-child{grid-column:1 / -1}
   .nfbox{padding:14px;border-radius:16px;background:color-mix(in srgb, var(--accent) 10%, var(--card));line-height:1.45}.nfbox.on{background:color-mix(in srgb, #3FB56B 14%, var(--card))}
-  .nfbox small{color:var(--muted)}.nfgrp{margin-top:14px}.nfrow{margin-top:8px}
+  .nfbox small{color:var(--muted)}.nfgrp{margin-top:14px}
+  .nfwholist{display:flex;flex-direction:column;gap:6px}.nfwho{display:flex;align-items:center;gap:8px;font-size:14.5px}.nfwho small{color:var(--muted);margin-left:auto;text-align:right}.nfrow{margin-top:8px}
   .setlink{display:flex;align-items:center;gap:10px;border:0;border-radius:16px;padding:13px 12px;text-align:left;background:color-mix(in srgb, var(--accent) 10%, var(--card));color:var(--ink)}
   .setlink span{font-size:20px}.setlink b{font-size:14.5px;line-height:1.2}
   .helpsearch{margin-bottom:12px}
@@ -1446,6 +1447,7 @@ function subscribe() {
         id: d.id, name: str(v.name, "Quelqu'un"), removed: v.removed === true, hue: typeof v.hue === 'number' ? v.hue : null,
         avatar: typeof v.avatar === 'string' ? clipIcon(v.avatar) : '',
         cycles: cleanTrackers(v.cycles),
+        pushDevs: v.push && Array.isArray(v.push.subs) ? v.push.subs.filter(x => x && x.endpoint).map(x => String(x.dev || 'Appareil')) : [],
         mood: v.mood && v.mood.shared ? cleanMood(v.mood) : null,
         budget: v.budget && typeof v.budget === 'object' && Number(v.budget.salary) > 0 ? { salary: Math.round(Number(v.budget.salary)), payday: Math.min(31, Math.max(1, Number(v.budget.payday) || 1)) } : null,
         devices: devs.map(([k, x]) => ({ id: k, label: str(x && x.label, 'Appareil'), lastSeen: Number(x && x.lastSeen) || 0 }))
@@ -3449,6 +3451,10 @@ overlay.addEventListener('submit', e => {
       if (it && (it.title !== title || (it.sectionId || null) !== sheetSec || (it.emoji || null) !== emoji || it.qty !== qty || it.note !== note || asgChanged || photoChanged || it.important !== important || (it.link || '') !== link)) {
         fire(updateDoc(ref('items', it.id), { title, sectionId: sheetSec, emoji, qty, note, assignees: asg, photoId, important, link,
           ...(added ? { assignedAt: Date.now(), assignedBy: state.myName } : {}) }));
+        // préviens seulement les personnes qu'on vient d'ajouter
+        const newly = asg.filter(id => id !== meId && !(it.assignees || []).includes(id));
+        if (newly.length) { const ln = state.lists.find(x => x.id === it.listId)?.name || 'une liste';
+          pushNotify('assign', { title: `📌 ${state.myName} te confie « ${title.slice(0, 60)} »`, body: `Dans ${ln}`, url: appLink('tab=lists&list=' + it.listId), to: newly }); }
       }
       closeSheet(); break;
     }
@@ -4623,7 +4629,12 @@ async function openNotifSheet() {
     const head = grp !== lastGrp ? `<div class="label nfgrp">${grp}</div>` : ''; lastGrp = grp;
     return `${head}<label class="switch nfrow"><input type="checkbox" data-push-pref="${k}" ${pu.prefs[k] ? 'checked' : ''}><span class="sw"></span><span>${e} ${label}</span></label>`;
   }).join('');
+  const who = houseMembers().filter(m => !m.removed).map(m => {
+    const devs = m.id === meId ? pu.subs.map(x => x.dev || 'Appareil') : (m.pushDevs || []);
+    return `<div class="nfwho"><span>${devs.length ? '🔔' : '🔕'}</span><b>${esc(m.id === meId ? 'Toi' : m.name)}</b><small>${devs.length ? `activées · ${devs.map(esc).join(', ')}` : 'pas encore activées'}</small></div>`;
+  }).join('');
   openSheet(`<h3>🔔 Notifications</h3>${status}
+    ${pushOn() ? `<div class="label nfgrp">Dans la maison</div><div class="nfwholist">${who}</div>` : ''}
     ${pushOn() ? `<p class="hint" style="margin-top:14px">Choisis ce qui te prévient (sur tous tes appareils) :</p>${rows}` : ''}`);
   sheetKind = 'notif';
 }
@@ -4886,7 +4897,7 @@ document.addEventListener('click', e => {
 
 // ================== Mise à jour automatique ==================
 // L'iPhone garde souvent l'ancienne page en mémoire : on vérifie s'il existe une version plus récente et on recharge.
-const APP_VERSION = '20 nov. 18 h 00';
+const APP_VERSION = '20 nov. 18 h 20';
 let updChecking = false, updLast = 0;
 async function checkUpdate() {
   if (updChecking || Date.now() - updLast < 60 * 1000 || !navigator.onLine) return;
