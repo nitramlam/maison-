@@ -764,6 +764,8 @@
   .bdaycard.empty b{font-size:14px}
   .daterow{grid-template-columns:1fr 1fr}
   .daterow input[type=date]{min-width:0}
+  .dtile.fav{min-height:104px}
+  .dt-star{position:absolute;top:12px;right:12px;font-size:13px;opacity:.85}
   /* Messages vocaux */
   .iconchip{font-size:18px;padding:6px 12px}
   .vplayer{display:flex;align-items:center;gap:10px;margin-top:10px;padding:8px 12px 8px 8px;border-radius:999px;background:color-mix(in srgb, var(--accent) 10%, var(--card));max-width:300px}
@@ -3928,7 +3930,7 @@ document.addEventListener('submit', e => {
 
 // ================== Mise à jour automatique ==================
 // L'iPhone garde souvent l'ancienne page en mémoire : on vérifie s'il existe une version plus récente et on recharge.
-const APP_VERSION = '20 nov. 02 h 15';
+const APP_VERSION = '20 nov. 11 h 55';
 let updChecking = false, updLast = 0;
 async function checkUpdate() {
   if (updChecking || Date.now() - updLast < 60 * 1000 || !navigator.onLine) return;
@@ -3983,6 +3985,13 @@ function greeting() {
   const hr = new Date().getHours();
   return hr < 5 ? 'Bonne nuit' : hr < 18 ? 'Bonjour' : 'Bonsoir';
 }
+function favTile(l) {
+  const n = state.items.filter(i => i.listId === l.id && !isDoneItem(i)).length;
+  const imp = state.items.filter(i => i.listId === l.id && i.important && !isDoneItem(i)).length;
+  return `<button type="button" class="dtile fav" data-open-list="${esc(l.id)}" style="--h:${hueOf(l.id)}">
+    <span class="dt-ic">${esc(iconOf(l.emoji, l.name))}</span><span class="dt-star">⭐</span>
+    <b>${esc(l.name)}</b><small>${n ? `${n} élément${n > 1 ? 's' : ''}${l.shopping ? ' à acheter' : ''}` : 'Vide'}${imp ? ` · ❗ ${imp}` : ''}</small></button>`;
+}
 function renderDashboard() {
   let h = `<header class="hometop"><div class="grow">
       ${state.myName ? `<div class="hello">${greeting()} ${esc(state.myName)} 👋</div>` : ''}
@@ -3996,17 +4005,6 @@ function renderDashboard() {
   if (state.loading) return h;
   h += notifCards(false);
   h += todayWidget();
-
-  // Qui est là
-  const inHouse = new Set(state.house?.members || []);
-  const people = (state.members || []).filter(m => inHouse.has(m.id))
-    .sort((a, b) => (b.id === meId) - (a.id === meId) || a.name.localeCompare(b.name));
-  if (people.length) {
-    h += `<div class="sec"><div class="grp-h soft dh">La maison<span class="n">${people.length}</span></div>
-      <div class="dpeople" role="button" tabindex="0" data-action="members">${people.slice(0, 8).map(m => {
-        return `<span class="dp"><span class="avatar lg" style="--h:${pHue(m.id)}">${esc(initial(m.name))}</span><small>${esc(m.id === meId ? 'Toi' : m.name)}</small></span>`;
-      }).join('')}${people.length > 8 ? `<span class="dp"><span class="avatar lg more">+${people.length - 8}</span><small>&nbsp;</small></span>` : ''}</div></div>`;
-  }
 
   // Les grandes cases
   const todo = state.items.filter(i => !isDoneItem(i));
@@ -4024,22 +4022,16 @@ function renderDashboard() {
     ${tile('cal', '📅', 'Calendrier', evToday ? `${evToday} aujourd'hui` : evNext ? esc(`${relDay(evNext.date)} · ${evNext.title}`) : 'Rien de prévu', 0, 25)}
     ${tile('notes', '💬', 'Notes', lastPost ? esc(`${lastPost.byName || ''} : ${lastPost.text || (lastPost.audioId ? '🎤 vocal' : '📷 photo')}`) : 'Écris le premier mot', unreadN, 265)}
     ${tile('budget', '💶', 'Dépenses', budgetTileText(), 0, 45)}
-    ${(() => { const shop = state.lists.find(l => l.shopping);
-      if (!shop) return '';
-      const n = state.items.filter(i => i.listId === shop.id && !i.done).length;
-      return `<button type="button" class="dtile wide" data-open-list="${esc(shop.id)}" style="--h:205"><span class="dt-ic">${esc(iconOf(shop.emoji, shop.name))}</span>
-        <b>${esc(shop.name)}</b><small>${n ? `${n} à acheter` : 'Rien à acheter'}</small></button>`; })()}
+    ${(() => {
+      const favs = new Set(homePrefs().fav);
+      const favL = state.lists.filter(l => favs.has(l.id));
+      if (!favL.length) {   // pas de favori : raccourci vers la liste de courses s'il y en a une
+        const shop = state.lists.find(l => l.shopping);
+        return shop ? favTile(shop) : '';
+      }
+      return favL.map(favTile).join('');
+    })()}
   </div>`;
-
-  // Raccourcis vers les listes favorites
-  const favs = new Set(homePrefs().fav);
-  const favL = state.lists.filter(l => favs.has(l.id));
-  if (favL.length) {
-    h += `<div class="sec"><div class="grp-h soft dh">⭐ Mes favoris</div><div class="dfavs">${favL.map(l => {
-      const n = state.items.filter(i => i.listId === l.id && !isDoneItem(i)).length;
-      return `<button type="button" class="dfav" data-open-list="${esc(l.id)}" style="--h:${hueOf(l.id)}"><span class="lemo ${l.emoji ? '' : 'letter'}">${esc(iconOf(l.emoji, l.name))}</span><span class="grow">${esc(l.name)}</span>${n ? `<span class="n">${n}</span>` : ''}<span class="chev">${ICON.chev}</span></button>`;
-    }).join('')}</div></div>`;
-  }
   return h;
 }
 screen.addEventListener('click', e => {
