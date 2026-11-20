@@ -2489,7 +2489,7 @@ function submitAddItem(f, title) {
   }));
   { const ln = state.lists.find(x => x.id === listId)?.name || 'une liste', asg = [...sheetPeople].filter(id => id !== meId), url = appLink('tab=lists&list=' + listId);
     if (asg.length) pushNotify('assign', { title: `📌 ${state.myName} te confie « ${title.slice(0, 60)} »`, body: `Dans ${ln}`, url, to: asg });
-    pushNotify('item', { title: `${sheetEmoji || autoEmoji(title) || '📝'} ${title.slice(0, 60)}`, body: `${state.myName} l'a ajouté dans ${ln}`, url, tag: 'item-' + listId, to: houseMembers().map(m => m.id).filter(id => !asg.includes(id)) }); }
+  }
   draft.sec[listId] = sheetSec || null;        // la catégorie reste choisie pour le suivant
   // petit rappel de ce qui vient d'être ajouté
   const log = $('#addedLog');
@@ -4517,7 +4517,6 @@ const PUSH_RELAY = 'https://maison-notif.josearcadia33.workers.dev';   // adress
 const VAPID_PUBLIC = 'BAurtAVGj3Ag7_FDRhreWyz37PcuNkjx-nO_q9rlvYCsllNIeQnRKDYfGQz76Gx_b7jrQljysIaBi9YgEDTxvWM';
 const PUSH_KINDS = [
   ['assign', '📌', 'Quand on me confie un élément', 'Listes', true],
-  ['item', '📝', 'Nouvel élément dans une liste', 'Listes', false],
   ['event', '📅', 'Nouvel événement', 'Calendrier', true],
   ['post', '💬', 'Nouveau message', 'Bento', true],
   ['mention', '👤', 'Quand on m\'identifie', 'Bento', true],
@@ -4724,7 +4723,8 @@ const HELP = [
   ['🔔', 'Notifications', [
     "Réglages ⚙️ → 🔔 Notifications → « Activer les notifications sur cet appareil ».",
     "Sur iPhone, ça ne marche que depuis l'icône de l'écran d'accueil (pas dans Safari).",
-    "Choisis ce qui te prévient : éléments confiés, nouveaux messages, événements, charges…",
+    "Listes : tu es prévenu quand on te confie un élément (« Pour qui ? »), à l'ajout ou à la modification.",
+    "Choisis aussi ce qui te prévient : messages, événements, charges…",
     "« Envoyer un test » pour vérifier. Bloquées ? Réglages de l'iPhone → Notifications → Maison."]],
   ['💡', 'Une idée, un bug ?', [
     "Réglages ⚙️ → « Une idée, un bug ? » : ton message est envoyé directement, sans quitter l'app."]]
@@ -4805,7 +4805,6 @@ document.addEventListener('submit', e => {
     qty: '', note: '', emoji: autoEmoji(title) || null, important: false, link, photoId: null,
     byName: state.myName, by: meId, assignees: [], assignedAt: 0, assignedBy: '' }));
   const secName = sectionId ? state.sections.find(x => x.id === sectionId)?.name : '';
-  pushNotify('item', { title: `${autoEmoji(title) || '📝'} ${title.slice(0, 60)}`, body: `${state.myName} l'a ajouté dans ${l.name}`, url: appLink('tab=lists&list=' + listId), tag: 'item-' + listId });
   closeSheet();
   navigator.vibrate?.(12);
   toast(`✓ « ${title} » ajouté dans ${l.name}${secName ? ' › ' + secName : ''}`);
@@ -4897,7 +4896,7 @@ document.addEventListener('click', e => {
 
 // ================== Mise à jour automatique ==================
 // L'iPhone garde souvent l'ancienne page en mémoire : on vérifie s'il existe une version plus récente et on recharge.
-const APP_VERSION = '20 nov. 18 h 20';
+const APP_VERSION = '20 nov. 18 h 30';
 let updChecking = false, updLast = 0;
 async function checkUpdate() {
   if (updChecking || Date.now() - updLast < 60 * 1000 || !navigator.onLine) return;
