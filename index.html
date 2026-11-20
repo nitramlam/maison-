@@ -3964,7 +3964,7 @@ document.addEventListener('submit', e => {
 
 // ================== Mise à jour automatique ==================
 // L'iPhone garde souvent l'ancienne page en mémoire : on vérifie s'il existe une version plus récente et on recharge.
-const APP_VERSION = '20 nov. 12 h 20';
+const APP_VERSION = '20 nov. 12 h 25';
 let updChecking = false, updLast = 0;
 async function checkUpdate() {
   if (updChecking || Date.now() - updLast < 60 * 1000 || !navigator.onLine) return;
@@ -4067,12 +4067,6 @@ function renderDashboard() {
     ${tile('budget', '💶', 'Dépenses', budgetTileText(), 0, 45)}
   </div>`;
 
-  const shop = state.lists.find(l => l.shopping);
-  if (shop) {
-    const n = state.items.filter(i => i.listId === shop.id && !i.done).length;
-    h += `<div class="dtiles sec"><button type="button" class="dtile wide" data-open-list="${esc(shop.id)}" style="--h:205"><span class="dt-ic">${esc(iconOf(shop.emoji, shop.name))}</span>
-      <b>${esc(shop.name)}</b><small>${n ? `${n} à acheter` : 'Rien à acheter'}</small></button></div>`;
-  }
   return h;
 }
 screen.addEventListener('click', e => {
