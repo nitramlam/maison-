@@ -821,6 +821,9 @@
   .avhint{font-size:12.5px;line-height:1.3}
   .fbbtn{font-size:19px}
   .helpbtn{font-size:17px;padding-left:4px;padding-right:4px}
+  .setlinks{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 18px}
+  .setlink{display:flex;align-items:center;gap:10px;border:0;border-radius:16px;padding:13px 12px;text-align:left;background:color-mix(in srgb, var(--accent) 10%, var(--card));color:var(--ink)}
+  .setlink span{font-size:20px}.setlink b{font-size:14.5px;line-height:1.2}
   .helpsearch{margin-bottom:12px}
   .helplist{display:flex;flex-direction:column;gap:8px}
   .helpitem{background:color-mix(in srgb, var(--ink) 4%, var(--card));border-radius:16px;overflow:hidden}
@@ -2891,6 +2894,10 @@ function setMyColor(h) {
 }
 function openSettingsSheet() {
   openSheet(`<h3>Réglages</h3>
+    <div class="setlinks">
+      <button type="button" class="setlink" data-help><span>❓</span><b>Mode d'emploi</b></button>
+      <button type="button" class="setlink" data-feedback><span>${isFeedbackOwner() ? '📬' : '💡'}</span><b>${isFeedbackOwner() ? 'Retours reçus' : 'Une idée, un bug ?'}</b></button>
+    </div>
     <form data-form="settings" autocomplete="off">
       <div class="label" style="margin-top:0">Nom de la maison</div>
       <input class="field" name="q_house" maxlength="40" value="${esc(state.house?.name || '')}">
@@ -4546,7 +4553,7 @@ const HELP = [
     "Mises à jour : automatiques à l'ouverture. Sinon, ferme l'app complètement et rouvre-la.",
     "Micro ou position refusés : Réglages de l'iPhone → Safari → Micro / Position → Autoriser."]],
   ['💡', 'Une idée, un bug ?', [
-    "Touche 💡 en haut : ton message est envoyé directement, sans quitter l'app."]]
+    "Réglages ⚙️ → « Une idée, un bug ? » : ton message est envoyé directement, sans quitter l'app."]]
 ];
 function openHelp() {
   openSheet(`<h3>Mode d'emploi</h3>
@@ -4554,7 +4561,7 @@ function openHelp() {
     <div class="helplist">${HELP.map(([ic, t, lines], i) => `<details class="helpitem" data-help-item>
       <summary><span class="hic">${ic}</span><b>${esc(t)}</b><span class="chev">${ICON.chev}</span></summary>
       <ul>${lines.map(l => `<li>${esc(l)}</li>`).join('')}</ul></details>`).join('')}</div>
-    <p class="hint helpnone" hidden>Rien trouvé. Essaie un autre mot, ou demande via 💡.</p>
+    <p class="hint helpnone" hidden>Rien trouvé. Essaie un autre mot, ou écris-nous via « Une idée, un bug ? ».</p>
     <p class="hint" style="text-align:center;margin-top:14px">Version ${esc(APP_VERSION)}</p>`);
   sheetKind = 'help';
 }
@@ -4707,7 +4714,7 @@ document.addEventListener('click', e => {
 
 // ================== Mise à jour automatique ==================
 // L'iPhone garde souvent l'ancienne page en mémoire : on vérifie s'il existe une version plus récente et on recharge.
-const APP_VERSION = '20 nov. 15 h 50';
+const APP_VERSION = '20 nov. 16 h 00';
 let updChecking = false, updLast = 0;
 async function checkUpdate() {
   if (updChecking || Date.now() - updLast < 60 * 1000 || !navigator.onLine) return;
@@ -4773,8 +4780,6 @@ function renderDashboard() {
   let h = `<header class="hometop dashtop"><div class="grow">
       ${state.myName ? `<div class="hello">${greeting()} ${esc(state.myName)} 👋</div>` : ''}</div>
       <div class="btns">
-        <button class="iconbtn fbbtn helpbtn" data-help aria-label="Mode d'emploi">❓</button>
-        <button class="iconbtn fbbtn" data-feedback aria-label="Donner ton avis">💡</button>
         <button class="iconbtn members-btn" data-action="members" aria-label="Membres">${avatarStack()}</button>
         <button class="iconbtn" data-action="settings" aria-label="Réglages">${ICON.gear}</button>
       </div></header>
@@ -4839,8 +4844,6 @@ function pageHead(title, sub) {
       <div class="hello">${esc(state.house?.name || 'Maison')}</div>
       <h1>${title}</h1>${sub ? `<p class="sub">${sub}</p>` : ''}</div>
       <div class="btns">
-        <button class="iconbtn fbbtn helpbtn" data-help aria-label="Mode d'emploi">❓</button>
-        <button class="iconbtn fbbtn" data-feedback aria-label="Donner ton avis">💡</button>
         <button class="iconbtn members-btn" data-action="members" aria-label="Membres">${avatarStack()}</button>
         <button class="iconbtn" data-action="settings" aria-label="Réglages">${ICON.gear}</button>
       </div></header>`;
