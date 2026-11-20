@@ -522,6 +522,9 @@
   .pdnow{padding:8px 16px 16px}
   .pdday{display:flex;flex-direction:column;align-items:center;padding:14px;border-radius:16px;margin-bottom:6px;background:color-mix(in srgb, #D6455D 12%, var(--card))}
   .pdday b{font-size:34px;line-height:1.1;color:#C23A52}.pdday small{color:var(--muted);font-size:13px}
+  .pdpred{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;padding:14px;border-radius:16px;margin-bottom:12px;background:color-mix(in srgb, #D6455D 8%, var(--card))}
+  .pdpred>small{color:var(--muted);font-size:13px}.pdpred>b{font-size:28px;color:#C23A52;line-height:1.15}.pdpred>span{font-size:14.5px}
+  .pdpred em{font-style:normal;color:var(--muted);font-size:12px;margin-top:6px;line-height:1.35}
   .pdnext{margin:4px 0 14px;font-size:16px;text-align:center}.pdnext b{color:#C23A52}.pdnext small{color:var(--muted)}
   .pdstart{background:#C23A52}
   .pdend{margin-top:14px;background:color-mix(in srgb, var(--ink) 8%, transparent);color:var(--ink)}
@@ -4065,12 +4068,28 @@ function cycleStats(t) {
   for (let i = 1; i < ps.length; i++) { const d = dayDiff(ps[i - 1].start, ps[i].start); if (d >= 15 && d <= 60) cycles.push(d); }
   const durs = ps.filter(p => p.end).map(p => dayDiff(p.start, p.end) + 1);
   const avg = a => a.length ? Math.round(a.slice(-6).reduce((x, y) => x + y, 0) / Math.min(a.length, 6)) : 0;
-  const cycle = avg(cycles), dur = avg(durs) || 5;
+  // Moyenne pondérée des 6 derniers cycles : les plus récents comptent plus
+  const recent = cycles.slice(-6);
+  const wsum = recent.reduce((t, _, i) => t + i + 1, 0);
+  const cycle = recent.length ? Math.round(recent.reduce((t, c, i) => t + c * (i + 1), 0) / wsum) : 0;
+  const dur = avg(durs) || 5;
+  // Écart (variabilité) : sert à donner une fourchette
+  const sd = recent.length >= 2 ? Math.sqrt(recent.reduce((t, c) => t + (c - cycle) ** 2, 0) / recent.length) : 0;
+  const spread = recent.length >= 2 ? Math.min(7, Math.max(1, Math.round(sd))) : 3;
+  const estimate = !cycle;                // pas encore assez de données : 28 jours par défaut
+  const useCycle = cycle || 28;
   const current = ps.find(p => !p.end) || null;
   const last = ps[ps.length - 1];
-  let next = null;
-  if (cycle && last && !current) { next = addDays(last.start, cycle); while (next < today) next = addDays(next, cycle); }
-  return { cycle, dur, current, next, day: current ? dayDiff(current.start, today) + 1 : 0 };
+  let next = null, late = 0;
+  if (last) {
+    next = addDays(last.start, useCycle);
+    const over = dayDiff(next, today);
+    // Pas encore arrivées alors qu'elles étaient prévues (jusqu'à 10 j) : on signale le retard
+    if (!current && over > 0 && over <= 10) late = over;
+    else while (next < (current ? addDays(today, 1) : today)) next = addDays(next, useCycle);
+  }
+  return { cycle, useCycle, dur, current, next, spread, estimate, late, regular: recent.length >= 2 && sd <= 3, n: recent.length,
+           day: current ? dayDiff(current.start, today) + 1 : 0 };
 }
 const dayFlow = (p, d) => p.days[d] || p.flow;
 const relIn = d => { const n = dayDiff(todayYmd(), d); return n === 0 ? "aujourd'hui" : n === 1 ? 'demain' : n < 0 ? `il y a ${-n} j` : `dans ${n} j`; };
@@ -4081,7 +4100,7 @@ function periodEvents() {
     const st = cycleStats(t), who = t.name;
     for (const p of t.periods) out.push({ id: 'period-' + t.id + '-' + p.id, title: `Règles · ${who}`, emoji: '🩸', date: p.start, endDate: p.end || (today > p.start ? today : ''),
       allDay: true, time: '', end: '', note: p.end ? '' : 'En cours', byName: '', people: [], repeat: '', _period: t.id });
-    if (st.next) out.push({ id: 'period-' + t.id + '-next', title: `Règles prévues · ${who}`, emoji: '🩸', date: st.next, endDate: addDays(st.next, st.dur - 1),
+    if (st.next) out.push({ id: 'period-' + t.id + '-next', title: `Règles prévues · ${who}${st.estimate ? ' (estimation)' : ''}`, emoji: '🩸', date: st.next, endDate: addDays(st.next, st.dur - 1),
       allDay: true, time: '', end: '', note: 'Prévision', byName: '', people: [], repeat: '', _period: t.id });
   }
   return out;
@@ -4097,6 +4116,15 @@ function periodHomeCard() {
   if (!lines.length) return '';
   return `<button type="button" class="card bdaycard pdhome" data-go-tab="regles"><span class="bdic">🩸</span><span class="grow"><b>Règles</b>
     <small>${lines.join(' · ')}</small></span><span class="chev">${ICON.chev}</span></button>`;
+}
+function predictBox(st) {
+  const from = addDays(st.next, -st.spread), to = addDays(st.next, st.spread);
+  return `<div class="pdpred">
+    <small>${st.late ? `En retard de ${st.late} jour${st.late > 1 ? 's' : ''} sur la prévision` : 'Prochaines règles prévues'}</small>
+    <b>${st.late ? 'Bientôt' : cap(relIn(st.next))}</b>
+    <span>vers le <b>${fmtShort(st.next)}</b> · entre le ${fmtShort(from)} et le ${fmtShort(to)}</span>
+    <em>${st.estimate ? 'Estimation sur un cycle de 28 jours : elle deviendra précise après les prochaines règles.'
+      : `Calculé sur ${st.n} cycle${st.n > 1 ? 's' : ''} (moyenne de ${st.cycle} jours, les plus récents comptent plus).`}</em></div>`;
 }
 function flowDots(p) {
   const end = p.end || todayYmd(), n = Math.min(dayDiff(p.start, end) + 1, 14), out = [];
@@ -4122,13 +4150,13 @@ function renderRegles() {
       h += `<div class="pdnow"><div class="pdday"><small>Règles en cours</small><b>Jour ${st.day}</b><small>depuis le ${fmtShort(st.current.start)}</small></div>
         <div class="label">Flux aujourd'hui</div>
         <div class="seg pdseg">${FLOWS.map(([k, l]) => `<button type="button" class="${f === k ? 'on' : ''} fl-${k}" data-pd-flow="${k}" data-t="${esc(t.id)}">${l}</button>`).join('')}</div>
-        <button type="button" class="btn full pdend" data-pd-end="${esc(t.id)}">✓ Fin des règles</button></div>`;
+        <button type="button" class="btn full pdend" data-pd-end="${esc(t.id)}">✓ Fin des règles</button>
+        ${st.next ? `<p class="hint" style="text-align:center;margin:12px 0 0">Les suivantes vers le ${fmtShort(st.next)}${st.estimate ? ' (estimation)' : ''}</p>` : ''}</div>`;
     } else {
-      h += `<div class="pdnow">${st.next ? `<p class="pdnext">Prochaines règles prévues <b>${relIn(st.next)}</b><br><small>vers le ${fmtShort(st.next)}</small></p>`
-        : `<p class="hint" style="margin:0 0 12px">${t.periods.length ? 'Encore une fois et l\'app pourra prévoir les prochaines.' : 'Aucune règle enregistrée pour l\'instant.'}</p>`}
+      h += `<div class="pdnow">${st.next ? predictBox(st) : `<p class="hint" style="margin:0 0 12px">Aucune règle enregistrée pour l'instant.</p>`}
         <button type="button" class="btn primary full pdstart" data-pd-start="${esc(t.id)}">🩸 Enregistrer les nouvelles règles</button></div>`;
     }
-    if (st.cycle || t.periods.some(p => p.end)) h += `<div class="pdstats"><span><b>${st.dur} j</b><small>durée moyenne</small></span><span><b>${st.cycle ? st.cycle + ' j' : '—'}</b><small>cycle moyen</small></span></div>`;
+    if (st.cycle || t.periods.some(p => p.end)) h += `<div class="pdstats"><span><b>${st.dur} j</b><small>durée moyenne</small></span><span><b>${st.cycle ? st.cycle + ' j' : '—'}</b><small>cycle moyen</small></span>${st.n >= 2 ? `<span><b>${st.regular ? 'Régulier' : '± ' + st.spread + ' j'}</b><small>${st.regular ? 'cycle' : 'variation'}</small></span>` : ''}</div>`;
     if (t.periods.length) h += `<div class="pdhist">${t.periods.slice(0, 8).map(p => {
       const n = dayDiff(p.start, p.end || todayYmd()) + 1;
       return `<button type="button" class="exrow" data-pd-period="${esc(p.id)}" data-t="${esc(t.id)}"><span class="grow"><b>${fmtShort(p.start)}${p.end ? ' → ' + fmtShort(p.end) : ' · en cours'}</b>
@@ -4287,7 +4315,7 @@ document.addEventListener('click', e => {
 
 // ================== Mise à jour automatique ==================
 // L'iPhone garde souvent l'ancienne page en mémoire : on vérifie s'il existe une version plus récente et on recharge.
-const APP_VERSION = '20 nov. 14 h 10';
+const APP_VERSION = '20 nov. 14 h 20';
 let updChecking = false, updLast = 0;
 async function checkUpdate() {
   if (updChecking || Date.now() - updLast < 60 * 1000 || !navigator.onLine) return;
