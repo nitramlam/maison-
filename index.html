@@ -1267,6 +1267,8 @@ function touchMember(force) {
   lastTouch = now;
   const extra = typeof state.profile?.color === 'number' ? { hue: state.profile.color } : {};
   if (typeof state.profile?.avatar === 'string') extra.avatar = clipIcon(state.profile.avatar);
+  // Humeur partagée : recopiée dans la maison ouverte (utile si on a plusieurs maisons ou si un envoi a raté)
+  if (state.profile && 'moodData' in state.profile) { const m = cleanMood(state.profile.moodData); extra.mood = m.shared ? { e: m.e, c: m.c, shared: true } : deleteField(); }
   // plus aucune trace d'activité (« vu il y a… ») : on efface l'ancienne si elle existe
   fire(setDoc(ref('members', meId), { name: state.myName, removed: false, ...extra, devices: deleteField() }, { merge: true }));
 }
@@ -4162,12 +4164,15 @@ function renderHumeur() {
   <label class="switch card pad sec mshare"><input type="checkbox" data-mood-share ${m.shared ? 'checked' : ''}><span class="sw"></span><span>Visible par la maison<br><small class="muted">${m.shared ? 'Toute la maison voit ton humeur et ton compteur.' : 'Pour l\'instant, toi seul·e vois tout ça.'}</small></span></label>`;
   // Ceux qui partagent dans la maison
   const others = houseMembers().filter(p => p.id !== meId && p.mood);
-  if (others.length) {
+  const hidden = houseMembers().filter(p => p.id !== meId && !p.mood && !p.removed);
+  if (others.length || hidden.length) {
     h += `<div class="grp-h soft dh" style="margin-top:22px">Dans la maison</div><div class="card exlist">${others.map(p => {
       const s = moodStats(p.mood), y = moodOf(s.today);
       return `<div class="exrow"><span class="exic">${y ? y[1] : '·'}</span><span class="grow"><b>${esc(p.name)}</b><small>${y ? y[2] + " aujourd'hui" : 'Pas encore d\'humeur aujourd\'hui'}</small></span>
         <span class="examt"><b>${s.week ? '💧 ' + s.week : '—'}</b><small>pioune / sem.</small></span></div>`;
     }).join('')}</div>`;
+    if (!others.length) h = h.replace('<div class="card exlist"></div>', '');
+    if (hidden.length) h += `<p class="hint" style="margin:10px 4px 30px">🔒 ${hidden.map(p => esc(p.name)).join(', ')} ${hidden.length > 1 ? 'gardent' : 'garde'} son humeur privée. Pour la partager, il faut activer « Visible par la maison » sur son téléphone.</p>`;
   }
   return h;
 }
@@ -4653,7 +4658,7 @@ document.addEventListener('click', e => {
 
 // ================== Mise à jour automatique ==================
 // L'iPhone garde souvent l'ancienne page en mémoire : on vérifie s'il existe une version plus récente et on recharge.
-const APP_VERSION = '20 nov. 15 h 30';
+const APP_VERSION = '20 nov. 15 h 40';
 let updChecking = false, updLast = 0;
 async function checkUpdate() {
   if (updChecking || Date.now() - updLast < 60 * 1000 || !navigator.onLine) return;
