@@ -545,6 +545,22 @@
   .linkrow{display:flex;gap:8px;align-items:stretch}.linkrow .field{flex:1;min-width:0}
   .pastebtn{flex:none;border:0;border-radius:14px;padding:0 14px;font-weight:600;font-size:15px;background:color-mix(in srgb, var(--accent) 14%, var(--card));color:var(--accent)}
   .linkok{font-size:13px;color:var(--accent);margin-top:6px}.linkok:empty{display:none}
+  .mtitle{text-align:center;font-size:17px;margin-bottom:4px}
+  .mwheel{display:block;width:100%;max-width:320px;margin:0 auto;touch-action:manipulation}
+  .mwseg{cursor:pointer;transition:transform .18s}.mwseg path{stroke:var(--card);stroke-width:2.5}
+  .mwlab{font-size:9.5px;font-weight:700;fill:rgba(31,27,22,.72);pointer-events:none}.mwseg.on .mwlab{fill:#fff}.mwseg text{pointer-events:none}
+  .mwhub{fill:var(--card);stroke:var(--line)}.mwhubt{fill:var(--muted);font-weight:600}
+  .m7{display:flex;justify-content:space-between;margin:16px 0 12px;padding:0 2px}
+  .m7d{display:flex;flex-direction:column;align-items:center;gap:2px;width:13%;position:relative}
+  .m7d i{font-style:normal;font-size:22px;height:28px;display:grid;place-items:center}.m7d small{color:var(--muted);font-size:11px;text-transform:uppercase}
+  .m7d.today small{color:var(--accent);font-weight:700}.m7d b{font-size:10px;position:absolute;top:-6px;right:-2px}
+  .mcard .pdstats,.pcard .pdstats{margin:0 -16px}.mcard .pdstats:last-child,.pcard .pdstats:last-child{margin-bottom:-16px}
+  .pchead b{display:block;font-size:17px}.pchead small{color:var(--muted);font-size:13px}
+  .pcrow{display:flex;align-items:center;gap:12px;margin:16px 0}
+  .pcminus{width:48px;height:48px;border-radius:14px;border:0;font-size:24px;background:color-mix(in srgb, var(--ink) 8%, transparent);color:var(--ink)}.pcminus:disabled{opacity:.35}
+  .pcnum{flex:1;display:flex;flex-direction:column;align-items:center}.pcnum b{font-size:36px;line-height:1;color:#4A7FCC}.pcnum small{color:var(--muted);font-size:12px}
+  .pcplus{border:0;border-radius:16px;padding:14px 16px;font-weight:700;font-size:16px;color:#fff;background:#4A7FCC}
+  .mshare{margin-top:0}
   .pdhome .bdic{background:color-mix(in srgb, #D6455D 14%, var(--card))}
   .seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
   .swatches{display:flex;flex-wrap:wrap;gap:10px}
@@ -1415,6 +1431,7 @@ function subscribe() {
         id: d.id, name: str(v.name, "Quelqu'un"), removed: v.removed === true, hue: typeof v.hue === 'number' ? v.hue : null,
         avatar: typeof v.avatar === 'string' ? clipIcon(v.avatar) : '',
         cycles: cleanTrackers(v.cycles),
+        mood: v.mood && v.mood.shared ? cleanMood(v.mood) : null,
         budget: v.budget && typeof v.budget === 'object' && Number(v.budget.salary) > 0 ? { salary: Math.round(Number(v.budget.salary)), payday: Math.min(31, Math.max(1, Number(v.budget.payday) || 1)) } : null,
         devices: devs.map(([k, x]) => ({ id: k, label: str(x && x.label, 'Appareil'), lastSeen: Number(x && x.lastSeen) || 0 }))
                      .sort((a, b) => b.lastSeen - a.lastSeen)
@@ -2603,6 +2620,14 @@ function render() {
     body.innerHTML = `<div class="${anim}">${renderBudget()}</div>`;
     composer.hidden = true;
     renderedKey = 'budget';
+    return;
+  }
+  if (state.tab === 'humeur') {
+    const anim = state.anim ? 'anim-' + state.anim : ''; state.anim = null;
+    screen.innerHTML = `<div class="${anim}">${pageHead('Humeur', 'Comment ça va, vraiment&nbsp;?')}</div>`;
+    body.innerHTML = `<div class="${anim}">${renderHumeur()}</div>`;
+    composer.hidden = true;
+    renderedKey = 'humeur';
     return;
   }
   if (state.tab === 'regles') {
@@ -4040,6 +4065,120 @@ document.addEventListener('submit', e => {
   }
 }, true);
 
+// ================== Humeur : roue des humeurs + compteur de pioune ==================
+// Mes données : users/{moi}.moodData = { e:{ymd:clé}, c:{ymd:nombre}, shared:bool }
+// Si partagé : copie dans members/{moi}.mood (lisible par la maison), comme le salaire.
+const MOODS = [
+  ['super', '😄', 'Super', 5, '#F2B01E'], ['bien', '🙂', 'Bien', 4, '#7CC36B'], ['calme', '😌', 'Calme', 4, '#5BB8C9'],
+  ['amour', '🥰', 'Amoureux·se', 5, '#EE7FA8'], ['bof', '😐', 'Bof', 3, '#B4A99B'], ['fatigue', '😴', 'Fatigué·e', 2, '#9A8FD1'],
+  ['stress', '😟', 'Stressé·e', 2, '#E8935A'], ['triste', '😢', 'Triste', 1, '#5C8FD6'], ['colere', '😠', 'En colère', 1, '#D9534F']
+];
+const moodOf = k => MOODS.find(m => m[0] === k);
+function cleanMood(v) {
+  const o = v && typeof v === 'object' ? v : {};
+  const e = {}, c = {};
+  if (o.e && typeof o.e === 'object') for (const [k, x] of Object.entries(o.e)) if (isYmd(k) && moodOf(x)) e[k] = x;
+  if (o.c && typeof o.c === 'object') for (const [k, x] of Object.entries(o.c)) { const n = Math.round(Number(x)); if (isYmd(k) && n > 0 && n < 100) c[k] = n; }
+  return { e, c, shared: o.shared === true };
+}
+const myMood = () => cleanMood(state.profile?.moodData);
+function saveMood(m) {
+  // on ne garde que ~13 mois
+  const cut = addDays(todayYmd(), -400);
+  for (const k of Object.keys(m.e)) if (k < cut) delete m.e[k];
+  for (const k of Object.keys(m.c)) if (k < cut) delete m.c[k];
+  if (state.profile) state.profile.moodData = m;
+  fire(updateDoc(userRef(), { moodData: m }));
+  fire(updateDoc(ref('members', meId), { mood: m.shared ? { e: m.e, c: m.c, shared: true } : deleteField() }));
+  renderedKey = ''; render();
+}
+// Début de semaine (lundi) et de mois
+const weekStart = d => { const x = fromYmd(d); x.setDate(x.getDate() - (x.getDay() + 6) % 7); return ymd(x); };
+const monthStart = d => d.slice(0, 8) + '01';
+function moodStats(m) {
+  const today = todayYmd(), ws = weekStart(today), ms = monthStart(today);
+  const days = Object.keys(m.c).sort();
+  const sumFrom = from => Object.entries(m.c).reduce((t, [k, n]) => t + (k >= from && k <= today ? n : 0), 0);
+  const week = sumFrom(ws), month = sumFrom(ms), total = sumFrom('0000');
+  // moyennes depuis le premier jour enregistré (au moins 1 semaine / 1 mois)
+  const first = days[0] || today;
+  const nDays = dayDiff(first, today) + 1;
+  const perWeek = total / Math.max(1, nDays / 7), perMonth = total / Math.max(1, nDays / 30.44);
+  const score = from => { const v = Object.entries(m.e).filter(([k]) => k >= from && k <= today).map(([, x]) => moodOf(x)[3]); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : 0; };
+  return { today: m.e[today] || null, cryToday: m.c[today] || 0, week, month, perWeek, perMonth, hasCry: total > 0, wScore: score(ws), mScore: score(ms) };
+}
+const scoreFace = s => !s ? '—' : s >= 4.5 ? '😄' : s >= 3.5 ? '🙂' : s >= 2.5 ? '😐' : s >= 1.5 ? '😟' : '😢';
+const fmt1 = n => (Math.round(n * 10) / 10).toLocaleString('fr-FR');
+// La roue (SVG) : 9 parts, l'humeur choisie ressort
+function moodWheel(sel) {
+  const N = MOODS.length, R = 140, r0 = 48, cx = 150, cy = 150;
+  const pt = (a, rr) => [cx + rr * Math.cos(a), cy + rr * Math.sin(a)];
+  let g = '';
+  MOODS.forEach(([k, emo, label, , col], i) => {
+    const a0 = -Math.PI / 2 + (i - .5) * 2 * Math.PI / N, a1 = a0 + 2 * Math.PI / N, am = (a0 + a1) / 2;
+    const on = k === sel, off = on ? 8 : 0, dx = off * Math.cos(am), dy = off * Math.sin(am);
+    const [x0, y0] = pt(a0, R), [x1, y1] = pt(a1, R), [x2, y2] = pt(a1, r0), [x3, y3] = pt(a0, r0);
+    const [ex, ey0] = pt(am, (R + r0) / 2 + 4), ey = ey0 - 8, lx = ex, ly = ey0 + 17;
+    g += `<g class="mwseg ${on ? 'on' : ''}" data-mood="${k}" transform="translate(${dx.toFixed(1)} ${dy.toFixed(1)})">
+      <path d="M${x0.toFixed(1)} ${y0.toFixed(1)} A${R} ${R} 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)} L${x2.toFixed(1)} ${y2.toFixed(1)} A${r0} ${r0} 0 0 0 ${x3.toFixed(1)} ${y3.toFixed(1)}Z" fill="${col}" fill-opacity="${sel && !on ? .35 : .9}"/>
+      <text x="${ex.toFixed(1)}" y="${ey.toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-size="${on ? 30 : 24}">${emo}</text>
+      <text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" dominant-baseline="middle" class="mwlab">${label === 'Amoureux·se' ? 'Amour' : label.replace('·e', '')}</text></g>`;
+  });
+  const m = moodOf(sel);
+  g += `<circle cx="${cx}" cy="${cy}" r="${r0 - 4}" class="mwhub"/><text x="${cx}" y="${cy + 2}" text-anchor="middle" dominant-baseline="middle" font-size="${m ? 40 : 15}" class="mwhubt">${m ? m[1] : 'Choisis'}</text>`;
+  return `<svg class="mwheel" viewBox="0 0 300 300" role="group" aria-label="Roue des humeurs">${g}</svg>`;
+}
+function last7(m) {
+  const today = todayYmd(), out = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = addDays(today, -i), x = moodOf(m.e[d]);
+    out.push(`<span class="m7d ${d === today ? 'today' : ''}"><i>${x ? x[1] : '·'}</i><small>${fromYmd(d).toLocaleDateString('fr-FR', { weekday: 'narrow' })}</small>${m.c[d] ? `<b>💧${m.c[d] > 1 ? m.c[d] : ''}</b>` : ''}</span>`);
+  }
+  return `<div class="m7">${out.join('')}</div>`;
+}
+function moodTileText() {
+  const m = myMood(), x = moodOf(m.e[todayYmd()]);
+  return x ? `${x[1]} ${x[2]} aujourd'hui` : 'Comment tu te sens ?';
+}
+function renderHumeur() {
+  const m = myMood(), st = moodStats(m), x = moodOf(st.today);
+  let h = `<section class="card pad sec mcard">
+    <div class="mtitle">${x ? `Aujourd'hui : <b style="color:${x[4]}">${x[1]} ${x[2]}</b>` : 'Comment tu te sens aujourd\'hui ?'}</div>
+    ${moodWheel(st.today)}
+    <p class="hint" style="text-align:center;margin:4px 0 0">Touche une humeur. Tu peux la changer dans la journée.</p>
+    ${last7(m)}
+    <div class="pdstats"><span><b>${scoreFace(st.wScore)}</b><small>cette semaine</small></span><span><b>${scoreFace(st.mScore)}</b><small>ce mois-ci</small></span></div>
+  </section>
+  <section class="card pad sec pcard">
+    <div class="pchead"><span class="grow"><b>Compteur de pioune 😭</b><small>Pas de honte, ça fait du bien de savoir.</small></span></div>
+    <div class="pcrow"><button type="button" class="pcminus" data-cry="-1" ${st.cryToday ? '' : 'disabled'} aria-label="Retirer">−</button>
+      <div class="pcnum"><b>${st.cryToday}</b><small>aujourd'hui</small></div>
+      <button type="button" class="pcplus" data-cry="1">＋ 1 pioune</button></div>
+    <div class="pdstats"><span><b>${st.week}</b><small>cette semaine</small></span><span><b>${st.month}</b><small>ce mois-ci</small></span></div>
+    ${st.hasCry ? `<div class="pdstats"><span><b>${fmt1(st.perWeek)}</b><small>en moyenne / semaine</small></span><span><b>${fmt1(st.perMonth)}</b><small>en moyenne / mois</small></span></div>` : ''}
+  </section>
+  <label class="switch card pad sec mshare"><input type="checkbox" data-mood-share ${m.shared ? 'checked' : ''}><span class="sw"></span><span>Visible par la maison<br><small class="muted">${m.shared ? 'Toute la maison voit ton humeur et ton compteur.' : 'Pour l\'instant, toi seul·e vois tout ça.'}</small></span></label>`;
+  // Ceux qui partagent dans la maison
+  const others = houseMembers().filter(p => p.id !== meId && p.mood);
+  if (others.length) {
+    h += `<div class="grp-h soft dh" style="margin-top:22px">Dans la maison</div><div class="card exlist">${others.map(p => {
+      const s = moodStats(p.mood), y = moodOf(s.today);
+      return `<div class="exrow"><span class="exic">${y ? y[1] : '·'}</span><span class="grow"><b>${esc(p.name)}</b><small>${y ? y[2] + " aujourd'hui" : 'Pas encore d\'humeur aujourd\'hui'}</small></span>
+        <span class="examt"><b>${s.week ? '💧 ' + s.week : '—'}</b><small>pioune / sem.</small></span></div>`;
+    }).join('')}</div>`;
+  }
+  return h;
+}
+document.addEventListener('click', e => {
+  const seg = e.target.closest('[data-mood]');
+  if (seg && state.tab === 'humeur') { const m = myMood(); m.e[todayYmd()] = seg.dataset.mood; navigator.vibrate?.(10); saveMood(m); return; }
+  const cr = e.target.closest('[data-cry]');
+  if (cr) { const m = myMood(), d = todayYmd(); const n = Math.max(0, (m.c[d] || 0) + Number(cr.dataset.cry)); if (n) m.c[d] = n; else delete m.c[d]; navigator.vibrate?.(10); saveMood(m); }
+});
+document.addEventListener('change', e => {
+  if (e.target.matches('[data-mood-share]')) { const m = myMood(); m.shared = e.target.checked; saveMood(m); toast(m.shared ? 'Ton humeur est partagée avec la maison.' : 'Ton humeur est redevenue privée.'); }
+});
+
 // ================== Règles : suivi des cycles (privé ou partagé avec la maison) ==================
 // Un suivi = { id, name, periods:[{ id, start, end|null, flow, days:{ymd:flow} }] }
 // Privé : dans le profil (users/{moi}.cycles) — Partagé : dans la fiche membre de la maison (members/{auteur}.cycles), modifiable par tous.
@@ -4292,7 +4431,7 @@ const HELP = [
   ['🏠', "L'accueil", [
     "En haut : le jour, ce qui est prévu, la météo et les anniversaires.",
     "⭐ Mes favoris : tes listes préférées en un toucher (touche ☆ sur une liste, page Listes).",
-    "Les pages (Listes, Calendrier, Bento, Dépenses, Règles) : touche une page pour l'ouvrir."]],
+    "Les pages (Listes, Calendrier, Bento, Dépenses, Humeur, Règles) : touche une page pour l'ouvrir."]],
   ['＋', 'Ajout rapide', [
     "Sur l'accueil, le bouton vert « Ajout rapide ».",
     "Choisis la liste et la catégorie, tape le nom, colle un lien si tu veux, puis Ajouter.",
@@ -4327,6 +4466,11 @@ const HELP = [
     "＋ Charge : loyer, abonnements… par semaine, mois ou année.",
     "Une charge partagée est divisée à parts égales entre les personnes choisies.",
     "Tu vois ce qu'il te reste chaque mois."]],
+  ['🌈', 'Humeur', [
+    "Sur l'accueil, la page Humeur. Touche la roue pour dire comment tu te sens aujourd'hui.",
+    "Compteur de pioune : ＋ 1 à chaque fois que tu pleures (− pour corriger).",
+    "Tu vois ta semaine, ta moyenne par semaine et par mois.",
+    "Privé par défaut ; « Visible par la maison » pour que les autres voient ton humeur et ton compteur."]],
   ['🩸', 'Règles', [
     "Sur l'accueil, la page Règles. Crée un suivi pour toi ou pour quelqu'un d'autre.",
     "« Enregistrer les nouvelles règles » avec le flux, puis « Fin des règles ».",
@@ -4507,7 +4651,7 @@ document.addEventListener('click', e => {
 
 // ================== Mise à jour automatique ==================
 // L'iPhone garde souvent l'ancienne page en mémoire : on vérifie s'il existe une version plus récente et on recharge.
-const APP_VERSION = '20 nov. 15 h 00';
+const APP_VERSION = '20 nov. 15 h 20';
 let updChecking = false, updLast = 0;
 async function checkUpdate() {
   if (updChecking || Date.now() - updLast < 60 * 1000 || !navigator.onLine) return;
@@ -4612,7 +4756,8 @@ function renderDashboard() {
     ${tile('cal', '📅', 'Calendrier', evToday ? `${evToday} aujourd'hui` : evNext ? esc(`${relDay(evNext._on)} · ${evNext.title}`) : 'Rien de prévu', 0, 25)}
     ${tile('notes', '💬', 'Bento', lastPost ? esc(`${lastPost.byName || ''} : ${lastPost.text || (lastPost.audioId ? '🎤 vocal' : '📷 photo')}`) : 'Écris le premier mot', unreadN, 265)}
     ${tile('budget', '💶', 'Dépenses', budgetTileText(), 0, 45)}
-    ${tile('regles', '🩸', 'Règles', reglesTileText(), 0, 350).replace('class="dtile"', 'class="dtile wide"')}
+    ${tile('humeur', '🌈', 'Humeur', moodTileText(), 0, 200)}
+    ${tile('regles', '🩸', 'Règles', reglesTileText(), 0, 350)}
   </div>`;
 
   return h;
