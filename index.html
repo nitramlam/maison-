@@ -802,6 +802,16 @@
   .avrow .iconbox{width:62px}
   .avhint{font-size:12.5px;line-height:1.3}
   .fbbtn{font-size:19px}
+  .helpbtn{font-size:17px;padding-left:4px;padding-right:4px}
+  .helpsearch{margin-bottom:12px}
+  .helplist{display:flex;flex-direction:column;gap:8px}
+  .helpitem{background:color-mix(in srgb, var(--ink) 4%, var(--card));border-radius:16px;overflow:hidden}
+  .helpitem summary{list-style:none;display:flex;align-items:center;gap:12px;padding:13px 14px;cursor:pointer}
+  .helpitem summary::-webkit-details-marker{display:none}
+  .helpitem summary b{flex:1;font-size:16px}
+  .helpitem .hic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:18px;background:var(--card);flex:none}
+  .helpitem .chev{transition:transform .2s;color:var(--muted)}.helpitem[open] .chev{transform:rotate(90deg)}
+  .helpitem ul{margin:0;padding:0 16px 14px 34px;display:flex;flex-direction:column;gap:7px;font-size:14.5px;line-height:1.4}
   .fbseg{margin-bottom:4px}
   .fbitem{padding:12px 14px}
   .fbitem + .fbitem{border-top:1px solid var(--line)}
@@ -4277,6 +4287,91 @@ document.addEventListener('submit', e => {
   }
 }, true);
 
+// ================== Mode d'emploi ==================
+const HELP = [
+  ['🏠', "L'accueil", [
+    "En haut : le jour, ce qui est prévu, la météo et les anniversaires.",
+    "⭐ Mes favoris : tes listes préférées en un toucher (touche ☆ sur une liste, page Listes).",
+    "Les pages (Listes, Calendrier, Bento, Dépenses, Règles) : touche une page pour l'ouvrir."]],
+  ['＋', 'Ajout rapide', [
+    "Sur l'accueil, le bouton vert « Ajout rapide ».",
+    "Choisis la liste et la catégorie, tape le nom, colle un lien si tu veux, puis Ajouter.",
+    "La dernière liste et catégorie utilisées sont retenues pour la fois suivante."]],
+  ['📝', 'Listes', [
+    "＋ Ajouter dans une catégorie pour y mettre un élément directement.",
+    "Touche un élément pour le modifier (nom, quantité, lien, photo, ❗ Important, pour qui).",
+    "Appui long sur un élément : mode sélection pour en déplacer, cocher ou supprimer plusieurs.",
+    "Touche le nom d'une catégorie en haut pour y sauter. Les plus remplies passent en premier.",
+    "Option « 🛒 Liste de courses » (quand tu modifies la liste) : un toucher coche ou décoche."]],
+  ['🎬', 'Liens et vidéos', [
+    "Dans TikTok, YouTube ou Instagram : Partager → Copier le lien.",
+    "Dans Maison : bouton 📋 Coller à côté du champ Lien (ou Ajout rapide sur l'accueil).",
+    "Une miniature apparaît dans la liste ; touche-la pour ouvrir la vidéo.",
+    "Pas de miniature ? Ajoute une capture d'écran en photo, elle servira d'image."]],
+  ['📅', 'Calendrier', [
+    "Touche un jour, puis « ＋ Ajouter un événement ».",
+    "« Jusqu'au » pour un événement sur plusieurs jours (vacances, week-end…).",
+    "« Répéter » : chaque semaine, chaque mois ou chaque année.",
+    "Les événements de plus de 2 mois sont effacés automatiquement (sauf ceux qui se répètent)."]],
+  ['🎂', 'Anniversaires', [
+    "Sur l'accueil, touche le bandeau Anniversaires.",
+    "Ajoute un prénom et une date de naissance (année facultative).",
+    "Le jour J, l'accueil l'affiche avec l'âge ; sinon il montre le prochain."]],
+  ['💬', 'Bento', [
+    "Le mur de la maison : un mot, une photo ou un message vocal (60 s max).",
+    "👤 Identifier pour prévenir quelqu'un : il le voit sur son accueil.",
+    "☺＋ sous un message pour réagir (👍❤️😂…) ; ⋯ pour répondre, épingler, modifier ou supprimer.",
+    "On peut répondre avec une photo."]],
+  ['💶', 'Dépenses', [
+    "Ajoute ton salaire : il reste privé, sauf si tu actives « Visible par la maison ».",
+    "＋ Charge : loyer, abonnements… par semaine, mois ou année.",
+    "Une charge partagée est divisée à parts égales entre les personnes choisies.",
+    "Tu vois ce qu'il te reste chaque mois."]],
+  ['🩸', 'Règles', [
+    "Sur l'accueil, la page Règles. Crée un suivi pour toi ou pour quelqu'un d'autre.",
+    "« Enregistrer les nouvelles règles » avec le flux, puis « Fin des règles ».",
+    "Après 2 règles, l'app prévoit les prochaines (avec une fourchette).",
+    "Privé par défaut. Partagé : toute la maison le voit et le rappel s'affiche sur l'accueil.",
+    "Touche une ligne de l'historique pour modifier ou supprimer."]],
+  ['🌤️', 'Météo', [
+    "Touche la case Météo pour choisir ta ville et ajouter des favoris.",
+    "Chacun a ses propres villes."]],
+  ['👥', 'La maison et les membres', [
+    "Touche les ronds en haut à droite pour voir les membres et le code de la maison.",
+    "Pour inviter : donne le code, la personne choisit « Rejoindre une maison ».",
+    "Les admins peuvent nommer d'autres admins, retirer quelqu'un ou changer le code.",
+    "Réglages ⚙️ : ton nom, ton rond (une lettre ou un émoji), thème clair ou sombre, changer de maison."]],
+  ['📱', 'Sur iPhone', [
+    "Installer : dans Safari, Partager → « Sur l'écran d'accueil ».",
+    "Mises à jour : automatiques à l'ouverture. Sinon, ferme l'app complètement et rouvre-la.",
+    "Micro ou position refusés : Réglages de l'iPhone → Safari → Micro / Position → Autoriser."]],
+  ['💡', 'Une idée, un bug ?', [
+    "Touche 💡 en haut : ton message est envoyé directement, sans quitter l'app."]]
+];
+function openHelp() {
+  openSheet(`<h3>Mode d'emploi</h3>
+    <input class="field helpsearch" type="search" placeholder="Rechercher (ex. vidéo, code, vocal…)" data-help-search autocomplete="off">
+    <div class="helplist">${HELP.map(([ic, t, lines], i) => `<details class="helpitem" data-help-item>
+      <summary><span class="hic">${ic}</span><b>${esc(t)}</b><span class="chev">${ICON.chev}</span></summary>
+      <ul>${lines.map(l => `<li>${esc(l)}</li>`).join('')}</ul></details>`).join('')}</div>
+    <p class="hint helpnone" hidden>Rien trouvé. Essaie un autre mot, ou demande via 💡.</p>
+    <p class="hint" style="text-align:center;margin-top:14px">Version ${esc(APP_VERSION)}</p>`);
+  sheetKind = 'help';
+}
+const fold = t => String(t).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+document.addEventListener('click', e => { if (e.target.closest('[data-help]')) openHelp(); });
+document.addEventListener('input', e => {
+  if (!e.target.matches('[data-help-search]')) return;
+  const q = fold(e.target.value.trim());
+  let n = 0;
+  sheet.querySelectorAll('[data-help-item]').forEach(d => {
+    const ok = !q || fold(d.textContent).includes(q);
+    d.hidden = !ok; if (ok) n++;
+    d.open = !!q && ok;
+  });
+  const none = sheet.querySelector('.helpnone'); if (none) none.hidden = n > 0;
+});
+
 // ================== Ajout rapide (depuis l'accueil) ==================
 function qaSecOptions(listId, sel) {
   return `<option value="">Sans catégorie</option>` + sectionsOf(listId).map(x => `<option value="${esc(x.id)}" ${x.id === sel ? 'selected' : ''}>${esc((x.emoji ? x.emoji + ' ' : '') + x.name)}</option>`).join('');
@@ -4412,7 +4507,7 @@ document.addEventListener('click', e => {
 
 // ================== Mise à jour automatique ==================
 // L'iPhone garde souvent l'ancienne page en mémoire : on vérifie s'il existe une version plus récente et on recharge.
-const APP_VERSION = '20 nov. 14 h 50';
+const APP_VERSION = '20 nov. 15 h 00';
 let updChecking = false, updLast = 0;
 async function checkUpdate() {
   if (updChecking || Date.now() - updLast < 60 * 1000 || !navigator.onLine) return;
@@ -4480,6 +4575,7 @@ function renderDashboard() {
       <button class="housebtn" data-action="houses" aria-label="Mes maisons"><h1>${esc(state.house?.name || 'Maison')}</h1><span class="caret">${ICON.down}</span></button>
       ${state.loading ? '<p class="sub">Chargement…</p>' : ''}</div>
       <div class="btns">
+        <button class="iconbtn fbbtn helpbtn" data-help aria-label="Mode d'emploi">❓</button>
         <button class="iconbtn fbbtn" data-feedback aria-label="Donner ton avis">💡</button>
         <button class="iconbtn members-btn" data-action="members" aria-label="Membres">${avatarStack()}</button>
         <button class="iconbtn" data-action="settings" aria-label="Réglages">${ICON.gear}</button>
@@ -4542,6 +4638,7 @@ function pageHead(title, sub) {
       <div class="hello">${esc(state.house?.name || 'Maison')}</div>
       <h1>${title}</h1>${sub ? `<p class="sub">${sub}</p>` : ''}</div>
       <div class="btns">
+        <button class="iconbtn fbbtn helpbtn" data-help aria-label="Mode d'emploi">❓</button>
         <button class="iconbtn fbbtn" data-feedback aria-label="Donner ton avis">💡</button>
         <button class="iconbtn members-btn" data-action="members" aria-label="Membres">${avatarStack()}</button>
         <button class="iconbtn" data-action="settings" aria-label="Réglages">${ICON.gear}</button>
