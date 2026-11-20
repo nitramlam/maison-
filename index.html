@@ -537,6 +537,11 @@
   .fd{width:9px;height:9px;border-radius:50%;display:block}.fd.petit{background:#F1B3BE}.fd.moyen{background:#D6455D}.fd.fort{background:#8E1A30}
   .stepper{display:flex;align-items:center;gap:8px}.stepper button{width:46px;height:46px;border-radius:14px;border:0;font-size:22px;background:color-mix(in srgb, var(--ink) 8%, transparent);color:var(--ink)}
   .stepper .field{width:70px;text-align:center}.stepper span{color:var(--muted)}
+  .qabtn{display:flex;align-items:center;gap:12px;width:100%;border:0;text-align:left;padding:14px 16px;border-radius:20px;color:#fff;
+    background:linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 70%, #000));box-shadow:0 6px 18px color-mix(in srgb, var(--accent) 30%, transparent)}
+  .qabtn b{display:block;font-size:17px}.qabtn small{opacity:.85;font-size:13px}
+  .qaplus{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.2);display:grid;place-items:center;font-size:24px;font-weight:700;flex:none}
+  .qaclip{font-size:20px;opacity:.9}
   .linkrow{display:flex;gap:8px;align-items:stretch}.linkrow .field{flex:1;min-width:0}
   .pastebtn{flex:none;border:0;border-radius:14px;padding:0 14px;font-weight:600;font-size:15px;background:color-mix(in srgb, var(--accent) 14%, var(--card));color:var(--accent)}
   .linkok{font-size:13px;color:var(--accent);margin-top:6px}.linkok:empty{display:none}
@@ -4272,6 +4277,55 @@ document.addEventListener('submit', e => {
   }
 }, true);
 
+// ================== Ajout rapide (depuis l'accueil) ==================
+function qaSecOptions(listId, sel) {
+  return `<option value="">Sans catégorie</option>` + sectionsOf(listId).map(x => `<option value="${esc(x.id)}" ${x.id === sel ? 'selected' : ''}>${esc((x.emoji ? x.emoji + ' ' : '') + x.name)}</option>`).join('');
+}
+function openQuickAdd() {
+  let last = {}; try { last = JSON.parse(store.get('maison.qa.' + state.code) || '{}') || {}; } catch (_) {}
+  const listId = state.lists.some(l => l.id === last.l) ? last.l : (state.lists.find(l => homePrefs().fav.includes(l.id)) || state.lists[0])?.id;
+  if (!listId) return;
+  openSheet(`<h3>Ajout rapide</h3>
+    <form data-form="quickadd" autocomplete="off">
+      <div class="addrow2">
+        <div><div class="label">Liste</div><select class="field" name="qa_list">${state.lists.map(l => `<option value="${esc(l.id)}" ${l.id === listId ? 'selected' : ''}>${esc(iconOf(l.emoji, l.name) + ' ' + l.name)}</option>`).join('')}</select></div>
+        <div><div class="label">Catégorie</div><select class="field" name="qa_sec">${qaSecOptions(listId, last.l === listId ? last.s : '')}</select></div>
+      </div>
+      <div class="label">Nom</div>
+      <input class="field" name="q_name" maxlength="200" placeholder="ex. Pâtes au pesto, Lampe salon…" autocomplete="off" enterkeyhint="done">
+      <div class="label">Lien <span class="muted">(facultatif)</span></div>
+      <div class="linkrow"><input class="field" name="q_link" type="text" inputmode="url" maxlength="500" placeholder="Colle un lien ici" autocomplete="off" autocapitalize="off" enterkeyhint="done"><button type="button" class="pastebtn" data-paste-link>📋 Coller</button></div>
+      <div class="linkok" data-link-ok></div>
+      ${actions('Ajouter')}
+    </form>`);
+  sheetKind = 'quickadd';
+  sheet.querySelector('[name="q_name"]')?.focus();
+}
+document.addEventListener('click', e => { if (e.target.closest('[data-quick-add]')) openQuickAdd(); });
+document.addEventListener('change', e => {
+  if (sheetKind === 'quickadd' && e.target.name === 'qa_list') sheet.querySelector('[name="qa_sec"]').innerHTML = qaSecOptions(e.target.value, '');
+});
+document.addEventListener('submit', e => {
+  const f = e.target;
+  if (f.dataset.form !== 'quickadd') return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  const nm = f.querySelector('[name="q_name"]'), linkRaw = f.querySelector('[name="q_link"]').value;
+  const link = normLink(linkRaw);
+  let title = (nm.value || '').trim().slice(0, 200);
+  if (!title && link) title = linkKind(link).replace(/^\S+\s/, '');   // pas de nom : « Vidéo TikTok »
+  if (!title) { nm.classList.add('err'); nm.focus(); return; }
+  const listId = f.querySelector('[name="qa_list"]').value, sectionId = f.querySelector('[name="qa_sec"]').value || null;
+  const l = state.lists.find(x => x.id === listId); if (!l) return;
+  store.set('maison.qa.' + state.code, JSON.stringify({ l: listId, s: sectionId || '' }));
+  fire(setDoc(doc(col('items')), { listId, sectionId, title, done: false, createdAt: Date.now(), order: Date.now(),
+    qty: '', note: '', emoji: autoEmoji(title) || null, important: false, link, photoId: null,
+    byName: state.myName, by: meId, assignees: [], assignedAt: 0, assignedBy: '' }));
+  const secName = sectionId ? state.sections.find(x => x.id === sectionId)?.name : '';
+  closeSheet();
+  navigator.vibrate?.(12);
+  toast(`✓ « ${title} » ajouté dans ${l.name}${secName ? ' › ' + secName : ''}`);
+}, true);
+
 // ================== Bouton « Coller le lien » ==================
 // TikTok copie souvent « texte + lien » : on garde seulement le lien
 const firstUrl = t => (String(t || '').match(/https?:\/\/[^\s<>"']+/i) || [])[0] || '';
@@ -4358,7 +4412,7 @@ document.addEventListener('click', e => {
 
 // ================== Mise à jour automatique ==================
 // L'iPhone garde souvent l'ancienne page en mémoire : on vérifie s'il existe une version plus récente et on recharge.
-const APP_VERSION = '20 nov. 14 h 40';
+const APP_VERSION = '20 nov. 14 h 50';
 let updChecking = false, updLast = 0;
 async function checkUpdate() {
   if (updChecking || Date.now() - updLast < 60 * 1000 || !navigator.onLine) return;
@@ -4434,6 +4488,7 @@ function renderDashboard() {
   if (state.loading) return h;
   h += notifCards(false);
   h += todayWidget();
+  if (state.lists.length) h += `<button type="button" class="qabtn sec" data-quick-add><span class="qaplus">＋</span><span class="grow"><b>Ajout rapide</b><small>Une idée, une vidéo, un truc à acheter…</small></span><span class="qaclip">📋</span></button>`;
 
   // Raccourcis vers les listes favorites (au-dessus des grandes cases)
   const favs = new Set(homePrefs().fav);
