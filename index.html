@@ -1040,7 +1040,8 @@ import { firebaseConfig } from './firebase-config.js';
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
 import {
   getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-  sendPasswordResetEmail, signOut, updateProfile
+  sendPasswordResetEmail, signOut, updateProfile,
+  verifyBeforeUpdateEmail, reauthenticateWithCredential, EmailAuthProvider
 } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
 import {
   initializeFirestore, getFirestore, persistentLocalCache, persistentMultipleTabManager,
@@ -1258,7 +1259,8 @@ function touchUser(force) {
   const now = Date.now();
   if (!force && now - lastTouchUser < 10 * 60 * 1000) return;
   lastTouchUser = now;
-  fire(updateDoc(userRef(), { [`devices.${deviceId}`]: { label: deviceLabel(), lastSeen: now }, lastSeen: now }));
+  const em = auth?.currentUser?.email || '';
+  fire(updateDoc(userRef(), { [`devices.${deviceId}`]: { label: deviceLabel(), lastSeen: now }, lastSeen: now, ...(em && em !== state.profile?.email ? { email: em } : {}) }));
 }
 function touchMember(force) {
   if (!db || !state.code || !meId || !state.myName) return;
@@ -1718,7 +1720,9 @@ const AUTH_ERRORS = {
   'auth/user-disabled': 'Ce compte a été désactivé.',
   'auth/too-many-requests': 'Trop de tentatives. Réessaie dans quelques minutes.',
   'auth/network-request-failed': 'Pas de connexion internet.',
-  'auth/operation-not-allowed': "La connexion par e-mail n'est pas encore activée dans Firebase."
+  'auth/operation-not-allowed': "La connexion par e-mail n'est pas encore activée dans Firebase.",
+  'auth/requires-recent-login': 'Par sécurité, déconnecte-toi puis reconnecte-toi, et réessaie.',
+  'auth/missing-new-email': 'Écris ta nouvelle adresse e-mail.'
 };
 const authError = e => AUTH_ERRORS[e && e.code] || "Ça n'a pas marché, réessaie.";
 
@@ -2913,6 +2917,7 @@ function openSettingsSheet() {
       <button type="button" class="btn ghost" data-reset-pw>Changer de mot de passe</button>
       <button type="button" class="btn ghost" data-logout>Se déconnecter</button>
     </div>
+    <button type="button" class="btn ghost full" data-change-email style="margin-top:10px">✉️ Changer d'adresse e-mail</button>
     <div class="sep" style="margin-bottom:16px"></div>
     <button type="button" class="btn danger full" data-leave>Quitter cette maison</button>
     <p class="hint" style="text-align:center">${amAdmin() && houseAdmins().length === 1 ? ((state.house?.members || []).length > 1 ? "Tu es l'administrateur : tu choisiras qui reprend les droits." : 'Tu es seul : la maison sera supprimée.') : 'Les listes restent pour les autres. Tu pourras revenir avec le code de la maison.'}</p>`);
@@ -4433,6 +4438,49 @@ document.addEventListener('submit', e => {
   }
 }, true);
 
+// ================== Changer d'adresse e-mail ==================
+// Firebase envoie un lien à la nouvelle adresse : l'adresse ne change qu'après le clic.
+function openEmailSheet() {
+  openSheet(`<h3>Changer d'adresse e-mail</h3>
+    <p class="hint" style="margin-top:-4px">Adresse actuelle : <b>${esc(auth?.currentUser?.email || state.user?.email || '')}</b></p>
+    <form data-form="chemail" autocomplete="off">
+      <div class="label">Nouvelle adresse</div>
+      <input class="field" name="q_newmail" type="email" inputmode="email" autocapitalize="off" autocomplete="email" placeholder="nouvelle@adresse.fr">
+      <div class="label">Ton mot de passe actuel <span class="muted">(par sécurité)</span></div>
+      <input class="field" name="q_curpw" type="password" autocomplete="current-password" placeholder="Mot de passe">
+      <p class="hint">Tu vas recevoir un lien sur la <b>nouvelle</b> adresse. L'adresse change seulement quand tu cliques dessus ; ensuite, reconnecte-toi avec la nouvelle.</p>
+      ${actions('Envoyer le lien')}
+    </form>`);
+  sheetKind = 'chemail';
+  sheet.querySelector('[name="q_newmail"]')?.focus();
+}
+document.addEventListener('click', e => { if (e.target.closest('[data-change-email]')) openEmailSheet(); });
+document.addEventListener('submit', async e => {
+  const f = e.target;
+  if (f.dataset.form !== 'chemail') return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  const ne = f.querySelector('[name="q_newmail"]'), pw = f.querySelector('[name="q_curpw"]');
+  const newMail = (ne.value || '').trim().toLowerCase(), cur = auth?.currentUser;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newMail)) { ne.classList.add('err'); ne.focus(); toast("Cette adresse e-mail n'est pas valide."); return; }
+  if (cur && newMail === (cur.email || '').toLowerCase()) { toast("C'est déjà ton adresse."); return; }
+  if (!pw.value) { pw.classList.add('err'); pw.focus(); return; }
+  const btn = f.querySelector('button[type="submit"]'); if (btn) { btn.disabled = true; btn.textContent = 'Envoi…'; }
+  try {
+    await reauthenticateWithCredential(cur, EmailAuthProvider.credential(cur.email, pw.value));
+    await verifyBeforeUpdateEmail(cur, newMail);
+    closeSheet();
+    openSheet(`<h3>📬 Regarde tes e-mails</h3>
+      <p>Un lien a été envoyé à <b>${esc(newMail)}</b>.</p>
+      <p class="hint">Clique dessus pour confirmer (pense aux spams). Ensuite, l'app te demandera peut-être de te reconnecter : utilise ta nouvelle adresse et le même mot de passe.</p>
+      <button type="button" class="btn primary full" data-close style="margin-top:12px">OK</button>`);
+  } catch (err) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Envoyer le lien'; }
+    const code = err && err.code;
+    if (code === 'auth/wrong-password' || code === 'auth/invalid-credential' || code === 'auth/invalid-login-credentials') { pw.classList.add('err'); pw.focus(); toast('Mot de passe incorrect.'); }
+    else toast(authError(err));
+  }
+}, true);
+
 // ================== Mode d'emploi ==================
 const HELP = [
   ['🏠', "L'accueil", [
@@ -4491,7 +4539,8 @@ const HELP = [
     "Touche les ronds en haut à droite pour voir les membres et le code de la maison.",
     "Pour inviter : donne le code, la personne choisit « Rejoindre une maison ».",
     "Les admins peuvent nommer d'autres admins, retirer quelqu'un ou changer le code.",
-    "Réglages ⚙️ : ton nom, ton rond (une lettre ou un émoji), thème clair ou sombre, changer de maison."]],
+    "Réglages ⚙️ : ton nom, ton rond (une lettre ou un émoji), thème clair ou sombre, changer de maison.",
+    "Réglages ⚙️ → « Changer d'adresse e-mail » : un lien de confirmation part sur la nouvelle adresse."]],
   ['📱', 'Sur iPhone', [
     "Installer : dans Safari, Partager → « Sur l'écran d'accueil ».",
     "Mises à jour : automatiques à l'ouverture. Sinon, ferme l'app complètement et rouvre-la.",
@@ -4658,7 +4707,7 @@ document.addEventListener('click', e => {
 
 // ================== Mise à jour automatique ==================
 // L'iPhone garde souvent l'ancienne page en mémoire : on vérifie s'il existe une version plus récente et on recharge.
-const APP_VERSION = '20 nov. 15 h 40';
+const APP_VERSION = '20 nov. 15 h 50';
 let updChecking = false, updLast = 0;
 async function checkUpdate() {
   if (updChecking || Date.now() - updLast < 60 * 1000 || !navigator.onLine) return;
