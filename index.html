@@ -771,6 +771,12 @@
   .avhint{font-size:12.5px;line-height:1.3}
   .fbbtn{font-size:19px}
   .fbseg{margin-bottom:4px}
+  .fbitem{padding:12px 14px}
+  .fbitem + .fbitem{border-top:1px solid var(--line)}
+  .fbhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .fbhead small{color:var(--muted);font-size:12.5px;flex:1}
+  .fbtext{margin-top:6px;font-size:15px;white-space:pre-wrap;word-break:break-word}
+  .fbmeta{display:block;margin-top:6px;font-size:11.5px;color:var(--muted)}
   /* Messages vocaux */
   .iconchip{font-size:18px;padding:6px 12px}
   .vplayer{display:flex;align-items:center;gap:10px;margin-top:10px;padding:8px 12px 8px 8px;border-radius:999px;background:color-mix(in srgb, var(--accent) 10%, var(--card));max-width:300px}
@@ -3964,14 +3970,12 @@ document.addEventListener('submit', e => {
   }
 }, true);
 
-// ================== Avis / suggestions (envoyés par mail) ==================
-// adresse découpée pour ne pas être ramassée telle quelle par les robots qui lisent le code public
-const FEEDBACK_TO = ['josearcadia33', 'gmail.com'].join('@');
+// ================== Avis / suggestions (messagerie interne) ==================
 let fbKind = 'idee';
 function openFeedback() {
   fbKind = 'idee';
   openSheet(`<h3>💡 Ton avis</h3>
-    <p class="hint" style="margin:-4px 0 12px">Une idée, un bug, quelque chose qui t'agace ? Dis-le, ça part directement par mail.</p>
+    <p class="hint" style="margin:-4px 0 12px">Une idée, un bug, quelque chose qui t'agace ? Écris-le ici, c'est envoyé directement.</p>
     <div class="seg fbseg"><button type="button" class="on" data-fbk="idee">💡 Idée</button><button type="button" data-fbk="bug">🐞 Bug</button><button type="button" data-fbk="autre">💬 Autre</button></div>
     <div class="label">Ton message</div>
     <textarea class="field" id="fbText" rows="5" maxlength="2000" placeholder="Écris ici…"></textarea>
@@ -3979,19 +3983,39 @@ function openFeedback() {
   sheetKind = 'feedback';
   setTimeout(() => sheet.querySelector('#fbText')?.focus(), 200);
 }
+// Le message est rangé dans l'app : seul le créateur de l'app le lit, dans sa boîte de réception
+const FEEDBACK_OWNER = 'martinlamalleau@gmail.com';   // compte de l'app qui voit la boîte de réception
+const isFeedbackOwner = () => (auth?.currentUser?.email || state.profile?.email || '').toLowerCase() === FEEDBACK_OWNER;
 function sendFeedback() {
-  const ta = sheet.querySelector('#fbText'), txt = (ta?.value || '').trim();
+  const ta = sheet.querySelector('#fbText'), txt = (ta?.value || '').trim().slice(0, 2000);
   if (!txt) { ta?.classList.add('err'); ta?.focus(); return; }
-  const label = { idee: 'Idée', bug: 'Bug', autre: 'Avis' }[fbKind];
-  const subject = `[Maison] ${label} de ${state.myName || 'quelqu\'un'}`;
-  const body = `${txt}\n\n—\nDe : ${state.myName || '?'} (${state.profile?.email || auth?.currentUser?.email || ''})\nMaison : ${state.house?.name || '?'}\nVersion : ${APP_VERSION}\nAppareil : ${navigator.userAgent}`;
-  location.href = `mailto:${FEEDBACK_TO}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  const data = { text: txt, kind: fbKind, by: meId, byName: state.myName || '', email: auth?.currentUser?.email || state.profile?.email || '',
+    house: state.code || '', houseName: state.house?.name || '', version: APP_VERSION, device: navigator.userAgent.slice(0, 200), createdAt: Date.now() };
   closeSheet();
-  toast('Ton app Mail s\'ouvre : il ne reste plus qu\'à appuyer sur Envoyer. Merci !');
+  toast('Merci ! Ton message est envoyé 🙏');
+  fire(setDoc(doc(collection(db, 'feedback')), data));
+}
+async function openFeedbackInbox() {
+  openSheet(`<h3>📬 Retours reçus</h3><div id="fbInbox"><p class="hint">Chargement…</p></div>
+    <div class="actions"><button type="button" class="btn ghost" data-close>Fermer</button><button type="button" class="btn primary" data-fb-write>💡 Écrire un avis</button></div>`);
+  sheetKind = 'fbInbox';
+  try {
+    const sn = await getDocs(query(collection(db, 'feedback'), orderBy('createdAt', 'desc'), limit(60)));
+    const box = sheet.querySelector('#fbInbox'); if (!box) return;
+    const icon = { idee: '💡', bug: '🐞', autre: '💬' };
+    box.innerHTML = sn.docs.length ? `<div class="card exlist">${sn.docs.map(d => { const v = d.data();
+      return `<div class="fbitem"><div class="fbhead"><span>${icon[v.kind] || '💬'}</span><b>${esc(v.byName || '?')}</b><small>${esc(v.houseName || '')} · ${esc(whenFr(v.createdAt || 0))}</small>
+        <button type="button" class="link rdel" data-fb-del="${esc(d.id)}">Supprimer</button></div><div class="fbtext">${linkify(esc(v.text || ''))}</div>
+        <small class="fbmeta">${esc(v.email || '')} · v. ${esc(v.version || '?')}</small></div>`; }).join('')}</div>`
+      : '<p class="hint">Aucun retour pour l\'instant.</p>';
+  } catch (e) { const box = sheet.querySelector('#fbInbox'); if (box) box.innerHTML = '<div class="banner">Impossible de lire les retours : publie les nouvelles règles Firestore.</div>'; }
 }
 document.addEventListener('click', e => {
   const t = e.target;
-  if (t.closest('[data-feedback]')) { openFeedback(); return; }
+  if (t.closest('[data-feedback]')) { isFeedbackOwner() ? openFeedbackInbox() : openFeedback(); return; }
+  if (t.closest('[data-fb-write]')) { openFeedback(); return; }
+  const fd = t.closest('[data-fb-del]');
+  if (fd) { fire(deleteDoc(doc(db, 'feedback', fd.dataset.fbDel))); fd.closest('.fbitem')?.remove(); return; }
   if (sheetKind !== 'feedback') return;
   const k = t.closest('[data-fbk]');
   if (k) { fbKind = k.dataset.fbk; sheet.querySelectorAll('[data-fbk]').forEach(b => b.classList.toggle('on', b === k)); return; }
@@ -4000,7 +4024,7 @@ document.addEventListener('click', e => {
 
 // ================== Mise à jour automatique ==================
 // L'iPhone garde souvent l'ancienne page en mémoire : on vérifie s'il existe une version plus récente et on recharge.
-const APP_VERSION = '20 nov. 12 h 35';
+const APP_VERSION = '20 nov. 13 h 00';
 let updChecking = false, updLast = 0;
 async function checkUpdate() {
   if (updChecking || Date.now() - updLast < 60 * 1000 || !navigator.onLine) return;
