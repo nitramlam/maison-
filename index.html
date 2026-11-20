@@ -537,7 +537,9 @@
   .fd{width:9px;height:9px;border-radius:50%;display:block}.fd.petit{background:#F1B3BE}.fd.moyen{background:#D6455D}.fd.fort{background:#8E1A30}
   .stepper{display:flex;align-items:center;gap:8px}.stepper button{width:46px;height:46px;border-radius:14px;border:0;font-size:22px;background:color-mix(in srgb, var(--ink) 8%, transparent);color:var(--ink)}
   .stepper .field{width:70px;text-align:center}.stepper span{color:var(--muted)}
-  .dtile.wide{grid-column:1 / -1;min-height:88px}
+  .linkrow{display:flex;gap:8px;align-items:stretch}.linkrow .field{flex:1;min-width:0}
+  .pastebtn{flex:none;border:0;border-radius:14px;padding:0 14px;font-weight:600;font-size:15px;background:color-mix(in srgb, var(--accent) 14%, var(--card));color:var(--accent)}
+  .linkok{font-size:13px;color:var(--accent);margin-top:6px}.linkok:empty{display:none}
   .pdhome .bdic{background:color-mix(in srgb, #D6455D 14%, var(--card))}
   .seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
   .swatches{display:flex;flex-wrap:wrap;gap:10px}
@@ -2403,7 +2405,8 @@ function openAddSheet() {
         <div><div class="label">Quantité</div><input class="field" name="q_qty" maxlength="30" placeholder="ex. 2, 500 g, 5 vis" autocomplete="off" enterkeyhint="done"></div>
       </div>
       <div class="label">Lien <span class="muted">(vidéo TikTok, YouTube, Instagram, site…)</span></div>
-      <input class="field" name="q_link" type="text" inputmode="url" maxlength="500" placeholder="Colle un lien ici" autocomplete="off" autocapitalize="off" enterkeyhint="done">
+      <div class="linkrow"><input class="field" name="q_link" type="text" inputmode="url" maxlength="500" placeholder="Colle un lien ici" autocomplete="off" autocapitalize="off" enterkeyhint="done"><button type="button" class="pastebtn" data-paste-link>📋 Coller</button></div>
+      <div class="linkok" data-link-ok></div>
       <label class="switch impsw"><input type="checkbox" name="important" ><span class="sw"></span>❗ Important</label>
       <div class="label">Commentaire</div>
       <textarea class="field" name="q_note" maxlength="500" rows="1" placeholder="Facultatif"></textarea>
@@ -3056,7 +3059,8 @@ function openItemSheet(item) {
       <div class="label">Commentaire</div>
       <textarea class="field note-field" name="q_note" maxlength="500" rows="3" placeholder="Des détails, une précision… (ex. la marque, où ranger, comment faire)">${esc(item.note)}</textarea>
       <div class="label">Lien <span class="muted">(vidéo TikTok, YouTube, Instagram, site…)</span></div>
-      <input class="field" name="q_link" type="text" inputmode="url" maxlength="500" placeholder="Colle un lien ici" value="${esc(item.link || '')}" autocomplete="off" autocapitalize="off">
+      <div class="linkrow"><input class="field" name="q_link" type="text" inputmode="url" maxlength="500" placeholder="Colle un lien ici" value="${esc(item.link || '')}" autocomplete="off" autocapitalize="off"><button type="button" class="pastebtn" data-paste-link>📋 Coller</button></div>
+      <div class="linkok" data-link-ok></div>
       <div class="label">Quantité</div>
       <input class="field" name="q_qty" maxlength="30" placeholder="ex. 2, 500 g, 5 vis, 1 kilo…" value="${esc(item.qty)}" autocomplete="off">
       <div class="label">Pour qui ?</div>
@@ -4268,6 +4272,38 @@ document.addEventListener('submit', e => {
   }
 }, true);
 
+// ================== Bouton « Coller le lien » ==================
+// TikTok copie souvent « texte + lien » : on garde seulement le lien
+const firstUrl = t => (String(t || '').match(/https?:\/\/[^\s<>"']+/i) || [])[0] || '';
+function linkKind(u) {
+  if (/tiktok\.com/i.test(u)) return '🎵 Vidéo TikTok';
+  if (/youtu\.?be/i.test(u)) return '▶️ Vidéo YouTube';
+  if (/instagram\.com/i.test(u)) return '📸 Instagram';
+  return u ? '🔗 Lien' : '';
+}
+function showLinkOk(input) {
+  const box = input.closest('form')?.querySelector('[data-link-ok]'); if (!box) return;
+  const u = firstUrl(input.value);
+  box.textContent = u ? `${linkKind(u)} prêt ✓ — la miniature apparaîtra dans la liste` : '';
+}
+document.addEventListener('click', async e => {
+  const b = e.target.closest('[data-paste-link]'); if (!b) return;
+  const input = b.parentElement.querySelector('[name="q_link"]');
+  try {
+    const txt = await navigator.clipboard.readText();
+    const u = firstUrl(txt);
+    if (!u) { toast('Pas de lien copié. Dans TikTok : Partager → Copier le lien.'); return; }
+    input.value = u; input.classList.remove('err');
+    showLinkOk(input);
+    const nm = input.closest('form')?.querySelector('[name="q_name"]');
+    if (nm && !nm.value.trim()) nm.focus();
+  } catch (err) {
+    input.focus();
+    toast('Appuie longtemps dans le champ, puis « Coller ».');
+  }
+});
+document.addEventListener('input', e => { if (e.target.name === 'q_link') showLinkOk(e.target); });
+
 // ================== Avis / suggestions (messagerie interne) ==================
 let fbKind = 'idee';
 function openFeedback() {
@@ -4322,7 +4358,7 @@ document.addEventListener('click', e => {
 
 // ================== Mise à jour automatique ==================
 // L'iPhone garde souvent l'ancienne page en mémoire : on vérifie s'il existe une version plus récente et on recharge.
-const APP_VERSION = '20 nov. 14 h 30';
+const APP_VERSION = '20 nov. 14 h 40';
 let updChecking = false, updLast = 0;
 async function checkUpdate() {
   if (updChecking || Date.now() - updLast < 60 * 1000 || !navigator.onLine) return;
