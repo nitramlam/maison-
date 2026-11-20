@@ -515,6 +515,25 @@
   .seg{display:flex;background:color-mix(in srgb, var(--ink) 7%, transparent);border-radius:12px;padding:3px;gap:3px}
   .seg button{flex:1;border:0;background:none;border-radius:10px;padding:9px 4px;font-size:14px;font-weight:600;color:var(--muted)}
   .repseg button,.freqseg button{font-size:13.5px;padding:9px 2px}
+  .pdintro{text-align:center}.pdintro .pdbig{font-size:44px;margin-bottom:6px}.pdintro b{font-size:18px}.pdintro .hint{margin:8px 0 16px}
+  .pdcard{padding:0}
+  .pdhead{display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:16px 16px 6px;text-align:left;color:var(--ink)}
+  .pdhead b{font-size:18px;display:block}.pdhead small{color:var(--muted);font-size:13px}
+  .pdnow{padding:8px 16px 16px}
+  .pdday{display:flex;flex-direction:column;align-items:center;padding:14px;border-radius:16px;margin-bottom:6px;background:color-mix(in srgb, #D6455D 12%, var(--card))}
+  .pdday b{font-size:34px;line-height:1.1;color:#C23A52}.pdday small{color:var(--muted);font-size:13px}
+  .pdnext{margin:4px 0 14px;font-size:16px;text-align:center}.pdnext b{color:#C23A52}.pdnext small{color:var(--muted)}
+  .pdstart{background:#C23A52}
+  .pdend{margin-top:14px;background:color-mix(in srgb, var(--ink) 8%, transparent);color:var(--ink)}
+  .pdseg button.on.fl-petit{color:#E07A8C}.pdseg button.on.fl-moyen{color:#D6455D}.pdseg button.on.fl-fort{color:#9E1F36}
+  .pdstats{display:flex;border-top:1px solid var(--line)}.pdstats span{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px}
+  .pdstats b{font-size:18px}.pdstats small{color:var(--muted);font-size:12px}
+  .pdhist{border-top:1px solid var(--line)}.pdhist .exrow{padding-left:16px;padding-right:16px}
+  .fdots{display:flex;gap:3px;flex-wrap:wrap;max-width:110px;justify-content:flex-end}
+  .fd{width:9px;height:9px;border-radius:50%;display:block}.fd.petit{background:#F1B3BE}.fd.moyen{background:#D6455D}.fd.fort{background:#8E1A30}
+  .stepper{display:flex;align-items:center;gap:8px}.stepper button{width:46px;height:46px;border-radius:14px;border:0;font-size:22px;background:color-mix(in srgb, var(--ink) 8%, transparent);color:var(--ink)}
+  .stepper .field{width:70px;text-align:center}.stepper span{color:var(--muted)}
+  .pdhome .bdic{background:color-mix(in srgb, #D6455D 14%, var(--card))}
   .seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
   .swatches{display:flex;flex-wrap:wrap;gap:10px}
   .swatch{width:34px;height:34px;border-radius:50%;border:0;background:hsl(var(--h) 55% 48%);box-shadow:0 0 0 2px var(--card);transition:transform .12s}
@@ -1373,6 +1392,7 @@ function subscribe() {
       return {
         id: d.id, name: str(v.name, "Quelqu'un"), removed: v.removed === true, hue: typeof v.hue === 'number' ? v.hue : null,
         avatar: typeof v.avatar === 'string' ? clipIcon(v.avatar) : '',
+        cycles: cleanTrackers(v.cycles),
         budget: v.budget && typeof v.budget === 'object' && Number(v.budget.salary) > 0 ? { salary: Math.round(Number(v.budget.salary)), payday: Math.min(31, Math.max(1, Number(v.budget.payday) || 1)) } : null,
         devices: devs.map(([k, x]) => ({ id: k, label: str(x && x.label, 'Appareil'), lastSeen: Number(x && x.lastSeen) || 0 }))
                      .sort((a, b) => b.lastSeen - a.lastSeen)
@@ -2562,6 +2582,14 @@ function render() {
     renderedKey = 'budget';
     return;
   }
+  if (state.tab === 'regles') {
+    const anim = state.anim ? 'anim-' + state.anim : ''; state.anim = null;
+    screen.innerHTML = `<div class="${anim}">${pageHead('Règles', 'Pour penser à celles qui les ont.')}</div>`;
+    body.innerHTML = `<div class="${anim}">${renderRegles()}</div>`;
+    composer.hidden = true;
+    renderedKey = 'regles';
+    return;
+  }
   if (state.tab === 'cal') {
     const anim = state.anim ? 'anim-' + state.anim : ''; state.anim = null;
     screen.innerHTML = `<div class="${anim}">${renderCalendar()}</div>`;
@@ -3414,7 +3442,8 @@ app.addEventListener('click', e => {
     case 'calNext': shiftMonth(1); break;
     case 'calToday': setCalDay(todayYmd()); break;
     case 'newEvent': openEventSheet(null, state.calDay); break;
-    case 'openEvent': { const ev = state.events.find(x => x.id === id); if (ev) openEventSheet(ev); break; }
+    case 'openEvent': { if (String(id).startsWith('period-')) { state.tab = 'regles'; state.anim = 'first'; renderedKey = ''; render(); window.scrollTo(0, 0); break; }
+      const ev = state.events.find(x => x.id === id); if (ev) openEventSheet(ev); break; }
     case 'thread': openThread(id); break;
     case 'favList': toggleHomePref('fav', id); break;
     case 'collapseList': toggleHomePref('collapsed', id); break;
@@ -3492,6 +3521,7 @@ function todayWidget() {
     </div>
     ${weatherCard()}
     ${birthdayCard()}
+    ${periodHomeCard()}
   </div>`;
 }
 // ================== Anniversaires (à part du calendrier) ==================
@@ -3769,6 +3799,7 @@ overlay.addEventListener('input', e => {
 
 // ================== Onglets : Listes / Calendrier / Notes ==================
 const TAB_ICONS = {
+  regles: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.7C9 7 6 10.4 6 14a6 6 0 0 0 12 0c0-3.6-3-7-6-11.3z"/></svg>',
   budget: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="3"/><path d="M2.5 10h19"/><path d="M7 15h3"/></svg>',
   home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg>',
   lists: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>',
@@ -3783,7 +3814,7 @@ function renderTabbar(show) {
   const n = t === 'notes' ? 0 : unreadMentions().length + unreadReplies().length;
   const a = unreadAssigned().length;
   const badge = k => k === 'notes' && n ? `<i class="tabbadge">${n}</i>` : k === 'lists' && a ? `<i class="tabbadge">${a}</i>` : '';
-  tabbar.innerHTML = [['home', 'Accueil'], ['lists', 'Listes'], ['cal', 'Agenda'], ['notes', 'Bento'], ['budget', 'Dépenses']].map(([k, label]) =>
+  tabbar.innerHTML = [['home', 'Accueil'], ['lists', 'Listes'], ['cal', 'Agenda'], ['notes', 'Bento'], ['budget', 'Dépenses'], ['regles', 'Règles']].map(([k, label]) =>
     `<button type="button" class="tab ${t === k ? 'on' : ''}" data-tab="${k}">${TAB_ICONS[k]}<span>${label}</span>${badge(k)}</button>`).join('');
 }
 tabbar.addEventListener('click', e => {
@@ -3985,6 +4016,222 @@ document.addEventListener('submit', e => {
   }
 }, true);
 
+// ================== Règles : suivi des cycles (privé ou partagé avec la maison) ==================
+// Un suivi = { id, name, periods:[{ id, start, end|null, flow, days:{ymd:flow} }] }
+// Privé : dans le profil (users/{moi}.cycles) — Partagé : dans la fiche membre de la maison (members/{auteur}.cycles), modifiable par tous.
+const FLOWS = [['petit', 'Petit'], ['moyen', 'Moyen'], ['fort', 'Fort']];
+const FLOW_LABEL = { petit: 'Petit', moyen: 'Moyen', fort: 'Fort' };
+const cleanFlow = f => FLOW_LABEL[f] ? f : 'moyen';
+const isYmd = s => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s);
+function cleanTrackers(arr) {
+  return (Array.isArray(arr) ? arr : []).filter(t => t && typeof t.id === 'string').slice(0, 12).map(t => ({
+    id: t.id, name: str(t.name, 'Moi').slice(0, 30),
+    periods: (Array.isArray(t.periods) ? t.periods : []).filter(p => p && isYmd(p.start)).map(p => ({
+      id: String(p.id || p.start), start: p.start, end: isYmd(p.end) && p.end >= p.start ? p.end : null, flow: cleanFlow(p.flow),
+      days: p.days && typeof p.days === 'object' ? Object.fromEntries(Object.entries(p.days).filter(([k, v]) => isYmd(k) && FLOW_LABEL[v])) : {}
+    })).sort((a, b) => a.start < b.start ? 1 : -1).slice(0, 40)
+  }));
+}
+// Tous les suivis visibles : les miens (privés) + ceux partagés dans la maison
+function allTrackers() {
+  const mine = cleanTrackers(state.profile?.cycles).map(t => ({ ...t, owner: null }));
+  const shared = [];
+  for (const m of state.members || []) for (const t of m.cycles || []) shared.push({ ...t, owner: m.id });
+  return [...mine, ...shared];
+}
+function saveTracker(t, remove) {
+  const strip = x => ({ id: x.id, name: x.name, periods: x.periods });
+  if (!t.owner) {
+    const list = cleanTrackers(state.profile?.cycles).filter(x => x.id !== t.id);
+    if (!remove) list.push(strip(t));
+    if (state.profile) state.profile.cycles = list;
+    fire(updateDoc(userRef(), { cycles: list }));
+  } else {
+    const m = (state.members || []).find(x => x.id === t.owner);
+    const list = (m?.cycles || []).filter(x => x.id !== t.id);
+    if (!remove) list.push(strip(t));
+    if (m) m.cycles = list;
+    fire(updateDoc(ref('members', t.owner), { cycles: list.map(strip) }));
+  }
+  renderedKey = ''; render();
+}
+const findTracker = id => allTrackers().find(t => t.id === id);
+// Statistiques et prévision
+function cycleStats(t) {
+  const ps = [...t.periods].sort((a, b) => a.start < b.start ? -1 : 1);
+  const today = todayYmd();
+  const cycles = [];
+  for (let i = 1; i < ps.length; i++) { const d = dayDiff(ps[i - 1].start, ps[i].start); if (d >= 15 && d <= 60) cycles.push(d); }
+  const durs = ps.filter(p => p.end).map(p => dayDiff(p.start, p.end) + 1);
+  const avg = a => a.length ? Math.round(a.slice(-6).reduce((x, y) => x + y, 0) / Math.min(a.length, 6)) : 0;
+  const cycle = avg(cycles), dur = avg(durs) || 5;
+  const current = ps.find(p => !p.end) || null;
+  const last = ps[ps.length - 1];
+  let next = null;
+  if (cycle && last && !current) { next = addDays(last.start, cycle); while (next < today) next = addDays(next, cycle); }
+  return { cycle, dur, current, next, day: current ? dayDiff(current.start, today) + 1 : 0 };
+}
+const dayFlow = (p, d) => p.days[d] || p.flow;
+const relIn = d => { const n = dayDiff(todayYmd(), d); return n === 0 ? "aujourd'hui" : n === 1 ? 'demain' : n < 0 ? `il y a ${-n} j` : `dans ${n} j`; };
+// Faux événements pour le calendrier (non enregistrés)
+function periodEvents() {
+  const out = [], today = todayYmd();
+  for (const t of allTrackers()) {
+    const st = cycleStats(t), who = t.name;
+    for (const p of t.periods) out.push({ id: 'period-' + t.id + '-' + p.id, title: `Règles · ${who}`, emoji: '🩸', date: p.start, endDate: p.end || (today > p.start ? today : ''),
+      allDay: true, time: '', end: '', note: p.end ? '' : 'En cours', byName: '', people: [], repeat: '', _period: t.id });
+    if (st.next) out.push({ id: 'period-' + t.id + '-next', title: `Règles prévues · ${who}`, emoji: '🩸', date: st.next, endDate: addDays(st.next, st.dur - 1),
+      allDay: true, time: '', end: '', note: 'Prévision', byName: '', people: [], repeat: '', _period: t.id });
+  }
+  return out;
+}
+// Bandeau de l'accueil : règles en cours ou prévues dans les 3 jours
+function periodHomeCard() {
+  const lines = [];
+  for (const t of allTrackers()) {
+    const st = cycleStats(t);
+    if (st.current) lines.push(`${esc(t.name)} : règles, jour ${st.day}`);
+    else if (st.next && dayDiff(todayYmd(), st.next) <= 3) lines.push(`${esc(t.name)} : règles prévues ${relIn(st.next)}`);
+  }
+  if (!lines.length) return '';
+  return `<button type="button" class="card bdaycard pdhome" data-go-tab="regles"><span class="bdic">🩸</span><span class="grow"><b>Règles</b>
+    <small>${lines.join(' · ')}</small></span><span class="chev">${ICON.chev}</span></button>`;
+}
+function flowDots(p) {
+  const end = p.end || todayYmd(), n = Math.min(dayDiff(p.start, end) + 1, 14), out = [];
+  for (let i = 0; i < n; i++) out.push(`<i class="fd ${dayFlow(p, addDays(p.start, i))}"></i>`);
+  return `<span class="fdots">${out.join('')}</span>`;
+}
+function renderRegles() {
+  const ts = allTrackers();
+  let h = '';
+  if (!ts.length) {
+    h += `<div class="card pad pdintro"><div class="pdbig">🩸</div><b>Suis les règles de quelqu'un</b>
+      <p class="hint">Pour toi ou pour une autre personne. Privé par défaut ; tu peux aussi le partager avec la maison pour que tout le monde y pense.</p>
+      <button type="button" class="btn primary full" data-pd-newtracker>＋ Commencer un suivi</button></div>`;
+    return h;
+  }
+  for (const t of ts) {
+    const st = cycleStats(t);
+    h += `<section class="card pdcard sec">
+      <button type="button" class="pdhead" data-pd-tracker="${esc(t.id)}"><span class="grow"><b>${esc(t.name)}</b>
+        <small>${t.owner ? `🏠 Partagé avec la maison${t.owner !== meId ? ' · par ' + esc(memberName(t.owner)) : ''}` : '🔒 Privé, visible par toi seul·e'}</small></span><span class="chev">${ICON.chev}</span></button>`;
+    if (st.current) {
+      const today = todayYmd(), f = dayFlow(st.current, today);
+      h += `<div class="pdnow"><div class="pdday"><small>Règles en cours</small><b>Jour ${st.day}</b><small>depuis le ${fmtShort(st.current.start)}</small></div>
+        <div class="label">Flux aujourd'hui</div>
+        <div class="seg pdseg">${FLOWS.map(([k, l]) => `<button type="button" class="${f === k ? 'on' : ''} fl-${k}" data-pd-flow="${k}" data-t="${esc(t.id)}">${l}</button>`).join('')}</div>
+        <button type="button" class="btn full pdend" data-pd-end="${esc(t.id)}">✓ Fin des règles</button></div>`;
+    } else {
+      h += `<div class="pdnow">${st.next ? `<p class="pdnext">Prochaines règles prévues <b>${relIn(st.next)}</b><br><small>vers le ${fmtShort(st.next)}</small></p>`
+        : `<p class="hint" style="margin:0 0 12px">${t.periods.length ? 'Encore une fois et l\'app pourra prévoir les prochaines.' : 'Aucune règle enregistrée pour l\'instant.'}</p>`}
+        <button type="button" class="btn primary full pdstart" data-pd-start="${esc(t.id)}">🩸 Enregistrer les nouvelles règles</button></div>`;
+    }
+    if (st.cycle || t.periods.some(p => p.end)) h += `<div class="pdstats"><span><b>${st.dur} j</b><small>durée moyenne</small></span><span><b>${st.cycle ? st.cycle + ' j' : '—'}</b><small>cycle moyen</small></span></div>`;
+    if (t.periods.length) h += `<div class="pdhist">${t.periods.slice(0, 8).map(p => {
+      const n = dayDiff(p.start, p.end || todayYmd()) + 1;
+      return `<button type="button" class="exrow" data-pd-period="${esc(p.id)}" data-t="${esc(t.id)}"><span class="grow"><b>${fmtShort(p.start)}${p.end ? ' → ' + fmtShort(p.end) : ' · en cours'}</b>
+        <small>${n} jour${n > 1 ? 's' : ''} · flux ${FLOW_LABEL[p.flow].toLowerCase()}</small></span>${flowDots(p)}</button>`; }).join('')}</div>`;
+    h += `</section>`;
+  }
+  h += `<button type="button" class="link" data-pd-newtracker style="display:block;margin:6px auto 30px">＋ Suivre une autre personne</button>`;
+  return h;
+}
+// ----- Fiches -----
+let pdT = null, pdP = null, pdFlow = 'moyen', pdShare = false;
+function openTrackerSheet(t) {
+  pdT = t || null;
+  pdShare = t ? !!t.owner : false;
+  openSheet(`<h3>${t ? 'Le suivi' : 'Nouveau suivi'}</h3>
+    <form data-form="pdtracker" autocomplete="off">
+      <div class="label">Pour qui ?</div>
+      <input class="field" name="q_name" maxlength="30" placeholder="ex. Moi, Léa…" value="${esc(t ? t.name : (allTrackers().some(x => x.name === state.myName) ? '' : state.myName || ''))}">
+      <label class="switch"><input type="checkbox" name="shared" ${pdShare ? 'checked' : ''}><span class="sw"></span><span>Visible par la maison<br><small class="muted">Tout le monde le voit, peut l'aider à le tenir à jour, et le rappel apparaît sur l'accueil.</small></span></label>
+      ${actions(t ? 'Enregistrer' : 'Créer')}
+    </form>
+    ${t ? `<div class="sep"></div><button type="button" class="btn danger full" data-pd-deltracker>Supprimer ce suivi et son historique</button>` : ''}`);
+  sheetKind = 'pdtracker';
+}
+function openPeriodSheet(t, p) {
+  pdT = t; pdP = p || null; pdFlow = p ? p.flow : 'moyen';
+  const today = todayYmd();
+  const dur = p ? dayDiff(p.start, p.end || today) + 1 : 1;
+  openSheet(`<h3>${p ? 'Modifier les règles' : 'Nouvelles règles'}</h3>
+    <p class="hint" style="margin-top:-6px">${esc(t.name)}</p>
+    <form data-form="pdperiod" autocomplete="off">
+      <div class="label">Début</div>
+      <input class="field" type="date" name="start" value="${esc(p ? p.start : today)}" max="${today}">
+      <div class="label">Flux</div>
+      <div class="seg pdseg">${FLOWS.map(([k, l]) => `<button type="button" class="${pdFlow === k ? 'on' : ''} fl-${k}" data-pd-sflow="${k}">${l}</button>`).join('')}</div>
+      ${p ? `<label class="switch"><input type="checkbox" name="ongoing" ${p.end ? '' : 'checked'}><span class="sw"></span>En cours</label>
+      <div class="pddur" ${p.end ? '' : 'hidden'}><div class="label">Durée</div>
+        <div class="stepper"><button type="button" data-pd-step="-1">−</button><input class="field" name="dur" inputmode="numeric" value="${dur}"><span>jours</span><button type="button" data-pd-step="1">＋</button></div></div>` : ''}
+      ${actions(p ? 'Enregistrer' : 'Enregistrer')}
+    </form>
+    ${p ? `<div class="sep"></div><button type="button" class="btn danger full" data-pd-delperiod>Supprimer</button>` : ''}`);
+  sheetKind = 'pdperiod';
+}
+document.addEventListener('click', e => {
+  const t = e.target;
+  if (t.closest('[data-pd-newtracker]')) { openTrackerSheet(null); return; }
+  const th = t.closest('[data-pd-tracker]'); if (th) { const x = findTracker(th.dataset.pdTracker); if (x) openTrackerSheet(x); return; }
+  const ps = t.closest('[data-pd-start]'); if (ps) { const x = findTracker(ps.dataset.pdStart); if (x) openPeriodSheet(x, null); return; }
+  const pp = t.closest('[data-pd-period]'); if (pp) { const x = findTracker(pp.dataset.t), p = x?.periods.find(y => y.id === pp.dataset.pdPeriod); if (p) openPeriodSheet(x, p); return; }
+  const fl = t.closest('[data-pd-flow]');
+  if (fl) { const x = findTracker(fl.dataset.t), st = x && cycleStats(x); if (!st?.current) return;
+    st.current.days = { ...st.current.days, [todayYmd()]: fl.dataset.pdFlow }; saveTracker(x); return; }
+  const en = t.closest('[data-pd-end]');
+  if (en) { const x = findTracker(en.dataset.pdEnd), st = x && cycleStats(x); if (!st?.current) return;
+    st.current.end = todayYmd(); saveTracker(x); toast(`Fin des règles enregistrée (${st.day} jour${st.day > 1 ? 's' : ''}).`); return; }
+  if (sheetKind === 'pdperiod') {
+    const sf = t.closest('[data-pd-sflow]'); if (sf) { pdFlow = sf.dataset.pdSflow; sheet.querySelectorAll('[data-pd-sflow]').forEach(b => b.classList.toggle('on', b === sf)); return; }
+    const sp = t.closest('[data-pd-step]'); if (sp) { const i = sheet.querySelector('[name="dur"]'); i.value = Math.min(15, Math.max(1, (parseInt(i.value) || 1) + Number(sp.dataset.pdStep))); return; }
+    const dp = t.closest('[data-pd-delperiod]');
+    if (dp) { if (!dp.classList.contains('sure')) { dp.classList.add('sure'); dp.textContent = 'Confirmer la suppression'; return; }
+      pdT.periods = pdT.periods.filter(y => y.id !== pdP.id); closeSheet(); saveTracker(pdT); return; }
+  }
+  if (sheetKind === 'pdtracker') {
+    const dt = t.closest('[data-pd-deltracker]');
+    if (dt) { if (!dt.classList.contains('sure')) { dt.classList.add('sure'); dt.textContent = 'Confirmer : tout supprimer'; return; }
+      closeSheet(); saveTracker(pdT, true); return; }
+  }
+});
+document.addEventListener('change', e => {
+  if (sheetKind === 'pdperiod' && e.target.name === 'ongoing') { const d = sheet.querySelector('.pddur'); if (d) d.hidden = e.target.checked; }
+});
+document.addEventListener('submit', e => {
+  const f = e.target;
+  if (f.dataset.form === 'pdtracker') {
+    e.preventDefault(); e.stopImmediatePropagation();
+    const n = f.querySelector('[name="q_name"]'), name = (n.value || '').trim().slice(0, 30);
+    if (!name) { n.classList.add('err'); n.focus(); return; }
+    const shared = f.querySelector('[name="shared"]').checked;
+    if (!pdT) { saveTracker({ id: Math.random().toString(36).slice(2, 10), name, periods: [], owner: shared ? meId : null }); closeSheet(); return; }
+    const moved = shared !== !!pdT.owner;
+    if (moved) saveTracker(pdT, true);   // on le retire de l'ancien endroit
+    saveTracker({ ...pdT, name, owner: shared ? (pdT.owner || meId) : null });
+    closeSheet();
+  } else if (f.dataset.form === 'pdperiod') {
+    e.preventDefault(); e.stopImmediatePropagation();
+    const today = todayYmd(), s = f.querySelector('[name="start"]');
+    const start = s.value;
+    if (!isYmd(start) || start > today) { s.classList.add('err'); return; }
+    const t = pdT;
+    if (pdP) {
+      const ongoing = f.querySelector('[name="ongoing"]').checked;
+      const dur = Math.min(15, Math.max(1, parseInt(f.querySelector('[name="dur"]')?.value) || 1));
+      let end = ongoing ? null : addDays(start, dur - 1);
+      if (end && end > today) end = today;
+      if (ongoing && t.periods.some(y => y.id !== pdP.id && !y.end)) { toast('Il y a déjà des règles en cours.'); return; }
+      Object.assign(pdP, { start, end, flow: pdFlow });
+    } else {
+      if (t.periods.some(y => !y.end)) { toast('Il y a déjà des règles en cours.'); return; }
+      t.periods.unshift({ id: Math.random().toString(36).slice(2, 10), start, end: null, flow: pdFlow, days: { [today]: pdFlow } });
+    }
+    closeSheet(); saveTracker(t);
+  }
+}, true);
+
 // ================== Avis / suggestions (messagerie interne) ==================
 let fbKind = 'idee';
 function openFeedback() {
@@ -4039,7 +4286,7 @@ document.addEventListener('click', e => {
 
 // ================== Mise à jour automatique ==================
 // L'iPhone garde souvent l'ancienne page en mémoire : on vérifie s'il existe une version plus récente et on recharge.
-const APP_VERSION = '20 nov. 13 h 40';
+const APP_VERSION = '20 nov. 14 h 00';
 let updChecking = false, updLast = 0;
 async function checkUpdate() {
   if (updChecking || Date.now() - updLast < 60 * 1000 || !navigator.onLine) return;
@@ -4139,7 +4386,7 @@ function renderDashboard() {
       <b>${title}</b><small>${sub}</small></button>`;
   h += `<div class="dtiles sec">
     ${tile('lists', '📝', 'Listes', `${state.lists.length} liste${state.lists.length > 1 ? 's' : ''}${imp ? ` · ❗ ${imp}` : ''}`, unreadAssigned().length, 150)}
-    ${tile('cal', '📅', 'Calendrier', evToday ? `${evToday} aujourd'hui` : evNext ? esc(`${relDay(evNext.date)} · ${evNext.title}`) : 'Rien de prévu', 0, 25)}
+    ${tile('cal', '📅', 'Calendrier', evToday ? `${evToday} aujourd'hui` : evNext ? esc(`${relDay(evNext._on)} · ${evNext.title}`) : 'Rien de prévu', 0, 25)}
     ${tile('notes', '💬', 'Bento', lastPost ? esc(`${lastPost.byName || ''} : ${lastPost.text || (lastPost.audioId ? '🎤 vocal' : '📷 photo')}`) : 'Écris le premier mot', unreadN, 265)}
     ${tile('budget', '💶', 'Dépenses', budgetTileText(), 0, 45)}
   </div>`;
@@ -4263,6 +4510,7 @@ function purgeOldEvents() {
 }
 
 function renderCalendar() {
+  const allEv = [...state.events, ...periodEvents()];
   const m = state.calMonth, year = m.getFullYear(), month = m.getMonth();
   const startOffset = (new Date(year, month, 1).getDay() + 6) % 7;   // lundi en premier
   const daysIn = new Date(year, month + 1, 0).getDate();
@@ -4271,10 +4519,10 @@ function renderCalendar() {
   const gridStart = ymd(new Date(year, month, 1 - startOffset)), gridEnd = ymd(new Date(year, month, 1 - startOffset + rows * 7 - 1));
   for (let i = 0; i < rows * 7; i++) {
     const key = ymd(new Date(year, month, 1 - startOffset + i));
-    for (const e of state.events) if (occursOn(e, key)) (byDay[key] = byDay[key] || []).push(e);
+    for (const e of allEv) if (occursOn(e, key)) (byDay[key] = byDay[key] || []).push(e);
   }
   const today = todayYmd(), sel = state.calDay;
-  if (!byDay[sel] && (sel < gridStart || sel > gridEnd)) byDay[sel] = state.events.filter(e => occursOn(e, sel));
+  if (!byDay[sel] && (sel < gridStart || sel > gridEnd)) byDay[sel] = allEv.filter(e => occursOn(e, sel));
 
   let cells = '';
   for (let i = 0; i < rows * 7; i++) {
@@ -4289,7 +4537,7 @@ function renderCalendar() {
   const dayEvs = (byDay[sel] || []).sort(evSort);
   const selLabel = cap(fromYmd(sel).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }));
   const from = ymd(new Date(fromYmd(sel > today ? sel : today).getTime() + 86400000));
-  const upcoming = state.events.map(e => ({ e, d: e.repeat ? nextOccurrence(e, from) : (e.date >= from ? e.date : null) }))
+  const upcoming = allEv.map(e => ({ e, d: e.repeat ? nextOccurrence(e, from) : (e.date >= from ? e.date : null) }))
     .filter(x => x.d).sort((a, b) => a.d < b.d ? -1 : a.d > b.d ? 1 : evSort(a.e, b.e)).slice(0, 6).map(x => ({ ...x.e, _on: x.d }));
 
   return `${pageHead('Calendrier')}
