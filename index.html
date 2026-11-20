@@ -3883,6 +3883,7 @@ const TAB_ICONS = {
 };
 const tabbar = $('#tabbar');
 function renderTabbar(show) {
+  if (show) setTimeout(() => { try { syncBadge(); } catch (_) {} }, 0);
   tabbar.hidden = !show;
   if (!show) return;
   const t = state.tab;
@@ -4576,6 +4577,19 @@ async function pushNotify(kind, msg) {
   } catch (e) { console.warn('notif', e); return null; }
 }
 const appLink = q => './' + (q ? '?' + q : '');
+// Pastille sur l'icône de l'écran d'accueil (iPhone : app installée + notifications autorisées)
+let lastBadge = -1;
+function syncBadge(force) {
+  if (!state.code) return;
+  let n = 0;
+  try { n = unreadMentions().length + unreadReplies().length + unreadAssigned().length; } catch (_) {}
+  if (!force && n === lastBadge) return;
+  lastBadge = n;
+  try { if (navigator.setAppBadge) { n ? navigator.setAppBadge(n) : navigator.clearAppBadge(); } } catch (_) {}
+  try { navigator.serviceWorker?.controller?.postMessage({ type: 'badge', n }); } catch (_) {}
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') setTimeout(() => syncBadge(true), 1500); });
+setInterval(() => { if (document.visibilityState === 'visible') syncBadge(); }, 20000);
 // Ouvrir la bonne page quand on touche une notification
 function openFromUrl(u) {
   try {
@@ -4620,7 +4634,10 @@ document.addEventListener('click', e => {
   if (t.closest('[data-push-off]')) { disablePush(); return; }
   if (t.closest('[data-push-test]')) {
     pushNotify('test', { title: '🔔 Test réussi !', body: 'Les notifications marchent sur cet appareil.', url: appLink('') })
-      .then(r => toast(r?.sent ? 'Test envoyé : la notification arrive.' : "Le test n'est pas parti. Réessaie dans un instant."));
+      .then(r => toast(!r ? "Le relais ne répond pas. Vérifie ta connexion et réessaie."
+        : r.sent ? `Test envoyé à ${r.sent} appareil${r.sent > 1 ? 's' : ''} : la notification arrive.`
+        : r.gone ? "L'abonnement de cet appareil a expiré : désactive puis réactive les notifications."
+        : "Aucun appareil trouvé : désactive puis réactive les notifications sur cet appareil."));
   }
 });
 document.addEventListener('change', e => {
@@ -4869,7 +4886,7 @@ document.addEventListener('click', e => {
 
 // ================== Mise à jour automatique ==================
 // L'iPhone garde souvent l'ancienne page en mémoire : on vérifie s'il existe une version plus récente et on recharge.
-const APP_VERSION = '20 nov. 17 h 40';
+const APP_VERSION = '20 nov. 18 h 00';
 let updChecking = false, updLast = 0;
 async function checkUpdate() {
   if (updChecking || Date.now() - updLast < 60 * 1000 || !navigator.onLine) return;
