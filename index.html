@@ -1427,7 +1427,7 @@ function subscribe() {
     if (state.tab === 'notes' || state.tab === 'home') render();
     else renderTabbar(true);
     if (sheetKind === 'post' && !state.posts.some(p => p.id === sheetTarget)) closeSheet();
-  }, soft('Notes')));
+  }, soft('Bento')));
 
   unsubs.push(onSnapshot(query(col('replies'), orderBy('createdAt', 'desc'), limit(300)), snap => {
     state.replies = snap.docs.map(d => { const v = d.data(); return { id: d.id, postId: v.postId, text: String(v.text || ''),
@@ -1573,7 +1573,7 @@ function startLeave() {
   if (!lastAdmin) return leaveHouse();
   if (others.length) return openTransferSheet(others);
   openSheet(`<h3>Supprimer la maison ?</h3>
-    <p class="hint">Tu es la dernière personne dans <b>${esc(state.house?.name || 'cette maison')}</b>. En partant, la maison et tout son contenu (listes, calendrier, notes, photos) seront <b>supprimés définitivement</b>.</p>
+    <p class="hint">Tu es la dernière personne dans <b>${esc(state.house?.name || 'cette maison')}</b>. En partant, la maison et tout son contenu (listes, calendrier, bento, dépenses) seront <b>supprimés définitivement</b>.</p>
     <div class="actions"><button type="button" class="btn ghost" data-close>Annuler</button>
       <button type="button" class="btn danger" data-delete-house>Supprimer et quitter</button></div>`);
   sheetKind = 'leaveDelete';
@@ -3783,7 +3783,7 @@ function renderTabbar(show) {
   const n = t === 'notes' ? 0 : unreadMentions().length + unreadReplies().length;
   const a = unreadAssigned().length;
   const badge = k => k === 'notes' && n ? `<i class="tabbadge">${n}</i>` : k === 'lists' && a ? `<i class="tabbadge">${a}</i>` : '';
-  tabbar.innerHTML = [['home', 'Accueil'], ['lists', 'Listes'], ['cal', 'Agenda'], ['notes', 'Notes'], ['budget', 'Dépenses']].map(([k, label]) =>
+  tabbar.innerHTML = [['home', 'Accueil'], ['lists', 'Listes'], ['cal', 'Agenda'], ['notes', 'Bento'], ['budget', 'Dépenses']].map(([k, label]) =>
     `<button type="button" class="tab ${t === k ? 'on' : ''}" data-tab="${k}">${TAB_ICONS[k]}<span>${label}</span>${badge(k)}</button>`).join('');
 }
 tabbar.addEventListener('click', e => {
@@ -4039,7 +4039,7 @@ document.addEventListener('click', e => {
 
 // ================== Mise à jour automatique ==================
 // L'iPhone garde souvent l'ancienne page en mémoire : on vérifie s'il existe une version plus récente et on recharge.
-const APP_VERSION = '20 nov. 13 h 30';
+const APP_VERSION = '20 nov. 13 h 40';
 let updChecking = false, updLast = 0;
 async function checkUpdate() {
   if (updChecking || Date.now() - updLast < 60 * 1000 || !navigator.onLine) return;
@@ -4140,7 +4140,7 @@ function renderDashboard() {
   h += `<div class="dtiles sec">
     ${tile('lists', '📝', 'Listes', `${state.lists.length} liste${state.lists.length > 1 ? 's' : ''}${imp ? ` · ❗ ${imp}` : ''}`, unreadAssigned().length, 150)}
     ${tile('cal', '📅', 'Calendrier', evToday ? `${evToday} aujourd'hui` : evNext ? esc(`${relDay(evNext.date)} · ${evNext.title}`) : 'Rien de prévu', 0, 25)}
-    ${tile('notes', '💬', 'Notes', lastPost ? esc(`${lastPost.byName || ''} : ${lastPost.text || (lastPost.audioId ? '🎤 vocal' : '📷 photo')}`) : 'Écris le premier mot', unreadN, 265)}
+    ${tile('notes', '💬', 'Bento', lastPost ? esc(`${lastPost.byName || ''} : ${lastPost.text || (lastPost.audioId ? '🎤 vocal' : '📷 photo')}`) : 'Écris le premier mot', unreadN, 265)}
     ${tile('budget', '💶', 'Dépenses', budgetTileText(), 0, 45)}
   </div>`;
 
@@ -4458,7 +4458,7 @@ function whenFr(ts) {
 // Liens affichés en version courte : https://www.amazon.fr/echo-dot-max/dp/B0… → 🔗 amazon.fr/echo-dot-max
 
 function renderNotesHead() {
-  return `${pageHead('Notes', 'Un mot, une photo, pour toute la maison.')}
+  return `${pageHead('Bento', 'Un mot, une photo, pour toute la maison.')}
     <form class="card wallform sec" id="wallForm" autocomplete="off">
       <textarea class="field" id="wallText" maxlength="2000" rows="2" placeholder="Écris quelque chose…"></textarea>
       <div class="wallprev" id="wallPrev" hidden></div>
