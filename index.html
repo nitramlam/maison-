@@ -49,6 +49,8 @@
   .stack > * + *{margin-top:10px}
 
   .hometop{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .dashtop{align-items:center}.dashtop .hello{margin:0}
+  .dashhouse{display:inline-flex!important;width:auto!important;justify-content:flex-start!important;align-items:center;gap:6px;margin:2px 0 4px;max-width:100%;text-align:left}.dashhouse h1{overflow-wrap:break-word}.dashhouse h1.long{font-size:32px}.dashhouse h1.xlong{font-size:26px}
   .hometop .btns{display:flex;gap:4px;margin:-6px -8px 0 0}
 
   /* Accueil */
@@ -4651,7 +4653,7 @@ document.addEventListener('click', e => {
 
 // ================== Mise à jour automatique ==================
 // L'iPhone garde souvent l'ancienne page en mémoire : on vérifie s'il existe une version plus récente et on recharge.
-const APP_VERSION = '20 nov. 15 h 20';
+const APP_VERSION = '20 nov. 15 h 30';
 let updChecking = false, updLast = 0;
 async function checkUpdate() {
   if (updChecking || Date.now() - updLast < 60 * 1000 || !navigator.onLine) return;
@@ -4714,16 +4716,16 @@ function favTile(l) {
     <b>${esc(l.name)}</b><small>${n ? `${n} élément${n > 1 ? 's' : ''}${l.shopping ? ' à acheter' : ''}` : 'Vide'}${imp ? ` · ❗ ${imp}` : ''}</small></button>`;
 }
 function renderDashboard() {
-  let h = `<header class="hometop"><div class="grow">
-      ${state.myName ? `<div class="hello">${greeting()} ${esc(state.myName)} 👋</div>` : ''}
-      <button class="housebtn" data-action="houses" aria-label="Mes maisons"><h1>${esc(state.house?.name || 'Maison')}</h1><span class="caret">${ICON.down}</span></button>
-      ${state.loading ? '<p class="sub">Chargement…</p>' : ''}</div>
+  let h = `<header class="hometop dashtop"><div class="grow">
+      ${state.myName ? `<div class="hello">${greeting()} ${esc(state.myName)} 👋</div>` : ''}</div>
       <div class="btns">
         <button class="iconbtn fbbtn helpbtn" data-help aria-label="Mode d'emploi">❓</button>
         <button class="iconbtn fbbtn" data-feedback aria-label="Donner ton avis">💡</button>
         <button class="iconbtn members-btn" data-action="members" aria-label="Membres">${avatarStack()}</button>
         <button class="iconbtn" data-action="settings" aria-label="Réglages">${ICON.gear}</button>
-      </div></header>`;
+      </div></header>
+    <button class="housebtn dashhouse" data-action="houses" aria-label="Mes maisons"><h1 class="${(state.house?.name || '').length > 22 ? 'xlong' : (state.house?.name || '').length > 14 ? 'long' : ''}">${esc(state.house?.name || 'Maison')}</h1><span class="caret">${ICON.down}</span></button>
+    ${state.loading ? '<p class="sub">Chargement…</p>' : ''}`;
   if (state.error) h += `<div class="banner">${esc(state.error)}</div>`;
   if (state.loading) return h;
   h += notifCards(false);
