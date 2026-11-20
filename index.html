@@ -821,7 +821,9 @@
   .fbbtn{font-size:19px}
   .helpbtn{font-size:17px;padding-left:4px;padding-right:4px}
   .grp-h{display:flex;align-items:center}.grp-edit{border:0;background:none;font-size:14px;padding:6px 8px;margin-left:2px;opacity:.6;border-radius:10px}.grp-edit:active{opacity:1;background:color-mix(in srgb, var(--ink) 8%, transparent)}
-  .setlinks{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 18px}
+  .setlinks{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 18px}.setlinks .setlink:first-child{grid-column:1 / -1}
+  .nfbox{padding:14px;border-radius:16px;background:color-mix(in srgb, var(--accent) 10%, var(--card));line-height:1.45}.nfbox.on{background:color-mix(in srgb, #3FB56B 14%, var(--card))}
+  .nfbox small{color:var(--muted)}.nfgrp{margin-top:14px}.nfrow{margin-top:8px}
   .setlink{display:flex;align-items:center;gap:10px;border:0;border-radius:16px;padding:13px 12px;text-align:left;background:color-mix(in srgb, var(--accent) 10%, var(--card));color:var(--ink)}
   .setlink span{font-size:20px}.setlink b{font-size:14.5px;line-height:1.2}
   .helpsearch{margin-bottom:12px}
@@ -1277,6 +1279,7 @@ function touchMember(force) {
   if (typeof state.profile?.avatar === 'string') extra.avatar = clipIcon(state.profile.avatar);
   // Humeur partagée : recopiée dans la maison ouverte (utile si on a plusieurs maisons ou si un envoi a raté)
   if (state.profile && 'moodData' in state.profile) { const m = cleanMood(state.profile.moodData); extra.mood = m.shared ? { e: m.e, c: m.c, shared: true } : deleteField(); }
+  if (state.profile && state.profile.push) extra.push = state.profile.push;
   // plus aucune trace d'activité (« vu il y a… ») : on efface l'ancienne si elle existe
   fire(setDoc(ref('members', meId), { name: state.myName, removed: false, ...extra, devices: deleteField() }, { merge: true }));
 }
@@ -1400,7 +1403,7 @@ function subscribe() {
   const have = {};
   const kinds = ['lists', 'sections', 'items'];
   const code = state.code;
-  const got = k => { have[k] = true; if (kinds.every(x => have[x])) state.loading = false; render(); };
+  const got = k => { have[k] = true; if (kinds.every(x => have[x])) state.loading = false; render(); if (!state.loading) maybeOpenPending(); };
   const lost = async () => {
     // On n'a plus accès à cette maison : retiré par un membre… ou compte bloqué.
     if (state.code !== code) return;
@@ -2482,6 +2485,9 @@ function submitAddItem(f, title) {
     byName: state.myName, by: meId,
     assignees: [...sheetPeople], assignedAt: sheetPeople.size ? Date.now() : 0, assignedBy: sheetPeople.size ? state.myName : ''
   }));
+  { const ln = state.lists.find(x => x.id === listId)?.name || 'une liste', asg = [...sheetPeople].filter(id => id !== meId), url = appLink('tab=lists&list=' + listId);
+    if (asg.length) pushNotify('assign', { title: `📌 ${state.myName} te confie « ${title.slice(0, 60)} »`, body: `Dans ${ln}`, url, to: asg });
+    pushNotify('item', { title: `${sheetEmoji || autoEmoji(title) || '📝'} ${title.slice(0, 60)}`, body: `${state.myName} l'a ajouté dans ${ln}`, url, tag: 'item-' + listId, to: houseMembers().map(m => m.id).filter(id => !asg.includes(id)) }); }
   draft.sec[listId] = sheetSec || null;        // la catégorie reste choisie pour le suivant
   // petit rappel de ce qui vient d'être ajouté
   const log = $('#addedLog');
@@ -2898,6 +2904,7 @@ function setMyColor(h) {
 function openSettingsSheet() {
   openSheet(`<h3>Réglages</h3>
     <div class="setlinks">
+      <button type="button" class="setlink" data-notif-open><span>🔔</span><b>Notifications</b></button>
       <button type="button" class="setlink" data-help><span>❓</span><b>Mode d'emploi</b></button>
       <button type="button" class="setlink" data-feedback><span>${isFeedbackOwner() ? '📬' : '💡'}</span><b>${isFeedbackOwner() ? 'Retours reçus' : 'Une idée, un bug ?'}</b></button>
     </div>
@@ -4073,7 +4080,11 @@ document.addEventListener('submit', e => {
     const data = { name, emoji: sheetEmoji || autoEmoji(name) || '', amount, freq: expFreq,
       people: [...sheetPeople].length ? [...sheetPeople] : [meId] };
     if (sheetTarget) fire(updateDoc(ref('expenses', sheetTarget), data));
-    else fire(setDoc(doc(col('expenses')), { ...data, by: meId, byName: state.myName, createdAt: Date.now() }));
+    else {
+      fire(setDoc(doc(col('expenses')), { ...data, by: meId, byName: state.myName, createdAt: Date.now() }));
+      const others = data.people.filter(id => id !== meId);
+      if (others.length) pushNotify('expense', { title: `💶 Nouvelle charge : ${name}`, body: `${eur(amount)} ${FREQ_LABEL[data.freq]}, partagée à ${data.people.length} — par ${state.myName}`, url: appLink('tab=budget'), to: others });
+    }
     closeSheet(); toast(sheetTarget ? 'Charge modifiée.' : 'Charge ajoutée.');
   } else if (f.dataset.form === 'salary') {
     e.preventDefault(); e.stopImmediatePropagation();
@@ -4193,7 +4204,9 @@ function renderHumeur() {
 }
 document.addEventListener('click', e => {
   const seg = e.target.closest('[data-mood]');
-  if (seg && state.tab === 'humeur') { const m = myMood(); m.e[todayYmd()] = seg.dataset.mood; navigator.vibrate?.(10); saveMood(m); return; }
+  if (seg && state.tab === 'humeur') { const m = myMood(), prev = m.e[todayYmd()]; m.e[todayYmd()] = seg.dataset.mood; navigator.vibrate?.(10); saveMood(m);
+    const x = moodOf(seg.dataset.mood); if (m.shared && prev !== seg.dataset.mood && x) pushNotify('mood', { title: `${x[1]} ${state.myName} : ${x[2]}`, body: "Son humeur du jour", url: appLink('tab=humeur'), tag: 'mood-' + meId });
+    return; }
   const cr = e.target.closest('[data-cry]');
   if (cr) { const m = myMood(), d = todayYmd(); const n = Math.max(0, (m.c[d] || 0) + Number(cr.dataset.cry)); if (n) m.c[d] = n; else delete m.c[d]; navigator.vibrate?.(10); saveMood(m); }
 });
@@ -4443,6 +4456,7 @@ document.addEventListener('submit', e => {
     } else {
       if (t.periods.some(y => !y.end)) { toast('Il y a déjà des règles en cours.'); return; }
       t.periods.unshift({ id: Math.random().toString(36).slice(2, 10), start, end: null, flow: pdFlow, days: { [today]: pdFlow } });
+      if (t.owner) pushNotify('period', { title: `🩸 ${t.name} : début des règles`, body: `Flux ${FLOW_LABEL[pdFlow].toLowerCase()} — pensez-y 💛`, url: appLink('tab=regles') });
     }
     closeSheet(); saveTracker(t);
   }
@@ -4490,6 +4504,129 @@ document.addEventListener('submit', async e => {
     else toast(authError(err));
   }
 }, true);
+
+// ================== Notifications (Web Push via le relais Cloudflare) ==================
+const PUSH_RELAY = 'https://maison-notif.josearcadia33.workers.dev';   // adresse du relais Cloudflare (https://….workers.dev)
+const VAPID_PUBLIC = 'BAurtAVGj3Ag7_FDRhreWyz37PcuNkjx-nO_q9rlvYCsllNIeQnRKDYfGQz76Gx_b7jrQljysIaBi9YgEDTxvWM';
+const PUSH_KINDS = [
+  ['assign', '📌', 'Quand on me confie un élément', 'Listes', true],
+  ['item', '📝', 'Nouvel élément dans une liste', 'Listes', false],
+  ['event', '📅', 'Nouvel événement', 'Calendrier', true],
+  ['post', '💬', 'Nouveau message', 'Bento', true],
+  ['mention', '👤', 'Quand on m\'identifie', 'Bento', true],
+  ['reply', '↩️', 'Réponse à mon message', 'Bento', true],
+  ['expense', '💶', 'Nouvelle charge qui me concerne', 'Dépenses', true],
+  ['mood', '🌈', 'Humeur du jour (partagée)', 'Humeur', false],
+  ['period', '🩸', 'Début des règles (suivi partagé)', 'Règles', true]
+];
+const pushOn = () => !!PUSH_RELAY;
+const isStandalone = () => window.matchMedia?.('(display-mode: standalone)').matches || navigator.standalone === true;
+const pushSupported = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+function myPush() {
+  const p = state.profile?.push || {};
+  const prefs = {}; for (const [k, , , , d] of PUSH_KINDS) prefs[k] = typeof p.prefs?.[k] === 'boolean' ? p.prefs[k] : d;
+  const subs = (Array.isArray(p.subs) ? p.subs : []).filter(s => s && typeof s.endpoint === 'string' && s.keys).slice(0, 6);
+  return { subs, prefs };
+}
+function savePush(pu) {
+  if (state.profile) state.profile.push = pu;
+  fire(updateDoc(userRef(), { push: pu }));
+  if (state.code) fire(updateDoc(ref('members', meId), { push: pu }));
+}
+let swReg = null;
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').then(r => { swReg = r; }).catch(e => console.warn('sw', e));
+  navigator.serviceWorker.addEventListener('message', e => { if (e.data?.type === 'open') openFromUrl(e.data.url); });
+}
+const ub64k = s => { s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return Uint8Array.from(atob(s), c => c.charCodeAt(0)); };
+async function currentSub() {
+  try { const r = swReg || await navigator.serviceWorker.ready; return await r.pushManager.getSubscription(); } catch (_) { return null; }
+}
+async function enablePush() {
+  if (!pushSupported()) { toast(isStandalone() ? 'Cet appareil ne gère pas les notifications.' : "Ouvre l'app depuis son icône sur l'écran d'accueil."); return; }
+  const perm = await Notification.requestPermission();
+  if (perm !== 'granted') { toast("Notifications refusées. Tu peux les autoriser dans les Réglages de l'iPhone."); openNotifSheet(); return; }
+  try {
+    const r = swReg || await navigator.serviceWorker.ready;
+    const sub = (await r.pushManager.getSubscription()) || await r.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: ub64k(VAPID_PUBLIC) });
+    const j = sub.toJSON();
+    const pu = myPush();
+    pu.subs = [{ endpoint: j.endpoint, keys: { p256dh: j.keys.p256dh, auth: j.keys.auth }, dev: deviceLabel(), at: Date.now() }, ...pu.subs.filter(s => s.endpoint !== j.endpoint)].slice(0, 6);
+    savePush(pu);
+    toast('🔔 Notifications activées sur cet appareil.');
+  } catch (e) { console.warn(e); toast("L'activation n'a pas marché, réessaie."); }
+  openNotifSheet();
+}
+async function disablePush() {
+  const sub = await currentSub();
+  const pu = myPush();
+  if (sub) { pu.subs = pu.subs.filter(s => s.endpoint !== sub.endpoint); try { await sub.unsubscribe(); } catch (_) {} }
+  savePush(pu);
+  toast('Notifications coupées sur cet appareil.');
+  openNotifSheet();
+}
+// Envoi : on demande au relais de prévenir les autres membres
+async function pushNotify(kind, msg) {
+  if (!pushOn() || !state.code || !auth?.currentUser) return;
+  try {
+    const token = await auth.currentUser.getIdToken();
+    const r = await fetch(PUSH_RELAY, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, house: state.code, kind, title: msg.title, body: msg.body || '', url: msg.url || './', tag: msg.tag || kind, to: msg.to || null }) });
+    return r.ok ? r.json() : null;
+  } catch (e) { console.warn('notif', e); return null; }
+}
+const appLink = q => './' + (q ? '?' + q : '');
+// Ouvrir la bonne page quand on touche une notification
+function openFromUrl(u) {
+  try {
+    const q = new URL(u, location.href).searchParams, tab = q.get('tab');
+    if (!tab) return;
+    if (tab === 'lists' && q.get('list') && state.lists.some(l => l.id === q.get('list'))) { state.tab = 'lists'; go('list', q.get('list')); return; }
+    state.tab = tab; if (tab === 'lists') state.view = 'home';
+    if (tab === 'cal' && q.get('day')) { setCalDay(q.get('day')); return; }
+    state.anim = 'first'; renderedKey = ''; render(); window.scrollTo(0, 0);
+  } catch (_) {}
+}
+let pendingOpen = location.search.includes('tab=') ? location.href : null;
+function maybeOpenPending() {
+  if (!pendingOpen || !state.code || state.loading) return;
+  const u = pendingOpen; pendingOpen = null;
+  history.replaceState(null, '', location.pathname);
+  setTimeout(() => openFromUrl(u), 50);
+}
+async function openNotifSheet() {
+  const pu = myPush(), sub = pushSupported() ? await currentSub() : null;
+  const here = !!(sub && pu.subs.some(s => s.endpoint === sub.endpoint));
+  const perm = 'Notification' in window ? Notification.permission : 'unsupported';
+  let status;
+  if (!pushOn()) status = `<p class="hint">Les notifications seront bientôt disponibles.</p>`;
+  else if (!pushSupported()) status = `<div class="nfbox">📱 <b>Ouvre l'app depuis son icône</b> sur l'écran d'accueil pour activer les notifications.<br><small>Dans Safari : Partager → « Sur l'écran d'accueil ».</small></div>`;
+  else if (perm === 'denied') status = `<div class="nfbox">🚫 <b>Notifications bloquées</b> sur cet appareil.<br><small>Réglages de l'iPhone → Notifications → Maison → Autoriser.</small></div>`;
+  else if (here) status = `<div class="nfbox on">✅ <b>Activées sur cet appareil</b><br><button type="button" class="link" data-push-off>Désactiver sur cet appareil</button> · <button type="button" class="link" data-push-test>Envoyer un test</button></div>`;
+  else status = `<button type="button" class="btn primary full" data-push-on>🔔 Activer les notifications sur cet appareil</button>`;
+  let lastGrp = '';
+  const rows = PUSH_KINDS.map(([k, e, label, grp]) => {
+    const head = grp !== lastGrp ? `<div class="label nfgrp">${grp}</div>` : ''; lastGrp = grp;
+    return `${head}<label class="switch nfrow"><input type="checkbox" data-push-pref="${k}" ${pu.prefs[k] ? 'checked' : ''}><span class="sw"></span><span>${e} ${label}</span></label>`;
+  }).join('');
+  openSheet(`<h3>🔔 Notifications</h3>${status}
+    ${pushOn() ? `<p class="hint" style="margin-top:14px">Choisis ce qui te prévient (sur tous tes appareils) :</p>${rows}` : ''}`);
+  sheetKind = 'notif';
+}
+document.addEventListener('click', e => {
+  const t = e.target;
+  if (t.closest('[data-notif-open]')) { openNotifSheet(); return; }
+  if (t.closest('[data-push-on]')) { enablePush(); return; }
+  if (t.closest('[data-push-off]')) { disablePush(); return; }
+  if (t.closest('[data-push-test]')) {
+    pushNotify('test', { title: '🔔 Test réussi !', body: 'Les notifications marchent sur cet appareil.', url: appLink('') })
+      .then(r => toast(r?.sent ? 'Test envoyé : la notification arrive.' : "Le test n'est pas parti. Réessaie dans un instant."));
+  }
+});
+document.addEventListener('change', e => {
+  const k = e.target.dataset?.pushPref; if (!k) return;
+  const pu = myPush(); pu.prefs[k] = e.target.checked; savePush(pu);
+});
 
 // ================== Mode d'emploi ==================
 const HELP = [
@@ -4556,6 +4693,11 @@ const HELP = [
     "Installer : dans Safari, Partager → « Sur l'écran d'accueil ».",
     "Mises à jour : automatiques à l'ouverture. Sinon, ferme l'app complètement et rouvre-la.",
     "Micro ou position refusés : Réglages de l'iPhone → Safari → Micro / Position → Autoriser."]],
+  ['🔔', 'Notifications', [
+    "Réglages ⚙️ → 🔔 Notifications → « Activer les notifications sur cet appareil ».",
+    "Sur iPhone, ça ne marche que depuis l'icône de l'écran d'accueil (pas dans Safari).",
+    "Choisis ce qui te prévient : éléments confiés, nouveaux messages, événements, charges…",
+    "« Envoyer un test » pour vérifier. Bloquées ? Réglages de l'iPhone → Notifications → Maison."]],
   ['💡', 'Une idée, un bug ?', [
     "Réglages ⚙️ → « Une idée, un bug ? » : ton message est envoyé directement, sans quitter l'app."]]
 ];
@@ -4635,6 +4777,7 @@ document.addEventListener('submit', e => {
     qty: '', note: '', emoji: autoEmoji(title) || null, important: false, link, photoId: null,
     byName: state.myName, by: meId, assignees: [], assignedAt: 0, assignedBy: '' }));
   const secName = sectionId ? state.sections.find(x => x.id === sectionId)?.name : '';
+  pushNotify('item', { title: `${autoEmoji(title) || '📝'} ${title.slice(0, 60)}`, body: `${state.myName} l'a ajouté dans ${l.name}`, url: appLink('tab=lists&list=' + listId), tag: 'item-' + listId });
   closeSheet();
   navigator.vibrate?.(12);
   toast(`✓ « ${title} » ajouté dans ${l.name}${secName ? ' › ' + secName : ''}`);
@@ -4726,7 +4869,7 @@ document.addEventListener('click', e => {
 
 // ================== Mise à jour automatique ==================
 // L'iPhone garde souvent l'ancienne page en mémoire : on vérifie s'il existe une version plus récente et on recharge.
-const APP_VERSION = '20 nov. 17 h 10';
+const APP_VERSION = '20 nov. 17 h 40';
 let updChecking = false, updLast = 0;
 async function checkUpdate() {
   if (updChecking || Date.now() - updLast < 60 * 1000 || !navigator.onLine) return;
@@ -5079,7 +5222,10 @@ function saveEvent(f, title) {
     repeat: (() => { const r = f.querySelector('[name="repeat"]').value; return REPEATS.includes(r) ? r : ''; })()
   };
   if (sheetTarget) fire(updateDoc(ref('events', sheetTarget), data));
-  else fire(setDoc(doc(col('events')), { ...data, by: meId, byName: state.myName, createdAt: Date.now() }));
+  else {
+    fire(setDoc(doc(col('events')), { ...data, by: meId, byName: state.myName, createdAt: Date.now() }));
+    pushNotify('event', { title: `📅 ${data.emoji ? data.emoji + ' ' : ''}${data.title}`, body: `${cap(fromYmd(date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }))}${data.allDay ? '' : ' · ' + data.time} — ajouté par ${state.myName}`, url: appLink('tab=cal&day=' + date) });
+  }
   closeSheet();
   setCalDay(date);
   return true;
@@ -5246,6 +5392,8 @@ function sendReply(f) {
   if (pendingAudio.reply) { data.audioId = saveAudio(pendingAudio.reply); data.dur = pendingAudio.reply.dur; pendingAudio.reply = null; showPendingAudio('reply'); }
   if (replyPhoto) { data.photoId = saveMedia(replyPhoto); data.w = replyPhoto.w; data.h = replyPhoto.h; }
   fire(setDoc(doc(col('replies')), data));
+  { const post = state.posts.find(x => x.id === sheetTarget);
+    if (post && post.by && post.by !== meId) pushNotify('reply', { title: `↩️ ${state.myName} a répondu`, body: text || (data.audioId ? '🎤 Message vocal' : '📷 Photo'), url: appLink('tab=notes'), to: [post.by] }); }
   replyPhoto = null; showReplyPhoto();
   ta.value = ''; ta.style.height = '';
   ta.focus();
@@ -5518,6 +5666,9 @@ function publishPost() {
   const data = { text, photoId: pendingPhoto ? saveMedia(pendingPhoto) : null, w: pendingPhoto?.w || 0, h: pendingPhoto?.h || 0,
                  by: meId, byName: state.myName, createdAt: Date.now(), pinned: false, mentions: [...pendingTags] };
   if (pendingAudio.wall) { data.audioId = saveAudio(pendingAudio.wall); data.dur = pendingAudio.wall.dur; pendingAudio.wall = null; showPendingAudio('wall'); }
+  { const what = text || (data.audioId ? '🎤 Message vocal' : data.photoId ? '📷 Photo' : '');
+    if (data.mentions.length) pushNotify('mention', { title: `👤 ${state.myName} t'a identifié`, body: what, url: appLink('tab=notes'), to: data.mentions });
+    pushNotify('post', { title: `💬 ${state.myName}`, body: what, url: appLink('tab=notes'), to: houseMembers().map(m => m.id).filter(id => !data.mentions.includes(id)) }); }
   setDoc(doc(col('posts')), data).catch(err => {
     console.error(err);
     toast(err && err.code === 'permission-denied' ? 'Publication refusée : mets à jour les règles Firebase.' : "La note n'a pas pu être publiée.");
