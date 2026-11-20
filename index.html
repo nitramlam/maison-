@@ -766,6 +766,9 @@
   .daterow input[type=date]{min-width:0}
   .dtile.fav{min-height:104px}
   .dt-star{position:absolute;top:12px;right:12px;font-size:13px;opacity:.85}
+  .avrow{display:flex;align-items:center;gap:12px}
+  .avrow .iconbox{width:62px}
+  .avhint{font-size:12.5px;line-height:1.3}
   /* Messages vocaux */
   .iconchip{font-size:18px;padding:6px 12px}
   .vplayer{display:flex;align-items:center;gap:10px;margin-top:10px;padding:8px 12px 8px 8px;border-radius:999px;background:color-mix(in srgb, var(--accent) 10%, var(--card));max-width:300px}
@@ -1195,6 +1198,7 @@ function touchMember(force) {
   if (!force && now - lastTouch < 10 * 60 * 1000) return;
   lastTouch = now;
   const extra = typeof state.profile?.color === 'number' ? { hue: state.profile.color } : {};
+  if (typeof state.profile?.avatar === 'string') extra.avatar = clipIcon(state.profile.avatar);
   // plus aucune trace d'activité (« vu il y a… ») : on efface l'ancienne si elle existe
   fire(setDoc(ref('members', meId), { name: state.myName, removed: false, ...extra, devices: deleteField() }, { merge: true }));
 }
@@ -1359,6 +1363,7 @@ function subscribe() {
       const devs = v.devices && typeof v.devices === 'object' ? Object.entries(v.devices) : [];
       return {
         id: d.id, name: str(v.name, "Quelqu'un"), removed: v.removed === true, hue: typeof v.hue === 'number' ? v.hue : null,
+        avatar: typeof v.avatar === 'string' ? clipIcon(v.avatar) : '',
         budget: v.budget && typeof v.budget === 'object' && Number(v.budget.salary) > 0 ? { salary: Math.round(Number(v.budget.salary)), payday: Math.min(31, Math.max(1, Number(v.budget.payday) || 1)) } : null,
         devices: devs.map(([k, x]) => ({ id: k, label: str(x && x.label, 'Appareil'), lastSeen: Number(x && x.lastSeen) || 0 }))
                      .sort((a, b) => b.lastSeen - a.lastSeen)
@@ -1571,7 +1576,7 @@ function openTransferSheet(others) {
   openSheet(`<h3>Avant de partir</h3>
     <p class="hint" style="margin-bottom:12px">Tu es l'administrateur de la maison. Choisis qui reprend les droits :</p>
     <div class="card">${ms.map(m => `<button type="button" class="tagrow" data-transfer="${esc(m.id)}">
-        <span class="avatar" style="--h:${pHue(m.id)}">${esc(initial(m.name))}</span><span class="grow">${esc(m.name)}</span><span class="tagck">${ICON.check}</span></button>`).join('')}</div>
+        <span class="avatar" style="--h:${pHue(m.id)}">${esc(avatarOf(m.id, m.name))}</span><span class="grow">${esc(m.name)}</span><span class="tagck">${ICON.check}</span></button>`).join('')}</div>
     <div class="actions"><button type="button" class="btn ghost" data-close>Annuler</button>
       <button type="button" class="btn danger" data-transfer-go disabled>Transférer et quitter</button></div>`);
   sheetKind = 'transfer';
@@ -1860,7 +1865,7 @@ function avatarStack() {
   const inHouse = Array.isArray(state.house?.members) ? new Set(state.house.members) : null;
   const ms = (state.members || []).filter(m => inHouse ? inHouse.has(m.id) : !m.removed);
   if (!ms.length) return ICON.people;
-  const shown = ms.slice(0, 3).map(m => `<span class="avatar" style="--h:${pHue(m.id)}">${esc(initial(m.name))}</span>`).join('');
+  const shown = ms.slice(0, 3).map(m => `<span class="avatar" style="--h:${pHue(m.id)}">${esc(avatarOf(m.id, m.name))}</span>`).join('');
   return `<span class="avatars">${shown}${ms.length > 3 ? `<span class="avatar more">+${ms.length - 3}</span>` : ''}</span>`;
 }
 
@@ -2312,9 +2317,16 @@ function peopleGrad(ids, a) {
   const c = ids.map(id => personColor(id, a));
   return c.length === 1 ? `linear-gradient(${c[0]}, ${c[0]})` : `linear-gradient(90deg, ${c.join(', ')})`;
 }
+// Ce qu'on affiche dans le rond d'une personne : son émoji si elle en a choisi un, sinon son initiale
+const clipAvatar = v => { const g = graphemes(String(v || '').replace(/\s+/g, '')); return g.length && !/^[\p{L}\p{N}]$/u.test(g[0]) ? g[0] : g.slice(0, 2).join(''); };
+function avatarOf(id, name) {
+  if (id === meId && typeof state.profile?.avatar === 'string') return state.profile.avatar ? clipAvatar(state.profile.avatar) : initial(name || state.myName);
+  const m = (state.members || []).find(x => x.id === id);
+  return m?.avatar ? clipAvatar(m.avatar) : initial(name || m?.name || '?');
+}
 function miniAvatars(ids) {
   if (!ids || !ids.length) return '';
-  return `<span class="minis">${ids.slice(0, 4).map(id => `<span class="mini" style="--h:${pHue(id)}" title="${esc(memberName(id))}">${esc(initial(memberName(id)))}</span>`).join('')}</span>`;
+  return `<span class="minis">${ids.slice(0, 4).map(id => `<span class="mini" style="--h:${pHue(id)}" title="${esc(memberName(id))}">${esc(avatarOf(id, memberName(id)))}</span>`).join('')}</span>`;
 }
 // Sélecteur de personnes dans une fenêtre (sheetPeople = sélection en cours)
 let sheetPeople = new Set();
@@ -2323,7 +2335,7 @@ function peoplePicker(includeMe = true) {
     .sort((a, b) => (b.id === meId) - (a.id === meId) || a.name.localeCompare(b.name));
   if (!ms.length) return '<p class="hint">Personne d\'autre dans la maison pour l\'instant.</p>';
   return `<div class="pchips">${ms.map(m => `<button type="button" class="pchip ${sheetPeople.has(m.id) ? 'on' : ''}" style="--h:${pHue(m.id)}" data-pick-person="${esc(m.id)}">
-      <span class="mini">${esc(initial(m.name))}</span>${esc(m.id === meId ? 'Moi' : m.name)}</button>`).join('')}</div>`;
+      <span class="mini">${esc(avatarOf(m.id, m.name))}</span>${esc(m.id === meId ? 'Moi' : m.name)}</button>`).join('')}</div>`;
 }
 
 // ----- Fenêtre « Nouvel élément » : tout se remplit au même endroit, et elle reste ouverte pour enchaîner -----
@@ -2705,7 +2717,7 @@ function openMembersSheet() {
   if (me && (state.house?.banned || []).length) fire(updateDoc(houseRef(), { banned: [] }));
   const active = all.filter(m => inHouse.has(m.id)).sort((a, b) => (b.id === meId) - (a.id === meId) || admins.has(b.id) - admins.has(a.id) || a.name.localeCompare(b.name));
   const row = m => `<div class="mrow">
-      <span class="avatar lg" style="--h:${pHue(m.id)}">${esc(initial(m.name))}</span>
+      <span class="avatar lg" style="--h:${pHue(m.id)}">${esc(avatarOf(m.id, m.name))}</span>
       <div class="grow">
         <div class="mname">${esc(m.name)}${m.id === meId ? ' <span class="muted">(toi)</span>' : ''}${admins.has(m.id) ? ' <span class="adminbadge">Admin</span>' : ''}</div>
       </div>
@@ -2725,7 +2737,7 @@ function openMembersSheet() {
 function openManageMember(uid) {
   const m = (state.members || []).find(x => x.id === uid) || { id: uid, name: memberName(uid) };
   const isAdm = houseAdmins().includes(uid);
-  openSheet(`<div class="mrow" style="border:0;padding-top:4px"><span class="avatar lg" style="--h:${pHue(uid)}">${esc(initial(m.name))}</span>
+  openSheet(`<div class="mrow" style="border:0;padding-top:4px"><span class="avatar lg" style="--h:${pHue(uid)}">${esc(avatarOf(uid, m.name))}</span>
       <div class="grow"><h3 style="margin:0">${esc(m.name)}</h3><div class="mdev muted">${isAdm ? 'Administrateur' : 'Membre'}</div></div></div>
     <button type="button" class="btn ghost full" style="margin-top:12px" data-set-admin="${esc(uid)}" data-on="${isAdm ? '0' : '1'}">${isAdm ? 'Retirer les droits d\'administrateur' : '🛡️ Nommer administrateur'}</button>
     <button type="button" class="btn danger full" style="margin-top:10px" data-remove-member="${esc(uid)}">Retirer de la maison</button>
@@ -2760,6 +2772,24 @@ function setTheme(pref) {
   applyTheme(pref);
   if (meId) fire(updateDoc(userRef(), { theme: pref }));
 }
+let avTimer = null;
+function setMyAvatar(v) {
+  v = clipAvatar(v);
+  if (state.profile) state.profile.avatar = v;
+  const pv = document.getElementById('avPreview'); if (pv) pv.textContent = avatarOf(meId, state.myName);
+  clearTimeout(avTimer);
+  avTimer = setTimeout(() => {
+    fire(updateDoc(userRef(), { avatar: v }));
+    if (state.code) fire(setDoc(ref('members', meId), { avatar: v }, { merge: true }));
+    render();
+  }, 500);
+}
+document.addEventListener('input', e => {
+  if (!e.target.matches('[data-avatar]')) return;
+  const v = clipAvatar(e.target.value);
+  if (e.target.value !== v) e.target.value = v;
+  setMyAvatar(v);
+});
 function setMyColor(h) {
   if (state.profile) state.profile.color = h;
   fire(updateDoc(userRef(), { color: h }));
@@ -2780,6 +2810,10 @@ function openSettingsSheet() {
     <div class="seg" data-seg>
       ${[['auto', '📱 Auto'], ['light', '☀️ Clair'], ['dark', '🌙 Sombre']].map(([k, l]) => `<button type="button" class="${themePref() === k ? 'on' : ''}" data-theme-set="${k}">${l}</button>`).join('')}
     </div>
+    <div class="label">Ton rond <span class="muted">(un émoji, ou laisse vide pour ton initiale)</span></div>
+    <div class="avrow"><span class="avatar lg" id="avPreview" style="--h:${pHue(meId)}">${esc(avatarOf(meId, state.myName))}</span>
+      <input class="field iconbox" data-avatar value="${esc(state.profile?.avatar || '')}" placeholder="🙂" maxlength="16" autocomplete="off" aria-label="Émoji de ton rond">
+      <span class="muted avhint">Touche 😀 sur ton clavier pour choisir un émoji.</span></div>
     <div class="label">Ta couleur <span class="muted">(ton rond, tes événements, ce qu'on te confie)</span></div>
     <div class="swatches">${COLOR_CHOICES.map(h => `<button type="button" class="swatch ${pHue(meId) === h ? 'on' : ''}" style="--h:${h}" data-color-set="${h}" aria-label="Couleur"></button>`).join('')}</div>
     <div class="sep"></div>
@@ -3819,7 +3853,7 @@ function renderBudget() {
   if (people.length) {
     h += `<div class="sec"><div class="grp-h soft dh">Chacun</div><div class="bpeople">${people.map(m => {
       const tot = state.expenses.reduce((t, e) => t + shareOf(e, m.id), 0), bb = budgetOf(m.id);
-      return `<div class="card bperson"><span class="avatar lg" style="--h:${pHue(m.id)}">${esc(initial(m.name))}</span>
+      return `<div class="card bperson"><span class="avatar lg" style="--h:${pHue(m.id)}">${esc(avatarOf(m.id, m.name))}</span>
         <div class="grow"><b>${esc(m.name)}</b><small>Charges : ${eur(tot)} / mois${bb ? ` · salaire ${eurInt(bb.salary)}` : ''}</small></div>
         <div class="bleft">${bb ? `<small>reste</small><b class="${bb.salary - tot < 0 ? 'neg' : ''}">${eurInt(bb.salary - tot)}</b>` : '<small>salaire privé</small>'}</div></div>`;
     }).join('')}</div></div>`;
@@ -3930,7 +3964,7 @@ document.addEventListener('submit', e => {
 
 // ================== Mise à jour automatique ==================
 // L'iPhone garde souvent l'ancienne page en mémoire : on vérifie s'il existe une version plus récente et on recharge.
-const APP_VERSION = '20 nov. 11 h 55';
+const APP_VERSION = '20 nov. 12 h 05';
 let updChecking = false, updLast = 0;
 async function checkUpdate() {
   if (updChecking || Date.now() - updLast < 60 * 1000 || !navigator.onLine) return;
@@ -4293,7 +4327,7 @@ function openTagSheet() {
   openSheet(`<h3>Identifier</h3>
     <p class="hint" style="margin-bottom:10px">Les personnes identifiées verront une notification dans l'app.</p>
     ${ms.length ? `<div class="card">${ms.map(m => `<button type="button" class="tagrow ${pendingTags.has(m.id) ? 'on' : ''}" data-tag="${esc(m.id)}">
-        <span class="avatar" style="--h:${pHue(m.id)}">${esc(initial(m.name))}</span><span class="grow">${esc(m.name)}</span>
+        <span class="avatar" style="--h:${pHue(m.id)}">${esc(avatarOf(m.id, m.name))}</span><span class="grow">${esc(m.name)}</span>
         <span class="tagck">${ICON.check}</span></button>`).join('')}</div>`
       : `<div class="card pad muted">Personne d'autre dans la maison pour l'instant.</div>`}
     <button type="button" class="btn primary full" style="margin-top:14px" data-close>OK</button>`);
@@ -4358,7 +4392,7 @@ function postCard(p) {
   return `<article class="post card ${state.freshPosts?.has(p.id) ? 'enter' : ''} ${tagged ? 'mentioned' : ''}">
     ${tagged ? `<div class="mtag">🔔 ${state.newMentions.has(p.id) ? '<b>Nouveau</b> · ' : ''}Tu es identifié dans cette note</div>` : ''}
     <div class="phead">
-      <span class="avatar" style="--h:${pHue(p.by || p.byName)}">${esc(initial(p.byName))}</span>
+      <span class="avatar" style="--h:${pHue(p.by || p.byName)}">${esc(avatarOf(p.by, p.byName))}</span>
       <div class="grow"><div class="pname">${esc(p.byName || "Quelqu'un")}${mine ? ' <span class="muted">(toi)</span>' : ''}</div><div class="ptime">${whenFr(p.createdAt)}${p.editedAt ? ' · modifié' : ''}</div></div>
       ${p.pinned ? '<span class="pin" title="Épinglé">📌</span>' : ''}
       <button type="button" class="iconbtn pmore" data-action="postMenu" data-id="${esc(p.id)}" aria-label="Options">${ICON.more}</button>
@@ -4392,13 +4426,13 @@ function openThread(postId) {
   const rs = repliesOf(postId);
   openSheet(`<h3>Réponses</h3>
     <div class="tpost">
-      <div class="phead"><span class="avatar" style="--h:${pHue(p.by || p.byName)}">${esc(initial(p.byName))}</span>
+      <div class="phead"><span class="avatar" style="--h:${pHue(p.by || p.byName)}">${esc(avatarOf(p.by, p.byName))}</span>
         <div class="grow"><div class="pname">${esc(p.byName || "Quelqu'un")}</div><div class="ptime">${whenFr(p.createdAt)}</div></div></div>
       ${p.text ? `<div class="ptext">${linkify(esc(p.text))}</div>` : ''}
       ${p.photoId ? `<img class="tthumb" data-media="${esc(p.photoId)}" alt="">` : p.photo ? `<img class="tthumb" src="${p.photo}" alt="">` : ''}
     </div>
     <div class="replies">${rs.length ? rs.map(r => `<div class="reply">
-        <span class="avatar" style="--h:${pHue(r.by || r.byName)}">${esc(initial(r.byName))}</span>
+        <span class="avatar" style="--h:${pHue(r.by || r.byName)}">${esc(avatarOf(r.by, r.byName))}</span>
         <div class="grow"><div class="rbubble" data-react-tap="replies:${esc(r.id)}"><b>${esc(r.byName || "Quelqu'un")}</b>${r.text ? `<div class="rtext">${linkify(esc(r.text))}</div>` : ''}
             ${r.audioId ? voicePlayer(r.audioId, r.dur) : ''}
             ${r.photoId ? `<button type="button" class="rphoto" data-view-media="${esc(r.photoId)}"><img data-media="${esc(r.photoId)}" alt="" ${r.w && r.h ? `width="${r.w}" height="${r.h}"` : ''}></button>` : ''}</div>
